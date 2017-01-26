@@ -7,8 +7,12 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack --display-error-details"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pl-lang/playground"
+  },
   "author": "Rodrigo Maximiliano Bellusci",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "@types/codemirror": "0.0.37",
     "@types/jquery": "^2.0.39",
