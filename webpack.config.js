@@ -7,12 +7,6 @@ module.exports = {
     module: {
         rules: [
             {
-                enforce: 'pre',
-                test: /\.(ts|js)$/,
-                loader: 'source-map-loader'
-            },
-            
-            {
                 test: /\.ts$/,
                 loader: 'ts-loader',
                 exclude: /node_modules/
@@ -21,6 +15,5 @@ module.exports = {
     },
     resolve: {
         extensions: ['.ts', '.js']
-    },
-    devtool: 'inline-source-map'
+    }
 }
