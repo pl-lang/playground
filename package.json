@@ -1,0 +1,24 @@
+{
+  "name": "pl-playground",
+  "version": "1.0.0",
+  "description": "Interfaz para editar y ejecutar programas escritos en PL",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack --display-error-details"
+  },
+  "author": "Rodrigo Maximiliano Bellusci",
+  "license": "ISC",
+  "dependencies": {
+    "@types/codemirror": "0.0.37",
+    "@types/jquery": "^2.0.39",
+    "codemirror": "^5.23.0",
+    "interprete-pl": "file:///C:\\Users\\Rodrigo\\Codigo\\interprete-pl",
+    "jquery": "^3.1.1",
+    "source-map-loader": "^0.1.6",
+    "ts-loader": "^2.0.0",
+    "tslib": "^1.5.0",
+    "typescript": "^2.1.5",
+    "webpack": "^2.2.0"
+  }
+}
