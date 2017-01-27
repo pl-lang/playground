@@ -24449,7 +24449,7 @@ function type_variable(iv, mn, p) {
          * Un vector[2][3][2] puede verse como dos matrices 3x2 o un vector 2 que
          * contiene dos vectores 3, cuyas celdas contienen vectores 2.
          */
-        var remaining_dimensions = helpers_1.drop(iv.dimensions.length - iv.indexes.length, iv.dimensions);
+        var remaining_dimensions = helpers_1.drop(iv.indexes.length, iv.dimensions);
         var last_type = void 0;
         for (var i = remaining_dimensions.length - 1; i >= 0; i--) {
             if (i == remaining_dimensions.length - 1) {
@@ -25094,34 +25094,77 @@ function style(s) {
      * Regexp que encuentra los nombres
      * de los estilos que hay que aplicar
      */
-    var r = /\$\w+\{\w+\}/g;
+    var r = /\$\w+/g;
     if (r.test(s)) {
         /**
-         * Partes de la cadena que no cambian
+         * Partes de la cadena que no cambian y estilos
          */
-        var pieces = s.split(r);
-        /**
-         * Estilos y sus contenidos
-         */
-        var styles = s.match(r);
+        var _a = split_at_styles(s), pieces = _a.pieces, styles = _a.styles;
         var i = 0;
         for (; i < styles.length; i++) {
-            var style_1 = styles[i].match(/(\w+)/)[1];
-            var content = styles[i].match(/\{(\w+)\}/)[1];
             var styled_content = '';
-            switch (style_1) {
+            switch (styles[i].name) {
                 case 'code':
-                    styled_content = "<span class=\"code\">" + content + "</span>";
+                    styled_content = "<span class=\"code\">" + styles[i].content + "</span>";
                     break;
             }
             result += pieces[i] + styled_content;
         }
-        result += pieces[i];
         return result;
     }
     else {
         return s;
     }
+}
+function split_at_styles(s) {
+    var pieces = [];
+    var styles = [];
+    var current_piece = '';
+    var index = 0;
+    while (index < s.length) {
+        if (s[index] == '$') {
+            index++;
+            var name_1 = '';
+            /**
+             * leer el nombre del estilo
+             */
+            while (s[index] != '{') {
+                name_1 += s[index];
+                index++;
+            }
+            /**
+             * esto hace que no se agregue el '{' al
+             * contenido
+             */
+            index++;
+            /**
+             * leer su contenido
+             */
+            var content = '';
+            var string_length = s.length;
+            var open_braces = 1;
+            while (open_braces > 0 && index < string_length) {
+                if (s[index] == '}') {
+                    open_braces--;
+                    if (open_braces > 0) {
+                        content += s[index];
+                    }
+                }
+                else {
+                    content += s[index];
+                }
+                index++;
+            }
+            styles.push({ name: name_1, content: content });
+            pieces.push(current_piece);
+            current_piece = '';
+        }
+        else {
+            current_piece += s[index];
+            index++;
+        }
+    }
+    return { pieces: pieces, styles: styles };
 }
 var templates = {
     default: { title: 'Tu programa contiene un error' },
