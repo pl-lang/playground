@@ -32,6 +32,7 @@ function ejecutar_codigo (): void {
      * Limpiar los restos de la ejecucion anterior...
      */
     status_bar.error_count = 0
+    pWindow.clear()
     if (message_panel.dirty) {
         message_panel.reset()
     }

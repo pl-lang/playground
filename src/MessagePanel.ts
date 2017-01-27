@@ -89,6 +89,7 @@ export default class MessagePanel {
         this.collapsed = true
         this.message_list.toggleClass('msg_list-expanded')
         this.message_list.empty()
+        this.dirty = false
     }
 
     collapse () {

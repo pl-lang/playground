@@ -31,4 +31,8 @@ export default class Window {
 
         this.interpreter.run()
     }
+
+    clear () {
+        this.container.empty()
+    }
 }
