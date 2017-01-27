@@ -84,6 +84,7 @@ function style(s: string): string {
 
             result += pieces[i] + styled_content
         }
+        result += pieces[i]
         return result
     }
     else {
@@ -153,6 +154,8 @@ function split_at_styles (s: string): {pieces: string[], styles: Style[]} {
         }
     }
 
+    pieces.push(current_piece)
+
     return {pieces, styles}
 }
 
@@ -163,5 +166,29 @@ const templates: { default: Template, [t: string]: Template } = {
         title: 'Se intento asignar un valor de tipo $code{@received} a una variable de tipo $code{@expected}.',
         description: 'Las variables de tipo $code{@expected} no pueden contener datos de tipo $code{@received}.',
         suggestion: 'Deberias cambiar el tipo de la variable o cambiar el valor que quieres asignarle.'
+    },
+
+    'repeated-variable': {
+        title: 'Variable repetida',
+        description: 'Se declararon dos variables con el mismo nombre. La primera es de tipo $code{@first_type} y la segunda es de tipo $code{@second_type}.',
+        suggestion: 'Para arreglar este error modifica el nombre de alguna de las dos variables.'
+    },
+
+    '@call-undefined-module': {
+        title: 'Modulo indefinido',
+        description: 'Se llamó al modulo $code{@name} pero este no fue declarado en el programa.',
+        suggestion: 'Debes definir todos los modulos que uses en tu programa.'
+    },
+
+    'undefined-variable': {
+        title: 'Variable indefinida',
+        description: 'Se invocó a la variable $code{@name} pero ésta no fue declarada en ningún lugar.',
+        suggestion: 'Debes declarar todas las variables que utilices en tu programa, ya sea en el ámbito global (el modulo principal) o en el ámbito local (dentro de algun modulo).'
+    },
+
+    '@invocation-extra-indexes': {
+        title: 'Se invocó una variable con demasiados indices',
+        description: 'La variable $code{@name} fue invocada con @indexes indice/s pero solo tiene @dimensions dimension/es.',
+        suggestion: 'Si una variable tiene $code{@dimensions} dimensiones entonces solo puede ser invocada con hasta $code{@dimensions} indices.'
     }
 }

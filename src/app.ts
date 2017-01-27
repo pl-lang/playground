@@ -71,9 +71,11 @@ function ejecutar_codigo (): void {
                 }
             }
             else {
-                /**
-                 * se encontraron errores durante la transformacion
-                 */
+                for (let error of transformed.result) {
+                    error_count++
+                    message_panel.add_message(error)
+                }
+                status_bar.error_count = error_count
             }
         }
         else {
