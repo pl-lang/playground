@@ -64,43 +64,96 @@ function style(s: string): string {
      * Regexp que encuentra los nombres
      * de los estilos que hay que aplicar
      */
-    const r = /\$\w+\{\w+\}/g
+    const r = /\$\w+/g
 
     if (r.test(s)) {
         /**
-         * Partes de la cadena que no cambian
+         * Partes de la cadena que no cambian y estilos
          */
-
-        const pieces = s.split(r)
-
-        /**
-         * Estilos y sus contenidos
-         */
-        const styles = s.match(r)
+        const {pieces, styles} = split_at_styles(s)
 
         let i = 0
         for (; i < styles.length; i++) {
-            const style = styles[i].match(/(\w+)/)[1]
-            const content = styles[i].match(/\{(\w+)\}/)[1]
-
             let styled_content = ''
 
-            switch (style) {
+            switch (styles[i].name) {
                 case 'code':
-                    styled_content = `<span class="code">${content}</span>`
+                    styled_content = `<span class="code">${styles[i].content}</span>`
                     break
             }
 
             result += pieces[i] + styled_content
         }
-
-        result += pieces[i]
-
         return result
     }
     else {
         return s
     }
+}
+
+interface Style {
+    name: string
+    content: string
+}
+
+function split_at_styles (s: string): {pieces: string[], styles: Style[]} {
+    const pieces: string[] = []
+    const styles: Style[] = []
+
+    let current_piece = ''
+
+    let index = 0
+    
+    while (index < s.length) {
+        if (s[index] == '$') {
+            index++
+            let name = ''
+            /**
+             * leer el nombre del estilo
+             */
+            while (s[index] != '{') {
+                name += s[index]
+                index++
+            }
+            /**
+             * esto hace que no se agregue el '{' al
+             * contenido
+             */
+            index++
+            /**
+             * leer su contenido
+             */
+            let content = ''
+
+            const string_length = s.length
+
+            let open_braces = 1
+
+            while (open_braces > 0 && index < string_length) {
+                if (s[index] == '}') {
+                    open_braces--
+                    if (open_braces > 0) {
+                        content += s[index]
+                    }
+                }
+                else {
+                    content += s[index]
+                }
+                index++
+            }
+
+            styles.push({name, content})
+            pieces.push(current_piece)
+
+            current_piece = ''
+        }
+        else {
+            current_piece += s[index]
+            index++
+        }
+    }
+
+    return {pieces, styles}
 }
 
 const templates: { default: Template, [t: string]: Template } = {
