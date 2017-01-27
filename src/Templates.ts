@@ -108,7 +108,7 @@ const templates: { default: Template, [t: string]: Template } = {
 
     '@assignment-incompatible-types': {
         title: 'Se intento asignar un valor de tipo $code{@received} a una variable de tipo $code{@expected}.',
-        description: 'Los tipos $code{@received} y $code{@expected} no son compatibles.',
+        description: 'Las variables de tipo $code{@expected} no pueden contener datos de tipo $code{@received}.',
         suggestion: 'Deberias cambiar el tipo de la variable o cambiar el valor que quieres asignarle.'
     }
 }
