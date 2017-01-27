@@ -11256,12 +11256,12 @@ function Parameter(source) {
             result.by_ref = true;
             source.next(); // consumir 'ref'
         }
-        var name_1 = Word(source);
-        if (name_1.error) {
-            return name_1;
+        var name = Word(source);
+        if (name.error) {
+            return name;
         }
         else {
-            result.name = name_1.result;
+            result.name = name.result;
         }
         if (source.current().kind === interfaces_1.SymbolKind.LeftBracket) {
             source.next();
@@ -11893,14 +11893,14 @@ function FunctionModule(source) {
          * Extraer las propiedades del parametro que son necesarias
          * para crear la variable
          */
-        var name_2 = par.name;
+        var name_1 = par.name;
         var is_array = par.is_array;
         var dimensions = par.dimensions;
         var type = par.type;
         /**
          * Meter los datos de la variable en el arreglo del enunciado de declaracion.
          */
-        par_declaration.variables.push({ name: name_2, is_array: is_array, dimensions: dimensions, datatype: type });
+        par_declaration.variables.push({ name: name_1, is_array: is_array, dimensions: dimensions, datatype: type });
     }
     if (source.current().kind != interfaces_1.SymbolKind.RightPar)
         return UnexpectedTokenReport(source.current(), [')'], 'missing-right-par');
@@ -11975,14 +11975,14 @@ function ProcedureModule(source) {
          * Extraer las propiedades del parametro que son necesarias
          * para crear la variable
          */
-        var name_3 = par.name;
+        var name_2 = par.name;
         var is_array = par.is_array;
         var dimensions = par.dimensions;
         var type = par.type;
         /**
          * Meter los datos de la variable en el arreglo del enunciado de declaracion.
          */
-        par_declaration.variables.push({ name: name_3, is_array: is_array, dimensions: dimensions, datatype: type });
+        par_declaration.variables.push({ name: name_2, is_array: is_array, dimensions: dimensions, datatype: type });
     }
     if (source.current().kind != interfaces_1.SymbolKind.RightPar)
         return UnexpectedTokenReport(source.current(), [')'], 'missing-right-par');
@@ -22146,6 +22146,7 @@ var MessagePanel = (function () {
         this.collapsed = true;
         this.message_list.toggleClass('msg_list-expanded');
         this.message_list.empty();
+        this.dirty = false;
     };
     MessagePanel.prototype.collapse = function () {
         this.collapsed = true;
@@ -22241,6 +22242,9 @@ var Window = (function () {
             _this.container.append($('<div class="line"><span>Programa finalizado</span></div>'));
         });
         this.interpreter.run();
+    };
+    Window.prototype.clear = function () {
+        this.container.empty();
     };
     return Window;
 }());
@@ -22708,23 +22712,23 @@ var Evaluator = (function () {
         for (var vn in variables) {
             var variable = variables[vn];
             if (variable.is_array) {
-                var datatype = variable.datatype, dimensions = variable.dimensions, is_array = variable.is_array, name_1 = variable.name;
+                var datatype = variable.datatype, dimensions = variable.dimensions, is_array = variable.is_array, name = variable.name;
                 var vcopy = {
                     datatype: datatype,
                     dimensions: dimensions,
                     is_array: is_array,
-                    name: name_1,
+                    name: name,
                     values: new Array(variable.values.length)
                 };
                 copy[vn] = vcopy;
             }
             else if (variable.is_array == false) {
-                var datatype = variable.datatype, dimensions = variable.dimensions, is_array = variable.is_array, name_2 = variable.name;
+                var datatype = variable.datatype, dimensions = variable.dimensions, is_array = variable.is_array, name = variable.name;
                 var vcopy = {
                     datatype: datatype,
                     dimensions: dimensions,
                     is_array: is_array,
-                    name: name_2,
+                    name: name,
                     value: null
                 };
                 copy[vn] = vcopy;
@@ -23702,9 +23706,9 @@ function transform(ast) {
     };
     var new_main = transform_main(ast.modules.main);
     result.entry_point = new_main;
-    for (var name_1 in ast.modules.user_modules) {
-        var module_1 = transform_module(ast.modules.user_modules[name_1], ast);
-        result.modules[name_1] = module_1;
+    for (var name in ast.modules.user_modules) {
+        var module_1 = transform_module(ast.modules.user_modules[name], ast);
+        result.modules[name] = module_1;
     }
     result.local_variables = ast.local_variables;
     return { error: false, result: result };
@@ -23721,8 +23725,8 @@ function transform_module(old_module, ast) {
     var parameters = {};
     for (var _i = 0, _a = old_module.parameters; _i < _a.length; _i++) {
         var par = _a[_i];
-        var name_2 = par.name, by_ref = par.by_ref, is_array = par.is_array, dimensions = par.dimensions;
-        parameters[name_2] = { name: name_2, by_ref: by_ref, is_array: is_array };
+        var name = par.name, by_ref = par.by_ref, is_array = par.is_array, dimensions = par.dimensions;
+        parameters[name] = { name: name, by_ref: by_ref, is_array: is_array };
     }
     /**
      * Inicializo los parametros. Tienen que ser inicializados
@@ -24273,13 +24277,13 @@ function transform(ast) {
     else {
         typed_program['main'] = main_report.result;
     }
-    for (var name_1 in ast.modules.user_modules) {
-        var report = transfor_module(ast.modules.user_modules[name_1], ast);
+    for (var name in ast.modules.user_modules) {
+        var report = transfor_module(ast.modules.user_modules[name], ast);
         if (report.error) {
             errors = errors.concat(report.result);
         }
         else {
-            typed_program[name_1] = report.result;
+            typed_program[name] = report.result;
         }
     }
     if (errors.length > 0) {
@@ -24731,25 +24735,23 @@ function check_call(c) {
          */
         for (var _i = 0, argtypes_1 = argtypes; _i < argtypes_1.length; _i++) {
             var arg = argtypes_1[_i];
-            if (!types_are_equal(arg.type, c.paramtypes[arg.index])) {
-                /**
-                 * Revisar que la expresion a asignar sea del mismo tipo
-                 * que la variable a la cual se asigna, a menos que la
-                 * expresion sea de tipo entero y la variable de tipo real.
-                 */
-                var param = c.paramtypes[arg.index];
-                var cond_a = param.kind != 'atomic' || arg.type.kind != 'atomic';
-                var cond_b = param.typename != 'real' && arg.type.typename != 'entero';
-                if (cond_a || cond_b) {
-                    var error = {
-                        reason: '@call-incompatible-argument',
-                        where: 'typechecker',
-                        expected: stringify(param),
-                        received: stringify(arg.type),
-                        index: arg.index + 1
-                    };
-                    errors.push(error);
-                }
+            /**
+             * Revisar que la expresion a asignar sea del mismo tipo
+             * que la variable a la cual se asigna, a menos que la
+             * expresion sea de tipo entero y la variable de tipo real.
+             */
+            var param = c.paramtypes[arg.index];
+            var cond_a = param.kind != 'atomic' || arg.type.kind != 'atomic';
+            var cond_b = param.typename != 'real' && arg.type.typename != 'entero';
+            if (!(types_are_equal(arg.type, param) && (cond_a || cond_b))) {
+                var error = {
+                    reason: '@call-incompatible-argument',
+                    where: 'typechecker',
+                    expected: stringify(param),
+                    received: stringify(arg.type),
+                    index: arg.index + 1
+                };
+                errors.push(error);
             }
         }
         if (errors.length > 0) {
@@ -24809,29 +24811,21 @@ function check_assignment(a) {
         errors = errors.concat(exp_report.result);
     }
     if (inv_report.error == false && exp_report.error == false) {
-        if (!types_are_equal(inv_report.result, exp_report.result)) {
-            /**
-             * Revisar que la expresion a asignar sea del mismo tipo
-             * que la variable a la cual se asigna, a menos que la
-             * expresion sea de tipo entero y la variable de tipo real.
-             *
-             * Es decir, NO hay error cuando:
-             *
-             * inv_report es atomico && es de tipo real && exp_report es atomico && es de tipo entero
-             *
-             * Entonces para saber si hay error uso el complemento de la expresion de arriba
-             */
-            var cond_a = inv_report.result.kind != 'atomic' || exp_report.result.kind != 'atomic';
-            var cond_b = inv_report.result.typename != 'real' && exp_report.result.typename != 'entero';
-            if (cond_a || cond_b) {
-                var error = {
-                    reason: '@assignment-incompatible-types',
-                    where: 'typechecker',
-                    expected: stringify(inv_report.result),
-                    received: stringify(exp_report.result)
-                };
-                errors.push(error);
-            }
+        /**
+         * Revisar que la expresion a asignar sea del mismo tipo
+         * que la variable a la cual se asigna, a menos que la
+         * expresion sea de tipo entero y la variable de tipo real.
+         */
+        var cond_a = inv_report.result.kind == 'atomic' && exp_report.result.kind == 'atomic';
+        var cond_b = inv_report.result.typename == 'real' && exp_report.result.typename == 'entero';
+        if (!(types_are_equal(inv_report.result, exp_report.result) || (cond_a && cond_b))) {
+            var error = {
+                reason: '@assignment-incompatible-types',
+                where: 'typechecker',
+                expected: stringify(inv_report.result),
+                received: stringify(exp_report.result)
+            };
+            errors.push(error);
         }
     }
     return errors;
@@ -25133,7 +25127,7 @@ var templates = {
     default: { title: 'Tu programa contiene un error' },
     '@assignment-incompatible-types': {
         title: 'Se intento asignar un valor de tipo $code{@received} a una variable de tipo $code{@expected}.',
-        description: 'Los tipos $code{@received} y $code{@expected} no son compatibles.',
+        description: 'Las variables de tipo $code{@expected} no pueden contener datos de tipo $code{@received}.',
         suggestion: 'Deberias cambiar el tipo de la variable o cambiar el valor que quieres asignarle.'
     }
 };
@@ -25169,6 +25163,7 @@ function ejecutar_codigo() {
      * Limpiar los restos de la ejecucion anterior...
      */
     status_bar.error_count = 0;
+    pWindow.clear();
     if (message_panel.dirty) {
         message_panel.reset();
     }
