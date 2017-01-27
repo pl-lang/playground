@@ -22093,14 +22093,14 @@ var MessagePanel = (function () {
         this.collapsed = true;
         this.dirty = false;
     }
-    MessagePanel.prototype.add_message = function (category, data) {
+    MessagePanel.prototype.add_message = function (data) {
         var _this = this;
         this.dirty = true;
         var message = $('<div class="error-msg-container"></div>');
         message.on('click', function (ev) { ev.stopPropagation(); });
         var title_bar = $("<div class=\"bar flex-row space-between center-align error-bar\"></div>");
         var template = Templates_1.default(data);
-        var title = $(template.title);
+        var title = $("<pre class=\"title small-title error-title\">" + template.title + "</pre>");
         title_bar.append(title);
         message.append(title_bar);
         if ('description' in template || 'suggestion' in template) {
@@ -22118,10 +22118,10 @@ var MessagePanel = (function () {
             var extra_info_container_1 = $('<div id="extra_info" class="collapsable"></div>');
             extra_info_container_1.on('click', function (e) { e.stopPropagation(); });
             if ('description' in template) {
-                extra_info_container_1.append($(template.description));
+                extra_info_container_1.append($("<p>" + template.description + "</p>"));
             }
             if ('suggestion' in template) {
-                extra_info_container_1.append($(template.suggestion));
+                extra_info_container_1.append($("<p>" + template.suggestion + "</p>"));
             }
             message.append(extra_info_container_1);
         }
@@ -25053,22 +25053,88 @@ exports.default = Prompt;
 
 "use strict";
 
-function title(s) {
-    return "<pre class=\"title small-title error-title\">" + s + "</pre>";
-}
 function get_template(data) {
-    if (data.reason in templates) {
-        return templates[data.reason](data);
+    var template = data.reason in templates ? templates[data.reason] : templates.default;
+    var parsed_template = { title: style(interpolate(data, template.title)) };
+    if ('description' in template) {
+        parsed_template['description'] = style(interpolate(data, template.description));
     }
-    else {
-        return templates.default(data);
+    if ('suggestion' in template) {
+        parsed_template['suggestion'] = style(interpolate(data, template.suggestion));
     }
+    return parsed_template;
 }
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = get_template;
+function interpolate(data, s) {
+    var result = '';
+    /**
+     * Regexp que encuentra los nombres de las
+     * las propiedades cuyos valores hay que sacar
+     * de data
+     */
+    var r = /@\w+/g;
+    if (r.test(s)) {
+        /**
+        * Partes de la cadena que no cambian
+        */
+        var pieces = s.split(r);
+        /**
+         * Nombres de las propiedades
+         */
+        var props = s.match(r).map(function (v) { return v.slice(1); });
+        var i = 0;
+        for (; i < props.length; i++) {
+            result += pieces[i] + data[props[i]];
+        }
+        result += pieces[i];
+        return result;
+    }
+    else {
+        return s;
+    }
+}
+function style(s) {
+    var result = '';
+    /**
+     * Regexp que encuentra los nombres
+     * de los estilos que hay que aplicar
+     */
+    var r = /\$\w+\{\w+\}/g;
+    if (r.test(s)) {
+        /**
+         * Partes de la cadena que no cambian
+         */
+        var pieces = s.split(r);
+        /**
+         * Estilos y sus contenidos
+         */
+        var styles = s.match(r);
+        var i = 0;
+        for (; i < styles.length; i++) {
+            var style_1 = styles[i].match(/(\w+)/)[1];
+            var content = styles[i].match(/\{(\w+)\}/)[1];
+            var styled_content = '';
+            switch (style_1) {
+                case 'code':
+                    styled_content = "<span class=\"code\">" + content + "</span>";
+                    break;
+            }
+            result += pieces[i] + styled_content;
+        }
+        result += pieces[i];
+        return result;
+    }
+    else {
+        return s;
+    }
+}
 var templates = {
-    default: function (d) {
-        return { title: title('Tu programa contiene un error') };
+    default: { title: 'Tu programa contiene un error' },
+    '@assignment-incompatible-types': {
+        title: 'Se intento asignar un valor de tipo $code{@received} a una variable de tipo $code{@expected}.',
+        description: 'Los tipos $code{@received} y $code{@expected} no son compatibles.',
+        suggestion: 'Deberias cambiar el tipo de la variable o cambiar el valor que quieres asignarle.'
     }
 };
 
@@ -25124,7 +25190,7 @@ function ejecutar_codigo() {
                     for (var _i = 0, checked_1 = checked; _i < checked_1.length; _i++) {
                         var error = checked_1[_i];
                         error_count++;
-                        message_panel.add_message('none', { reason: 'generic' });
+                        message_panel.add_message(error);
                     }
                     status_bar.error_count = error_count;
                 }

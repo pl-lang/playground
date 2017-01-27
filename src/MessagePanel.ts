@@ -15,7 +15,7 @@ export default class MessagePanel {
         this.dirty = false
     }
 
-    add_message (category: string, data: BaseError) {
+    add_message (data: BaseError) {
         this.dirty = true
 
         const message = $('<div class="error-msg-container"></div>')
@@ -26,7 +26,7 @@ export default class MessagePanel {
 
         const template = get_template(data)
         
-        const title = $(template.title)
+        const title = $(`<pre class="title small-title error-title">${template.title}</pre>`)
 
         title_bar.append(title)
 
@@ -54,11 +54,11 @@ export default class MessagePanel {
             extra_info_container.on('click', e => {e.stopPropagation()})
 
             if ('description' in template) {
-                extra_info_container.append($(template.description))
+                extra_info_container.append($(`<p>${template.description}</p>`))
             }
 
             if ('suggestion' in template) {
-                extra_info_container.append($(template.suggestion))
+                extra_info_container.append($(`<p>${template.suggestion}</p>`))
             }
 
             message.append(extra_info_container)

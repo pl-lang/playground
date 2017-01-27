@@ -57,7 +57,7 @@ function ejecutar_codigo (): void {
                      */
                     for (let error of checked) {
                         error_count++
-                        message_panel.add_message('none', {reason: 'generic'})
+                        message_panel.add_message(error)
                     }
 
                     status_bar.error_count = error_count
