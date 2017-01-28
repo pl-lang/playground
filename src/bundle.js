@@ -10806,7 +10806,7 @@ function Number(source) {
         var expected = ['entero', 'real'];
         var column = current.column;
         var line = current.line;
-        return { error: true, result: { unexpected: unexpected, expected: expected, column: column, line: line } };
+        return { error: true, result: { unexpected: unexpected, expected: expected, pos: { column: column, line: line }, where: 'parser', reason: 'syntax-error' } };
     }
 }
 exports.Number = Number;
@@ -10828,7 +10828,7 @@ function Integer(source) {
         var expected = ['entero'];
         var column = current.column;
         var line = current.line;
-        return { error: true, result: { unexpected: unexpected, expected: expected, column: column, line: line } };
+        return { error: true, result: { unexpected: unexpected, expected: expected, pos: { column: column, line: line }, where: 'parser', reason: 'syntax-error' } };
     }
 }
 exports.Integer = Integer;
@@ -10871,7 +10871,7 @@ function Word(source) {
         var expected = ['word'];
         var column = current.column;
         var line = current.line;
-        return { error: true, result: { unexpected: unexpected, expected: expected, column: column, line: line } };
+        return { error: true, result: { unexpected: unexpected, expected: expected, pos: { column: column, line: line }, where: 'parser', reason: 'syntax-error' } };
     }
 }
 exports.Word = Word;
@@ -10905,7 +10905,7 @@ function VariableDeclaration(source) {
                     var expected = ['right-bracket'];
                     var column = current.column;
                     var line = current.line;
-                    return { error: true, result: { unexpected: unexpected, expected: expected, column: column, line: line } };
+                    return { error: true, result: { unexpected: unexpected, expected: expected, pos: { column: column, line: line }, where: 'parser', reason: 'syntax-error' } };
                 }
             }
         }
@@ -10963,7 +10963,7 @@ function TypeName(source) {
         var column = current.column;
         var line = current.line;
         var reason = 'nonexistent-type';
-        return { error: true, result: { unexpected: unexpected, expected: expected, column: column, line: line, reason: reason } };
+        return { error: true, result: { unexpected: unexpected, expected: expected, pos: { column: column, line: line }, reason: reason, where: 'parser' } };
     }
 }
 exports.TypeName = TypeName;
@@ -11024,7 +11024,7 @@ function Variable(source) {
                 var expected = ['right-bracket'];
                 var column = current.column;
                 var line = current.line;
-                return { error: true, result: { unexpected: unexpected, expected: expected, column: column, line: line } };
+                return { error: true, result: { unexpected: unexpected, expected: expected, pos: { column: column, line: line }, where: 'parser', reason: 'syntax-error' } };
             }
         }
         else {
@@ -11108,7 +11108,7 @@ function Expression(source) {
                 var unexpected = interfaces_1.SymbolKind.LeftPar;
                 var expected = ['left-par'];
                 var reason = 'mismatched-parenthesis';
-                return { error: true, result: { unexpected: unexpected, expected: expected, reason: reason, column: column, line: line } };
+                return { error: true, result: { unexpected: unexpected, expected: expected, reason: reason, pos: { column: column, line: line }, where: 'parser' } };
             }
         }
         else if (is_operator(ctoken.kind)) {
@@ -11175,7 +11175,7 @@ function Value(source) {
         var reason = '@value-expected-expression';
         var column = ctoken.column;
         var line = ctoken.line;
-        return { error: true, result: { unexpected: unexpected, expected: expected, reason: reason, column: column, line: line } };
+        return { error: true, result: { unexpected: unexpected, expected: expected, reason: reason, pos: { column: column, line: line }, where: 'parser' } };
     }
 }
 exports.Value = Value;
@@ -11300,7 +11300,7 @@ function ModuleCall(source) {
             var expected = ['right-par'];
             var column = current.column;
             var line = current.line;
-            return { error: true, result: { unexpected: unexpected, expected: expected, column: column, line: line } };
+            return { error: true, result: { unexpected: unexpected, expected: expected, column: column, line: line, where: 'parser', reason: 'syntax-error' } };
         }
         else {
             source.next();
@@ -11321,7 +11321,7 @@ function ModuleCall(source) {
                     var expected = ['right-par'];
                     var column = current.column;
                     var line = current.line;
-                    return { error: true, result: { unexpected: unexpected, expected: expected, column: column, line: line } };
+                    return { error: true, result: { unexpected: unexpected, expected: expected, column: column, line: line, where: 'parser', reason: 'syntax-error' } };
                 }
             }
         }
@@ -11350,7 +11350,7 @@ function Assignment(source) {
             var line = current.line;
             var column = current.column;
             var reason = 'bad-assignment-operator';
-            return { error: true, result: { unexpected: unexpected, expected: expected, line: line, column: column, reason: reason } };
+            return { error: true, result: { unexpected: unexpected, expected: expected, pos: { line: line, column: column }, reason: reason, where: 'parser' } };
         }
         else {
             source.next();
@@ -11386,7 +11386,7 @@ function If(source) {
         var line = current.line;
         var column = current.column;
         var reason = 'missing-si';
-        return { error: true, result: { unexpected: unexpected, expected: expected, line: line, column: column, reason: reason } };
+        return { error: true, result: { unexpected: unexpected, expected: expected, pos: { line: line, column: column }, reason: reason, where: 'parser' } };
     }
     if (source.current().kind === interfaces_1.SymbolKind.LeftPar) {
         source.next();
@@ -11398,7 +11398,7 @@ function If(source) {
         var line = current.line;
         var column = current.column;
         var reason = 'missing-par-at-condition';
-        return { error: true, result: { unexpected: unexpected, expected: expected, line: line, column: column, reason: reason } };
+        return { error: true, result: { unexpected: unexpected, expected: expected, pos: { line: line, column: column }, reason: reason, where: 'parser' } };
     }
     var queue = [];
     while (/right\-par|eof|eol/.test(source.current().name) === false) {
@@ -11422,7 +11422,7 @@ function If(source) {
         var line = current.line;
         var column = current.column;
         var reason = 'missing-par-at-condition';
-        return { error: true, result: { unexpected: unexpected, expected: expected, line: line, column: column, reason: reason } };
+        return { error: true, result: { unexpected: unexpected, expected: expected, pos: { line: line, column: column }, reason: reason, where: 'parser' } };
     }
     if (source.current().kind === interfaces_1.ReservedKind.Entonces) {
         source.next();
@@ -11434,7 +11434,7 @@ function If(source) {
         var line = current.line;
         var column = current.column;
         var reason = 'missing-entonces';
-        return { error: true, result: { unexpected: unexpected, expected: expected, line: line, column: column, reason: reason } };
+        return { error: true, result: { unexpected: unexpected, expected: expected, pos: { line: line, column: column }, reason: reason, where: 'parser' } };
     }
     skipWhiteSpace(source);
     while (/finsi|sino|eof/.test(source.current().name) === false) {
@@ -11467,7 +11467,7 @@ function If(source) {
         var line = current.line;
         var column = current.column;
         var reason = 'missing-finsi';
-        return { error: true, result: { unexpected: unexpected, expected: expected, line: line, column: column, reason: reason } };
+        return { error: true, result: { unexpected: unexpected, expected: expected, pos: { line: line, column: column }, reason: reason, where: 'parser' } };
     }
     if (source.current().kind === interfaces_1.SymbolKind.EOL) {
         source.next();
@@ -11491,7 +11491,7 @@ function While(source) {
         var line = current.line;
         var column = current.column;
         var reason = 'missing-mientras';
-        return { error: true, result: { unexpected: unexpected, expected: expected, line: line, column: column, reason: reason } };
+        return { error: true, result: { unexpected: unexpected, expected: expected, pos: { line: line, column: column }, reason: reason, where: 'parser' } };
     }
     if (source.current().kind === interfaces_1.SymbolKind.LeftPar) {
         source.next();
@@ -11503,7 +11503,7 @@ function While(source) {
         var line = current.line;
         var column = current.column;
         var reason = 'missing-par-at-condition';
-        return { error: true, result: { unexpected: unexpected, expected: expected, line: line, column: column, reason: reason } };
+        return { error: true, result: { unexpected: unexpected, expected: expected, pos: { line: line, column: column }, reason: reason, where: 'parser' } };
     }
     var queue = [];
     while (/right\-par|eof|eol/.test(source.current().name) === false) {
@@ -11527,7 +11527,7 @@ function While(source) {
         var line = current.line;
         var column = current.column;
         var reason = 'missing-par-at-condition';
-        return { error: true, result: { unexpected: unexpected, expected: expected, line: line, column: column, reason: reason } };
+        return { error: true, result: { unexpected: unexpected, expected: expected, pos: { line: line, column: column }, reason: reason, where: 'parser' } };
     }
     skipWhiteSpace(source);
     while (/finmientras|eof/.test(source.current().name) === false) {
@@ -11548,7 +11548,7 @@ function While(source) {
         var line = current.line;
         var column = current.column;
         var reason = 'missing-finmientras';
-        return { error: true, result: { unexpected: unexpected, expected: expected, line: line, column: column, reason: reason } };
+        return { error: true, result: { unexpected: unexpected, expected: expected, pos: { line: line, column: column }, reason: reason, where: 'parser' } };
     }
     if (source.current().kind === interfaces_1.SymbolKind.EOL) {
         source.next();
@@ -11580,7 +11580,7 @@ function For(source) {
         var line = current.line;
         var column = current.column;
         var reason = 'missing-para';
-        return { error: true, result: { unexpected: unexpected, expected: expected, line: line, column: column, reason: reason } };
+        return { error: true, result: { unexpected: unexpected, expected: expected, pos: { line: line, column: column }, reason: reason, where: 'parser' } };
     }
     var queue = [];
     while (source.current().kind !== interfaces_1.ReservedKind.Hasta) {
@@ -11603,7 +11603,7 @@ function For(source) {
             var line = current.line;
             var column = current.column;
             var reason = 'missing-hasta';
-            return { error: true, result: { unexpected: unexpected, expected: expected, line: line, column: column, reason: reason } };
+            return { error: true, result: { unexpected: unexpected, expected: expected, pos: { line: line, column: column }, reason: reason, where: 'parser' } };
         }
         var last_val_exp = Expression(source);
         if (last_val_exp.error) {
@@ -11630,7 +11630,7 @@ function For(source) {
                 var line = current.line;
                 var column = current.column;
                 var reason = 'missing-finpara';
-                return { error: true, result: { unexpected: unexpected, expected: expected, line: line, column: column, reason: reason } };
+                return { error: true, result: { unexpected: unexpected, expected: expected, pos: { line: line, column: column }, reason: reason, where: 'parser' } };
             }
             skipWhiteSpace(source);
             return { error: false, result: result };
@@ -11654,7 +11654,7 @@ function Until(source) {
         var line = current.line;
         var column = current.column;
         var reason = 'missing-repetir';
-        return { error: true, result: { unexpected: unexpected, expected: expected, line: line, column: column, reason: reason } };
+        return { error: true, result: { unexpected: unexpected, expected: expected, pos: { line: line, column: column }, reason: reason, where: 'parser' } };
     }
     skipWhiteSpace(source);
     // TODO: hacer que "hasta que" sea un solo token ("hastaque")
@@ -11680,7 +11680,7 @@ function Until(source) {
         var line = current.line;
         var column = current.column;
         var reason = 'missing-hasta';
-        return { error: true, result: { unexpected: unexpected, expected: expected, line: line, column: column, reason: reason } };
+        return { error: true, result: { unexpected: unexpected, expected: expected, pos: { line: line, column: column }, reason: reason, where: 'parser' } };
     }
     if (source.current().kind === interfaces_1.ReservedKind.Que) {
         source.next();
@@ -11692,7 +11692,7 @@ function Until(source) {
         var line = current.line;
         var column = current.column;
         var reason = 'missing-que';
-        return { error: true, result: { unexpected: unexpected, expected: expected, line: line, column: column, reason: reason } };
+        return { error: true, result: { unexpected: unexpected, expected: expected, pos: { line: line, column: column }, reason: reason, where: 'parser' } };
     }
     if (source.current().kind === interfaces_1.SymbolKind.LeftPar) {
         source.next();
@@ -11704,7 +11704,7 @@ function Until(source) {
         var line = current.line;
         var column = current.column;
         var reason = 'missing-par-at-condition';
-        return { error: true, result: { unexpected: unexpected, expected: expected, line: line, column: column, reason: reason } };
+        return { error: true, result: { unexpected: unexpected, expected: expected, pos: { line: line, column: column }, reason: reason, where: 'parser' } };
     }
     var queue = [];
     while (/right\-par|eof|eol/.test(source.current().name) === false) {
@@ -11727,7 +11727,7 @@ function Until(source) {
             var line = current.line;
             var column = current.column;
             var reason = 'missing-par-at-condition';
-            return { error: true, result: { unexpected: unexpected, expected: expected, line: line, column: column, reason: reason } };
+            return { error: true, result: { unexpected: unexpected, expected: expected, pos: { line: line, column: column }, reason: reason, where: 'parser' } };
         }
         if (source.current().kind === interfaces_1.SymbolKind.EOL) {
             source.next();
@@ -11748,7 +11748,7 @@ function Return(source) {
         var line = current.line;
         var column = current.column;
         var reason = 'missing-retornar';
-        return { error: true, result: { unexpected: unexpected, expected: expected, line: line, column: column, reason: reason } };
+        return { error: true, result: { unexpected: unexpected, expected: expected, pos: { line: line, column: column }, reason: reason, where: 'parser' } };
     }
     else {
         source.next(); // consumir 'retornar'
@@ -11789,7 +11789,7 @@ function AnyStatement(source) {
             var expected = ['variable', 'funcion', 'procedimiento', 'si', 'mientras', 'repetir'];
             var line = current.line;
             var column = current.column;
-            return { error: true, result: { unexpected: unexpected, expected: expected, line: line, column: column, reason: reason } };
+            return { error: true, result: { unexpected: unexpected, expected: expected, pos: { line: line, column: column }, reason: reason, where: 'parser' } };
         }
     }
 }
@@ -11811,7 +11811,7 @@ function MainModule(source) {
         var line = current.line;
         var column = current.column;
         var reason = 'missing-variables';
-        return { error: true, result: { unexpected: unexpected, expected: expected, line: line, column: column, reason: reason } };
+        return { error: true, result: { unexpected: unexpected, expected: expected, pos: { line: line, column: column }, reason: reason, where: 'parser' } };
     }
     skipWhiteSpace(source);
     while (/inicio|eof/.test(source.current().name) === false) {
@@ -11834,7 +11834,7 @@ function MainModule(source) {
         var line = current.line;
         var column = current.column;
         var reason = 'missing-inicio';
-        return { error: true, result: { unexpected: unexpected, expected: expected, line: line, column: column, reason: reason } };
+        return { error: true, result: { unexpected: unexpected, expected: expected, pos: { line: line, column: column }, reason: reason, where: 'parser' } };
     }
     skipWhiteSpace(source);
     while (/fin|eof/.test(source.current().name) === false) {
@@ -11857,7 +11857,7 @@ function MainModule(source) {
         var line = current.line;
         var column = current.column;
         var reason = 'missing-fin';
-        return { error: true, result: { unexpected: unexpected, expected: expected, line: line, column: column, reason: reason } };
+        return { error: true, result: { unexpected: unexpected, expected: expected, pos: { line: line, column: column }, reason: reason, where: 'parser' } };
     }
     if (source.current().kind === interfaces_1.SymbolKind.EOL) {
         source.next();
@@ -12076,9 +12076,9 @@ function DeclarationStatement(source) {
                 result: {
                     unexpected: source.current().kind,
                     expected: ['eol', 'comma'],
-                    column: source.current().column,
-                    line: source.current().line,
-                    reason: '@declaration-unexpected-token'
+                    pos: { column: source.current().column, line: source.current().line },
+                    reason: '@declaration-unexpected-token',
+                    where: 'parser'
                 }
             };
     }
@@ -12108,11 +12108,11 @@ exports.skipWhiteSpace = skipWhiteSpace;
 function UnexpectedTokenReport(current_token, expected, reason) {
     var result = {
         unexpected: current_token.kind,
-        line: current_token.line,
-        column: current_token.column,
-        expected: expected
+        pos: { line: current_token.line, column: current_token.column },
+        expected: expected,
+        reason: reason,
+        where: 'parser'
     };
-    result.reason = reason;
     return { error: true, result: result };
 }
 
@@ -12229,9 +12229,9 @@ var NumberToken = (function () {
                 this.error_info = {
                     unexpected: source.currentChar(),
                     expected: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
-                    line: source._current_line,
-                    column: source._current_column,
-                    reason: 'unexpectedCharAtFloat'
+                    pos: { line: source._current_line, column: source._current_column },
+                    reason: 'unexpectedCharAtFloat',
+                    where: 'lexer'
                 };
             }
         }
@@ -12393,9 +12393,9 @@ var StringToken = (function () {
             this.error_info = {
                 unexpected: '\n',
                 expected: ['caracteres', '"'],
-                column: source._current_column,
-                line: source._current_line,
-                reason: 'unexpectedCharAtString'
+                pos: { line: source._current_line, column: source._current_column },
+                reason: 'unexpectedCharAtString',
+                where: 'lexer'
             };
         }
         // Consumo un caracter para dejar a currentChar() uno delante de la
@@ -12548,9 +12548,9 @@ var UnknownToken = (function () {
         this.error_info = {
             unexpected: source.currentChar(),
             expected: null,
-            line: source._current_line,
-            column: source._current_column,
-            reason: 'unknownToken'
+            pos: { line: source._current_line, column: source._current_column },
+            reason: 'unknownToken',
+            where: 'lexer'
         };
         source.nextChar();
     }
@@ -22486,7 +22486,8 @@ var Evaluator = (function () {
                 bad_index: bad_index,
                 dimensions: s.dimensions,
                 name: s.varname,
-                reason: '@assignment-index-out-of-bounds',
+                reason: 'index-out-of-bounds',
+                where: 'evaluator',
                 done: true
             };
             return { error: true, result: result };
@@ -22513,7 +22514,8 @@ var Evaluator = (function () {
                 bad_index: bad_index,
                 dimensions: s.dimensions,
                 name: s.varname,
-                reason: '@invocation-index-out-of-bounds',
+                reason: 'index-out-of-bounds',
+                where: 'evaluator',
                 done: true
             };
             return { error: true, result: result };
@@ -22964,20 +22966,14 @@ var Parser = (function (_super) {
         var lexer_report = lexer.tokenize(source);
         // emitir eventos de error si hubo alguno y finalizar parseo
         if (lexer_report.error) {
-            for (var _i = 0, _a = lexer_report.result; _i < _a.length; _i++) {
-                var error_report = _a[_i];
-                this.emit('lexical-error', error_report);
-            }
-            this.emit('parsing-finished', { error: true, result: 'lexical-error' });
-            return { error: true, result: 'lexical-error' };
+            return { error: true, result: lexer_report.result };
         }
         var token_queue = new TokenQueue_1.default(lexer_report.result);
         Patterns_1.skipWhiteSpace(token_queue);
         // buscar el modulo principal
         var main_match = Patterns_1.MainModule(token_queue);
         if (main_match.error) {
-            this.emit('syntax-error', main_match.result);
-            return { error: true, result: 'syntax-error' };
+            return { error: true, result: [main_match.result] };
         }
         else if (main_match.error == false) {
             var result = {
@@ -22997,8 +22993,7 @@ var Parser = (function (_super) {
                 Patterns_1.skipWhiteSpace(token_queue);
                 // si hubo un error emitir un error de sintaxis y finalizar parseo
                 if (module_match.error) {
-                    this.emit('syntax-error', module_match.result);
-                    return { error: true, result: 'syntax-error' };
+                    return { error: true, result: [module_match.result] };
                 }
                 else if (module_match.error == false) {
                     result.user_modules[module_match.result.name] = module_match.result;
@@ -23523,7 +23518,7 @@ function transform_expression(expression, ast, module_name) {
 }
 function get_module_info(name, ast) {
     if (!(name in ast.modules.user_modules)) {
-        return { error: true, result: [{ reason: '@call-undefined-module', name: name }] };
+        return { error: true, result: [{ reason: '@call-undefined-module', name: name, where: 'call-decorator-transform' }] };
     }
     else {
         return { error: false, result: ast.modules.user_modules[name] };
@@ -23536,7 +23531,7 @@ function get_variable_info(name, variables, module_name) {
         return { error: false, result: { datatype: variable.datatype, dimensions: variable.dimensions, is_array: variable.is_array } };
     }
     else
-        return { error: true, result: [{ reason: 'undefined-variable', name: name }] };
+        return { error: true, result: [{ reason: 'undefined-variable', name: name, where: 'call-decorator-transform' }] };
 }
 function is_builtin(name) {
     return name == 'escribir' || name == 'escribir_linea' || name == 'leer';
@@ -23583,6 +23578,7 @@ function transform(ast) {
             return { error: false, result: new_ast };
         }
     }
+    return { error: true, result: errors_found };
 }
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = transform;
@@ -23675,7 +23671,8 @@ function declare_variables(declarations) {
                     reason: 'repeated-variable',
                     name: original.name,
                     first_type: original.datatype,
-                    second_type: variable.datatype
+                    second_type: variable.datatype,
+                    where: 'declarator-transform'
                 };
                 repeated_variables.push(error_info);
             }
@@ -24419,7 +24416,7 @@ function type_variable(iv, mn, p) {
          * Se esta invocando una variable con mas indices
          * de los permitidos.
          */
-        errors.push({ reason: '@invocation-extra-indexes', name: iv.name, dimensions: iv.dimensions.length, indexes: iv.indexes.length });
+        errors.push({ where: 'typer', reason: '@invocation-extra-indexes', name: iv.name, dimensions: iv.dimensions.length, indexes: iv.indexes.length });
         /**
          * Solo queda ver si tambien hay errores en esos indices...
          */
@@ -24538,6 +24535,7 @@ function type_invocation(i, mn, p) {
         if (i.indexes.length > i.dimensions.length) {
             var error = {
                 reason: '@invocation-extra-indexes',
+                where: 'typer',
                 name: i.name,
                 indexes: i.indexes.length,
                 dimensions: i.dimensions.length
@@ -24912,15 +24910,6 @@ function calculate_type(exp) {
         return { error: false, result: stack.pop() };
     }
 }
-/**
- * Los operadores se implementan como funciones que toman una pila,
- * desapilan tantos elementos como necesiten, operan con ellos,
- * apilan el resultado y devuelven la nueva pila.
- *
- * Tambien pueden devolver un error en caso de que no haya suficientes
- * elementos en la pila o los tipos de estos no sean compatibles entre
- * si o con el operador.
- */
 var operators = {
     plus: function (s) {
         var supported = ['entero', 'real'];
@@ -24939,13 +24928,16 @@ var operators = {
                  * ERROR: este operador no opera sobre el tipo de alguno de sus operandos
                  */
                 if (supported.indexOf(a) == -1 && supported.indexOf(b) == -1) {
-                    return { error: true, result: { reason: 'incompatible-operands', where: 'typechecker', bad_type_a: a, bad_type_b: b } };
+                    var result = { reason: 'incompatible-operands', where: 'typechecker', bad_type_a: a, bad_type_b: b, operator: '+' };
+                    return { error: true, result: result };
                 }
                 else if (supported.indexOf(a) == -1) {
-                    return { error: true, result: { reason: 'incompatible-operand', where: 'typechecker', bad_type: a } };
+                    var result = { reason: 'incompatible-operand', where: 'typechecker', bad_type: a, operator: '+' };
+                    return { error: true, result: result };
                 }
                 else {
-                    return { error: true, result: { reason: 'incompatible-operand', where: 'typechecker', bad_type: b } };
+                    var result = { reason: 'incompatible-operand', where: 'typechecker', bad_type: b, operator: '+' };
+                    return { error: true, result: result };
                 }
             }
             switch (a) {
@@ -24966,7 +24958,8 @@ var operators = {
             return { error: false, result: s };
         }
         else {
-            return { error: true, result: { reason: 'missing-operands', where: 'typechecker', operator: 'plus', required: 2 } };
+            var result = { reason: 'missing-operands', where: 'typechecker', operator: '+', required: 2 };
+            return { error: true, result: result };
         }
     }
 };
@@ -25110,6 +25103,7 @@ function style(s) {
             }
             result += pieces[i] + styled_content;
         }
+        result += pieces[i];
         return result;
     }
     else {
@@ -25164,6 +25158,7 @@ function split_at_styles(s) {
             index++;
         }
     }
+    pieces.push(current_piece);
     return { pieces: pieces, styles: styles };
 }
 var templates = {
@@ -25172,6 +25167,26 @@ var templates = {
         title: 'Se intento asignar un valor de tipo $code{@received} a una variable de tipo $code{@expected}.',
         description: 'Las variables de tipo $code{@expected} no pueden contener datos de tipo $code{@received}.',
         suggestion: 'Deberias cambiar el tipo de la variable o cambiar el valor que quieres asignarle.'
+    },
+    'repeated-variable': {
+        title: 'Variable repetida',
+        description: 'Se declararon dos variables con el mismo nombre. La primera es de tipo $code{@first_type} y la segunda es de tipo $code{@second_type}.',
+        suggestion: 'Para arreglar este error modifica el nombre de alguna de las dos variables.'
+    },
+    '@call-undefined-module': {
+        title: 'Modulo indefinido',
+        description: 'Se llamó al modulo $code{@name} pero este no fue declarado en el programa.',
+        suggestion: 'Debes definir todos los modulos que uses en tu programa.'
+    },
+    'undefined-variable': {
+        title: 'Variable indefinida',
+        description: 'Se invocó a la variable $code{@name} pero ésta no fue declarada en ningún lugar.',
+        suggestion: 'Debes declarar todas las variables que utilices en tu programa, ya sea en el ámbito global (el modulo principal) o en el ámbito local (dentro de algun modulo).'
+    },
+    '@invocation-extra-indexes': {
+        title: 'Se invocó una variable con demasiados indices',
+        description: 'La variable $code{@name} fue invocada con @indexes indice/s pero solo tiene @dimensions dimension/es.',
+        suggestion: 'Si una variable tiene $code{@dimensions} dimensiones entonces solo puede ser invocada con hasta $code{@dimensions} indices.'
     }
 };
 
@@ -25240,9 +25255,21 @@ function ejecutar_codigo() {
                 }
             }
             else {
+                for (var _a = 0, _b = transformed.result; _a < _b.length; _a++) {
+                    var error = _b[_a];
+                    error_count++;
+                    message_panel.add_message(error);
+                }
+                status_bar.error_count = error_count;
             }
         }
         else {
+            for (var _c = 0, _d = parsed.result; _c < _d.length; _c++) {
+                var error = _d[_c];
+                error_count++;
+                message_panel.add_message(error);
+            }
+            status_bar.error_count = error_count;
         }
     }
     catch (error) {

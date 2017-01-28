@@ -1,6 +1,6 @@
 import * as $ from 'jquery'
 import {Editor, EditorFromTextArea} from 'codemirror'
-import {BaseError} from 'interprete-pl'
+import {Errors} from 'interprete-pl'
 import get_template from './Templates'
 
 export default class MessagePanel {
@@ -15,7 +15,7 @@ export default class MessagePanel {
         this.dirty = false
     }
 
-    add_message (data: BaseError) {
+    add_message (data: Errors.Base) {
         this.dirty = true
 
         const message = $('<div class="error-msg-container"></div>')

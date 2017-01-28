@@ -1,4 +1,4 @@
-import { BaseError } from 'interprete-pl'
+import { Errors } from 'interprete-pl'
 
 export interface Template {
     title: string
@@ -6,7 +6,7 @@ export interface Template {
     suggestion?: string
 }
 
-export default function get_template(data: BaseError): Template {
+export default function get_template(data: Errors.Base): Template {
     const template = data.reason in templates ? templates[data.reason] : templates.default
 
     const parsed_template: Template = { title: style(interpolate(data, template.title)) }

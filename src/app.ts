@@ -79,9 +79,11 @@ function ejecutar_codigo (): void {
             }
         }
         else {
-            /**
-             * se encontraron errores durante la lectura
-             */
+            for (let error of parsed.result) {
+                error_count++
+                message_panel.add_message(error)
+            }
+            status_bar.error_count = error_count
         }
     } catch (error) {
         /**
