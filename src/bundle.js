@@ -72,7 +72,7 @@
 
 "use strict";
 
-var tslib_1 = __webpack_require__(2);
+var tslib_1 = __webpack_require__(3);
 /**
  * Interfaces para elementos sintacticos
  */
@@ -10656,6 +10656,235 @@ return jQuery;
 
 /***/ }),
 /* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+// flatten :: [any] -> [[any]] -> [any]
+function flatten(accumulator, arr) {
+    for (var _i = 0, arr_1 = arr; _i < arr_1.length; _i++) {
+        var a = arr_1[_i];
+        for (var _a = 0, a_1 = a; _a < a_1.length; _a++) {
+            var element = a_1[_a];
+            accumulator.push(element);
+        }
+    }
+    return accumulator;
+}
+exports.flatten = flatten;
+// toma dos objetos y devuelve uno nuevo que contiene las propiedades (y valores)
+// de los dos anteriores. Si hay propiedades repetidas entre a y b, se toman las
+// de b
+function mergeObjs(a, b) {
+    var r = {};
+    for (var prop in a) {
+        r[prop] = a[prop];
+    }
+    for (var prop in b) {
+        r[prop] = b[prop];
+    }
+    return r;
+}
+exports.mergeObjs = mergeObjs;
+function clone_obj(a) {
+    return mergeObjs({}, a);
+}
+exports.clone_obj = clone_obj;
+// take, zip y zipObj estan basadas en funciones de haskell
+// crea un nuevo objeto dadas una lista de valores y una lista de cadenas.
+// Tendra tantos pares prop/valor como haya elementos en la lista mas
+// corta
+function zipObj(values, names) {
+    if (values.length > names.length) {
+        values = take(names.length, values);
+    }
+    else if (values.length < names.length) {
+        names = take(values.length, names);
+    }
+    var pairs = zip(names, values);
+    /**
+     * result es un objeto cuyas claves son cadenas y cuyos valores son de tipo A
+     */
+    var result = {};
+    for (var _i = 0, pairs_1 = pairs; _i < pairs_1.length; _i++) {
+        var _a = pairs_1[_i], prop = _a[0], value = _a[1];
+        result[prop] = value;
+    }
+    return result;
+}
+exports.zipObj = zipObj;
+// toma dos listas y devuelve una lista de pares donde el primer elemento
+// pertenece a "a" y el segundo a "b". La lista tendra tantos elementos
+// como la mas corta entre a y b
+function zip(a, b) {
+    if (a.length > b.length) {
+        a = take(b.length, a);
+    }
+    else if (a.length < b.length) {
+        b = take(a.length, b);
+    }
+    var result = [];
+    for (var i = 0; i < a.length; i++) {
+        result.push([a[i], b[i]]);
+    }
+    return result;
+}
+exports.zip = zip;
+// toma los primeros n elementos de un arreglo
+function take(n, list) {
+    return list.slice(0, n);
+}
+exports.take = take;
+/**
+ * drop
+ * quita los primeros n elementos de un arreglo
+ */
+function drop(n, list) {
+    return list.slice(n);
+}
+exports.drop = drop;
+/**
+ * arr_counter
+ * crea un arreglo numerico inicializado con una longitud especifica
+ * para ser usado como contador
+ */
+function arr_counter(length, init) {
+    var arr = new Array(length);
+    for (var i = 0; i < length; i++) {
+        arr[i] = init;
+    }
+    return arr;
+}
+exports.arr_counter = arr_counter;
+/**
+ * arr_equal
+ * compara dos arreglos para ver si son iguales
+ */
+function arr_equal(a, b) {
+    if (a.length != b.length) {
+        return false;
+    }
+    else {
+        for (var i = 0; i < a.length; i++) {
+            if (a[i] != b[i]) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+exports.arr_equal = arr_equal;
+/**
+ * arr_less
+ * compara dos arreglos numericos de la misma longitud
+ * para ver si el primero es menor que el segundo.
+ */
+function arr_minor(a, b) {
+    for (var i = 0; i < a.length; i++) {
+        if (a[i] > b[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+exports.arr_minor = arr_minor;
+/**
+ * arr_major
+ * compara dos arreglos numericos de la misma longitud
+ * para ver si el primero es mayor que el segundo
+ */
+function arr_major(a, b) {
+    for (var i = 0; i < a.length; i++) {
+        if (a[i] < b[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+exports.arr_major = arr_major;
+/**
+ * arr_counter_inc
+ * toma una arreglo de numeros usado como contador y lo incrementa `increment` unidades
+ */
+function arr_counter_inc(a, lengths, init) {
+    var done = false;
+    for (var i = a.length - 1; i >= 0 && !done; i--) {
+        a[i]++;
+        done = true;
+        /**
+         * Esto permite que el primer elemento del arreglo se incremente
+         * indefinidamente. Es el unico que no es reseteado.
+         */
+        if (i > 0) {
+            if (a[i] > lengths[i]) {
+                a[i] = init;
+                done = false;
+            }
+        }
+    }
+}
+exports.arr_counter_inc = arr_counter_inc;
+/**
+ * arr_counter_inc
+ * toma un arreglo numercio usado como contador y lo decrementa
+ * `dec` unidades.
+ */
+function arr_counter_dec(a, lengths) {
+    var done = false;
+    for (var i = a.length - 1; i >= 0 && !done; i--) {
+        a[i]--;
+        done = true;
+        if (i > 0) {
+            if (a[i] < 1) {
+                a[i] = lengths[i];
+                done = false;
+            }
+        }
+    }
+}
+exports.arr_counter_dec = arr_counter_dec;
+function types_are_equal(a, b) {
+    if (a.kind == b.kind) {
+        switch (a.kind) {
+            case 'array':
+                if (a.length == b.length) {
+                    return types_are_equal(a.cell_type, b.cell_type);
+                }
+                else {
+                    return false;
+                }
+            case 'atomic':
+                return a.typename == b.typename;
+        }
+    }
+    else {
+        return false;
+    }
+}
+exports.types_are_equal = types_are_equal;
+function stringify(type) {
+    if (type.kind == 'array') {
+        var dimensions = '';
+        var ct = type;
+        while (ct.kind == 'array') {
+            dimensions += ct.length;
+            if (ct.cell_type.kind == 'array') {
+                dimensions += ', ';
+            }
+            ct = ct.cell_type;
+        }
+        var atomic = ct.typename;
+        return atomic + "[" + dimensions + "]";
+    }
+    else {
+        return type.typename;
+    }
+}
+exports.stringify = stringify;
+
+
+/***/ }),
+/* 3 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -10765,7 +10994,7 @@ function __generator(thisArg, body) {
 };
 
 /***/ }),
-/* 3 */
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -10781,13 +11010,13 @@ exports.typecheck = TSChecker_1.default;
 
 
 /***/ }),
-/* 4 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 var interfaces_1 = __webpack_require__(0);
-var TokenQueue_js_1 = __webpack_require__(5);
+var TokenQueue_js_1 = __webpack_require__(6);
 /**
  * Funcion que intenta capturar un token numerico
  * @param {TokenQueue} source Fuente en la que hay que buscar el numero
@@ -12118,12 +12347,12 @@ function UnexpectedTokenReport(current_token, expected, reason) {
 
 
 /***/ }),
-/* 5 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var TokenTypes_1 = __webpack_require__(6);
+var TokenTypes_1 = __webpack_require__(7);
 var TokenQueue = (function () {
     function TokenQueue(array) {
         this.tokens = array;
@@ -12176,12 +12405,12 @@ exports.default = TokenQueue;
 
 
 /***/ }),
-/* 6 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var StringMethods_1 = __webpack_require__(8);
+var StringMethods_1 = __webpack_require__(9);
 var interfaces_1 = __webpack_require__(0);
 var EoFToken = (function () {
     function EoFToken(source) {
@@ -12665,7 +12894,7 @@ function wtk(word) {
 
 
 /***/ }),
-/* 7 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -12738,7 +12967,7 @@ exports.default = Emitter;
 
 
 /***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -12746,216 +12975,6 @@ exports.default = Emitter;
 exports.isDigit = function (char) { return /\d/.test(char); };
 exports.isLetter = function (char) { return /[a-zA-Z]/.test(char); };
 exports.isWhiteSpace = function (char) { return /\s/.test(char) && (char !== '\n'); };
-
-
-/***/ }),
-/* 9 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-// Estas dos funciones quedan comentadas como referencia
-// export function bindN (f, ...args) {
-//   let func = f
-//   let output
-
-//   for (let i = 0; i < args.length - 1; i++) {
-//     if (args[i].error)
-//       return args[i]
-//     else
-//       func = func(args[i].result)
-//   }
-//   return bind(func, last(args))
-// }
-// similar como seria bind (>>=) de haskell si solo pudiera ser aplicado a
-// Maybes
-// En resumen, una funcion que toma una funcion y un reporte. Si el reporte indica
-// un error, lo devuelve. Si no, aplica f sobre el valor que el reporte contiene
-// Cabe aclarar que f es una funcion que tambien devuelve reportes.
-// Un reporte es un objeto que contiene las propiedades `error` y `result`.
-// export const bind = curry((f : any, r : any) => r.error ? r:f(r.result))
-// flatten :: [any] -> [[any]] -> [any]
-function flatten(accumulator, arr) {
-    for (var _i = 0, arr_1 = arr; _i < arr_1.length; _i++) {
-        var a = arr_1[_i];
-        for (var _a = 0, a_1 = a; _a < a_1.length; _a++) {
-            var element = a_1[_a];
-            accumulator.push(element);
-        }
-    }
-    return accumulator;
-}
-exports.flatten = flatten;
-// toma dos objetos y devuelve uno nuevo que contiene las propiedades (y valores)
-// de los dos anteriores. Si hay propiedades repetidas entre a y b, se toman las
-// de b
-function mergeObjs(a, b) {
-    var r = {};
-    for (var prop in a) {
-        r[prop] = a[prop];
-    }
-    for (var prop in b) {
-        r[prop] = b[prop];
-    }
-    return r;
-}
-exports.mergeObjs = mergeObjs;
-function clone_obj(a) {
-    return mergeObjs({}, a);
-}
-exports.clone_obj = clone_obj;
-// take, zip y zipObj estan basadas en funciones de haskell
-// crea un nuevo objeto dadas una lista de valores y una lista de cadenas.
-// Tendra tantos pares prop/valor como haya elementos en la lista mas
-// corta
-function zipObj(values, names) {
-    if (values.length > names.length) {
-        values = take(names.length, values);
-    }
-    else if (values.length < names.length) {
-        names = take(values.length, names);
-    }
-    var pairs = zip(names, values);
-    /**
-     * result es un objeto cuyas claves son cadenas y cuyos valores son de tipo A
-     */
-    var result = {};
-    for (var _i = 0, pairs_1 = pairs; _i < pairs_1.length; _i++) {
-        var _a = pairs_1[_i], prop = _a[0], value = _a[1];
-        result[prop] = value;
-    }
-    return result;
-}
-exports.zipObj = zipObj;
-// toma dos listas y devuelve una lista de pares donde el primer elemento
-// pertenece a "a" y el segundo a "b". La lista tendra tantos elementos
-// como la mas corta entre a y b
-function zip(a, b) {
-    if (a.length > b.length) {
-        a = take(b.length, a);
-    }
-    else if (a.length < b.length) {
-        b = take(a.length, b);
-    }
-    var result = [];
-    for (var i = 0; i < a.length; i++) {
-        result.push([a[i], b[i]]);
-    }
-    return result;
-}
-exports.zip = zip;
-// toma los primeros n elementos de un arreglo
-function take(n, list) {
-    return list.slice(0, n);
-}
-exports.take = take;
-/**
- * drop
- * quita los primeros n elementos de un arreglo
- */
-function drop(n, list) {
-    return list.slice(n);
-}
-exports.drop = drop;
-/**
- * arr_counter
- * crea un arreglo numerico inicializado con una longitud especifica
- * para ser usado como contador
- */
-function arr_counter(length, init) {
-    var arr = new Array(length);
-    for (var i = 0; i < length; i++) {
-        arr[i] = init;
-    }
-    return arr;
-}
-exports.arr_counter = arr_counter;
-/**
- * arr_equal
- * compara dos arreglos para ver si son iguales
- */
-function arr_equal(a, b) {
-    if (a.length != b.length) {
-        return false;
-    }
-    else {
-        for (var i = 0; i < a.length; i++) {
-            if (a[i] != b[i]) {
-                return false;
-            }
-        }
-    }
-    return true;
-}
-exports.arr_equal = arr_equal;
-/**
- * arr_less
- * compara dos arreglos numericos de la misma longitud
- * para ver si el primero es menor que el segundo.
- */
-function arr_minor(a, b) {
-    for (var i = 0; i < a.length; i++) {
-        if (a[i] > b[i]) {
-            return false;
-        }
-    }
-    return true;
-}
-exports.arr_minor = arr_minor;
-/**
- * arr_major
- * compara dos arreglos numericos de la misma longitud
- * para ver si el primero es mayor que el segundo
- */
-function arr_major(a, b) {
-    for (var i = 0; i < a.length; i++) {
-        if (a[i] < b[i]) {
-            return false;
-        }
-    }
-    return true;
-}
-exports.arr_major = arr_major;
-/**
- * arr_counter_inc
- * toma una arreglo de numeros usado como contador y lo incrementa `increment` unidades
- */
-function arr_counter_inc(a, lengths, init) {
-    var done = false;
-    for (var i = a.length - 1; i >= 0 && !done; i--) {
-        a[i]++;
-        done = true;
-        /**
-         * Esto permite que el primer elemento del arreglo se incremente
-         * indefinidamente. Es el unico que no es reseteado.
-         */
-        if (i > 0) {
-            if (a[i] > lengths[i]) {
-                a[i] = init;
-                done = false;
-            }
-        }
-    }
-}
-exports.arr_counter_inc = arr_counter_inc;
-/**
- * arr_counter_inc
- * toma un arreglo numercio usado como contador y lo decrementa
- * `dec` unidades.
- */
-function arr_counter_dec(a, lengths) {
-    var done = false;
-    for (var i = a.length - 1; i >= 0 && !done; i--) {
-        a[i]--;
-        done = true;
-        if (i > 0) {
-            if (a[i] < 1) {
-                a[i] = lengths[i];
-                done = false;
-            }
-        }
-    }
-}
-exports.arr_counter_dec = arr_counter_dec;
 
 
 /***/ }),
@@ -22218,7 +22237,7 @@ exports.default = StatusBar;
 
 "use strict";
 
-var interprete_pl_1 = __webpack_require__(3);
+var interprete_pl_1 = __webpack_require__(4);
 var Prompt_1 = __webpack_require__(25);
 var $ = __webpack_require__(1);
 var Window = (function () {
@@ -22749,7 +22768,7 @@ exports.Evaluator = Evaluator;
 
 "use strict";
 
-var tslib_1 = __webpack_require__(2);
+var tslib_1 = __webpack_require__(3);
 /**
  * Eventos que emite:
  * 	- program-started
@@ -22760,7 +22779,7 @@ var tslib_1 = __webpack_require__(2);
  *  - read
  */
 var Evaluator_1 = __webpack_require__(14);
-var Emitter_js_1 = __webpack_require__(7);
+var Emitter_js_1 = __webpack_require__(8);
 var Interpreter = (function (_super) {
     tslib_1.__extends(Interpreter, _super);
     function Interpreter(p) {
@@ -22839,8 +22858,8 @@ exports.default = Interpreter;
 "use strict";
 
 var interfaces_1 = __webpack_require__(0);
-var TokenTypes_1 = __webpack_require__(6);
-var StringMethods_1 = __webpack_require__(8);
+var TokenTypes_1 = __webpack_require__(7);
+var StringMethods_1 = __webpack_require__(9);
 var isSpecialSymbolChar = TokenTypes_1.SpecialSymbolToken.isSpecialSymbolChar;
 /**
  * Clase para convertir una cadena en fichas.
@@ -22947,13 +22966,13 @@ exports.default = Lexer;
 
 "use strict";
 
-var tslib_1 = __webpack_require__(2);
-var Emitter_1 = __webpack_require__(7);
+var tslib_1 = __webpack_require__(3);
+var Emitter_1 = __webpack_require__(8);
 var SourceWrapper_1 = __webpack_require__(18);
 var Lexer_1 = __webpack_require__(16);
-var TokenQueue_1 = __webpack_require__(5);
-var Patterns_1 = __webpack_require__(4);
-var Patterns_2 = __webpack_require__(4);
+var TokenQueue_1 = __webpack_require__(6);
+var Patterns_1 = __webpack_require__(5);
+var Patterns_2 = __webpack_require__(5);
 var Parser = (function (_super) {
     tslib_1.__extends(Parser, _super);
     function Parser() {
@@ -23696,7 +23715,7 @@ function declare_variables(declarations) {
 "use strict";
 
 var interfaces_1 = __webpack_require__(0);
-var helpers_1 = __webpack_require__(9);
+var helpers_1 = __webpack_require__(2);
 function transform(ast) {
     var result = {
         entry_point: null,
@@ -24265,7 +24284,7 @@ function transform_exp_element(element) {
 "use strict";
 
 var interfaces_1 = __webpack_require__(0);
-var helpers_1 = __webpack_require__(9);
+var helpers_1 = __webpack_require__(2);
 function transform(ast) {
     var errors = [];
     var typed_program = {};
@@ -24380,13 +24399,22 @@ function transform_if(a, mn, p) {
         return { error: true, result: errors };
     }
     else {
-        var result = {
-            type: 'if',
-            condition: c_report.result,
-            true_branch: typed_tb,
-            false_branch: typed_fb
-        };
-        return { error: false, result: result };
+        var cond_type = calculate_type(c_report.result);
+        if (cond_type.error) {
+            return { error: true, result: errors.concat(cond_type.result) };
+        }
+        else {
+            var result = {
+                type: 'if',
+                condition: c_report.result,
+                true_branch: typed_tb,
+                false_branch: typed_fb,
+                typings: {
+                    condition: cond_type.result
+                }
+            };
+            return { error: false, result: result };
+        }
     }
 }
 function transform_for(f, mn, p) {
@@ -24414,13 +24442,23 @@ function transform_for(f, mn, p) {
         return { error: true, result: errors };
     }
     else {
-        var result = {
-            type: 'for',
-            counter_init: init.result,
-            body: body,
-            last_value: last.result
-        };
-        return { error: false, result: result };
+        var last_v_type = calculate_type(last.result);
+        if (last_v_type.error) {
+            return { error: true, result: errors.concat(last_v_type.result) };
+        }
+        else {
+            var result = {
+                type: 'for',
+                counter_init: init.result,
+                body: body,
+                last_value: last.result,
+                typings: {
+                    init_value: init.result.typings.right,
+                    last_value: last_v_type.result
+                }
+            };
+            return { error: false, result: result };
+        }
     }
 }
 function transform_while(w, mn, p) {
@@ -24429,7 +24467,7 @@ function transform_while(w, mn, p) {
     if (c_report.error) {
         errors = errors.concat(c_report.result);
     }
-    var body = [];
+    var body_statements = [];
     for (var _i = 0, _a = w.body; _i < _a.length; _i++) {
         var e = _a[_i];
         var report = transform_statement(e, mn, p);
@@ -24437,48 +24475,68 @@ function transform_while(w, mn, p) {
             errors = errors.concat(report.result);
         }
         else {
-            body.push(report.result);
+            body_statements.push(report.result);
         }
     }
     if (errors.length > 0) {
         return { error: true, result: errors };
     }
     else {
-        var result = {
-            type: 'while',
-            condition: c_report.result,
-            body: body
-        };
-        return { error: false, result: result };
+        var condition_type = calculate_type(c_report.result);
+        if (condition_type.error) {
+            return { error: true, result: errors.concat(condition_type.result) };
+        }
+        else {
+            var result = {
+                type: 'while',
+                condition: c_report.result,
+                body: body_statements,
+                typings: {
+                    body: body_statements,
+                    condition: condition_type.result
+                }
+            };
+            return { error: false, result: result };
+        }
     }
 }
-function transform_until(w, mn, p) {
+function transform_until(u, mn, p) {
     var errors = [];
-    var c_report = type_expression(w.condition, mn, p);
+    var c_report = type_expression(u.condition, mn, p);
     if (c_report.error) {
         errors = errors.concat(c_report.result);
     }
-    var body = [];
-    for (var _i = 0, _a = w.body; _i < _a.length; _i++) {
+    var body_statements = [];
+    for (var _i = 0, _a = u.body; _i < _a.length; _i++) {
         var e = _a[_i];
         var report = transform_statement(e, mn, p);
         if (report.error) {
             errors = errors.concat(report.result);
         }
         else {
-            body.push(report.result);
+            body_statements.push(report.result);
         }
     }
     if (errors.length > 0) {
         return { error: true, result: errors };
     }
     else {
-        var result = {
-            type: 'until',
-            condition: c_report.result,
-            body: body
-        };
-        return { error: false, result: result };
+        var condition_type = calculate_type(c_report.result);
+        if (condition_type.error) {
+            return { error: true, result: errors.concat(condition_type.result) };
+        }
+        else {
+            var result = {
+                type: 'until',
+                condition: c_report.result,
+                body: body_statements,
+                typings: {
+                    body: body_statements,
+                    condition: condition_type.result
+                }
+            };
+            return { error: false, result: result };
+        }
     }
 }
 function transform_return(r, mn, p) {
@@ -24488,17 +24546,33 @@ function transform_return(r, mn, p) {
         return exp;
     }
     else {
-        var result = {
-            type: 'return',
-            actual: exp.result,
-            expected: new interfaces_1.Typed.AtomicType(r.expected)
-        };
-        return { error: false, result: result };
+        /**
+         * el tipo del valor de este enunciado 'retornar'
+         */
+        var report = calculate_type(exp.result);
+        if (report.error) {
+            return report;
+        }
+        else {
+            var type = r.type, expected = r.expected;
+            var result = {
+                type: type,
+                expression: exp.result,
+                typings: {
+                    actual: report.result,
+                    expected: new interfaces_1.Typed.AtomicType(expected)
+                }
+            };
+            return { error: false, result: result };
+        }
     }
 }
 function type_call(a, mn, p) {
     var errors = [];
-    var argtypes = [];
+    /**
+     * epxresiones de tipo de cada argumento
+     */
+    var transformed_args = [];
     for (var _i = 0, _a = a.args; _i < _a.length; _i++) {
         var arg = _a[_i];
         var report = type_expression(arg, mn, p);
@@ -24506,23 +24580,49 @@ function type_call(a, mn, p) {
             errors = errors.concat(report.result);
         }
         else {
-            argtypes.push(report.result);
+            transformed_args.push(report.result);
         }
     }
     if (errors.length > 0) {
         return { error: true, result: errors };
     }
     else {
-        var paramtypes = type_params(a.parameters);
-        var datatype = new interfaces_1.Typed.AtomicType(a.return_type);
-        var result = {
-            type: 'call',
-            name: a.name,
-            argtypes: argtypes,
-            datatype: datatype,
-            paramtypes: paramtypes
-        };
-        return { error: false, result: result };
+        /**
+         * reducir las expresiones a tipos
+         */
+        var type_reports = transformed_args.map(calculate_type);
+        var argtypes = [];
+        var error_found = false;
+        for (var _b = 0, type_reports_1 = type_reports; _b < type_reports_1.length; _b++) {
+            var report = type_reports_1[_b];
+            if (report.error) {
+                error_found = true;
+                errors = errors.concat(report.result);
+            }
+            else {
+                argtypes.push(report.result);
+            }
+        }
+        if (error_found) {
+            return { error: true, result: errors };
+        }
+        else {
+            var paramtypes = type_params(a.parameters);
+            var ret = new interfaces_1.Typed.AtomicType(a.return_type);
+            var type = a.type, name = a.name, parameters = a.parameters;
+            var result = {
+                type: type,
+                name: name,
+                args: transformed_args,
+                parameters: parameters,
+                typings: {
+                    args: argtypes,
+                    parameters: paramtypes,
+                    return: ret
+                }
+            };
+            return { error: false, result: result };
+        }
     }
 }
 function type_params(params) {
@@ -24547,96 +24647,59 @@ function type_params(params) {
     }
     return paramtypes;
 }
-function transform_assignment(a, mn, p) {
+function transform_invocation(i, mn, p) {
     var errors = [];
-    var left_type = type_variable(a.left, mn, p);
-    if (left_type.error) {
-        errors = errors.concat(left_type.result);
-    }
-    var right_type = type_expression(a.right, mn, p);
-    if (right_type.error) {
-        errors = errors.concat(right_type.result);
+    var index_exps = [];
+    for (var _i = 0, _a = i.indexes; _i < _a.length; _i++) {
+        var index = _a[_i];
+        var report = type_expression(index, mn, p);
+        if (report.error) {
+            errors = errors.concat(report.result);
+        }
+        else {
+            index_exps.push(report.result);
+        }
     }
     if (errors.length > 0) {
         return { error: true, result: errors };
     }
     else {
-        return { error: false, result: { type: 'assignment', left: left_type.result, right: right_type.result } };
+        var type_reports = index_exps.map(calculate_type);
     }
 }
-function type_variable(iv, mn, p) {
+function transform_assignment(a, mn, p) {
     var errors = [];
-    if (iv.indexes.length > iv.dimensions.length) {
-        /**
-         * Se esta invocando una variable con mas indices
-         * de los permitidos.
-         */
-        errors.push({ where: 'typer', reason: '@invocation-extra-indexes', name: iv.name, dimensions: iv.dimensions.length, indexes: iv.indexes.length });
-        /**
-         * Solo queda ver si tambien hay errores en esos indices...
-         */
-        for (var _i = 0, _a = iv.indexes; _i < _a.length; _i++) {
-            var index = _a[_i];
-            var report = type_expression(index, mn, p);
-            if (report.error) {
-                for (var _b = 0, _c = report.result; _b < _c.length; _b++) {
-                    var error = _c[_b];
-                    errors.push(error);
-                }
-            }
-        }
-        return { error: true, result: errors };
+    var left_type = type_invocation(a.left, mn, p);
+    if (left_type.error) {
+        errors = errors.concat(left_type.result);
     }
-    if (iv.is_array) {
-        /**
-         * Se esta invocando una variable correctamente y la variable es un arreglo
-         * indexado.
-         */
-        /**
-         * Si la variable es un arreglo puede tener muchas dimensiones.
-         * Una variable de muchas dimensiones puede verse como un vector
-         * de vectores donde cada vector puede contener un vector o un tipo
-         * 'atomico'.
-         *
-         * Un vector[2][3][2] puede verse como dos matrices 3x2 o un vector 2 que
-         * contiene dos vectores 3, cuyas celdas contienen vectores 2.
-         */
-        var remaining_dimensions = helpers_1.drop(iv.indexes.length, iv.dimensions);
-        var last_type = void 0;
-        for (var i = remaining_dimensions.length - 1; i >= 0; i--) {
-            if (i == remaining_dimensions.length - 1) {
-                last_type = new interfaces_1.Typed.ArrayType(new interfaces_1.Typed.AtomicType(iv.datatype), remaining_dimensions[i]);
-            }
-            else {
-                last_type = new interfaces_1.Typed.ArrayType(last_type, remaining_dimensions[i]);
-            }
-        }
-        /**
-         * tipos de los indices o errores encontrados en ellos
-         */
-        var indextypes_report = type_indexes(iv.indexes, mn, p);
-        if (indextypes_report.error) {
-            return indextypes_report;
-        }
-        else {
-            var result = {
-                type: 'invocation',
-                datatype: last_type,
-                indextypes: indextypes_report.result
-            };
-            return { error: false, result: result };
-        }
+    var typed_right = type_expression(a.right, mn, p);
+    if (typed_right.error) {
+        errors = errors.concat(typed_right.result);
+        return { error: true, result: errors };
     }
     else {
         /**
-         * Se esta invocando una variable normal o un arreglo sin indices.
+         * reducir la expresion tipada a un solo tipo
          */
-        var result = {
-            datatype: new interfaces_1.Typed.AtomicType(iv.datatype),
-            indextypes: [],
-            type: 'invocation'
-        };
-        return { error: false, result: result };
+        var right_type = calculate_type(typed_right.result);
+        if (right_type.error) {
+            errors = errors.concat(right_type.result);
+            return { error: true, result: errors };
+        }
+        else {
+            /**
+             * copiar las propiedades que permanecen constantes
+             */
+            var type = a.type, left = a.left, right = a.right;
+            var result = {
+                type: type,
+                left: left_type.result,
+                right: typed_right.result,
+                typings: { left: left_type.result.typings.type, right: right_type.result }
+            };
+            return { error: false, result: result };
+        }
     }
 }
 function type_expression(es, mn, p) {
@@ -24657,7 +24720,7 @@ function type_expression(es, mn, p) {
                 }
                 break;
             case 'literal':
-                typed_exp.push(type_literal(e));
+                typed_exp.push(e);
                 break;
             case 'call':
                 {
@@ -24684,9 +24747,15 @@ function type_expression(es, mn, p) {
 }
 function type_invocation(i, mn, p) {
     var errors = [];
-    var datatype;
+    /**
+     * el tipo de dato que esta invocacion retorna
+     */
+    var invocation_datatype;
     if (i.is_array) {
-        var indextypes_report = type_indexes(i.indexes, mn, p);
+        /**
+         * 'expresiones de tipo'
+         */
+        var type_exps = type_indexes(i.indexes, mn, p);
         if (i.indexes.length > i.dimensions.length) {
             var error = {
                 reason: '@invocation-extra-indexes',
@@ -24703,9 +24772,13 @@ function type_invocation(i, mn, p) {
              * solo hay que calcular el tipo resultante y los tipos
              * de los indices.
              */
-            datatype = new interfaces_1.Typed.AtomicType(i.datatype);
+            invocation_datatype = new interfaces_1.Typed.AtomicType(i.datatype);
         }
         else {
+            /**
+             * Como hay menos indices que dimensiones hay que calcular
+             * el tipo del valor que esta invocacion retorna
+             */
             var remaining_dimensions = helpers_1.drop(i.indexes.length, i.dimensions);
             var last_type = void 0;
             for (var j = remaining_dimensions.length - 1; j >= 0; j--) {
@@ -24716,28 +24789,63 @@ function type_invocation(i, mn, p) {
                     last_type = new interfaces_1.Typed.ArrayType(last_type, remaining_dimensions[j]);
                 }
             }
-            datatype = last_type;
+            invocation_datatype = last_type;
         }
-        if (errors.length > 0 || indextypes_report.error) {
-            if (indextypes_report.error) {
-                errors = errors.concat(indextypes_report.result);
+        if (errors.length > 0 || type_exps.error) {
+            if (type_exps.error) {
+                errors = errors.concat(type_exps.result);
             }
             return { error: true, result: errors };
         }
         else {
-            var result = {
-                datatype: datatype,
-                indextypes: indextypes_report.result,
-                type: 'invocation'
-            };
-            return { error: false, result: result };
+            /**
+             * Reducir los indices a tipos individuales...ultima
+             * oportunidad para que haya errores
+             */
+            var types = type_exps.result.map(calculate_type);
+            var indextype_error_found = false;
+            for (var _i = 0, types_1 = types; _i < types_1.length; _i++) {
+                var report = types_1[_i];
+                if (report.error) {
+                    indextype_error_found = true;
+                    errors = errors.concat(report.result);
+                }
+            }
+            if (indextype_error_found) {
+                return { error: true, result: errors };
+            }
+            else {
+                var indextypes = types.map(function (t) { return t.result; });
+                var dimensions = i.dimensions, datatype = i.datatype, indexes = i.indexes, name = i.name, is_array = i.is_array;
+                var result = {
+                    type: 'invocation',
+                    datatype: datatype,
+                    indexes: indexes,
+                    dimensions: dimensions,
+                    name: name,
+                    is_array: is_array,
+                    typings: {
+                        indexes: indextypes,
+                        type: invocation_datatype
+                    }
+                };
+                return { error: false, result: result };
+            }
         }
     }
     else {
+        var dimensions = i.dimensions, datatype = i.datatype, indexes = i.indexes, name = i.name, is_array = i.is_array;
         var result = {
-            datatype: new interfaces_1.Typed.AtomicType(i.datatype),
-            indextypes: [],
-            type: 'invocation'
+            type: 'invocation',
+            datatype: datatype,
+            dimensions: dimensions,
+            indexes: indexes,
+            name: name,
+            is_array: is_array,
+            typings: {
+                indexes: [],
+                type: new interfaces_1.Typed.AtomicType(datatype)
+            }
         };
         return { error: false, result: result };
     }
@@ -24774,6 +24882,148 @@ function type_literal(l) {
         case 'number': {
             return l.value - Math.trunc(l.value) > 0 ? new interfaces_1.Typed.AtomicType('real') : new interfaces_1.Typed.AtomicType('entero');
         }
+    }
+}
+/**
+ * calculate_type
+ * "ejecuta" una expresion de tipos y calcula el tipo resultante
+ *
+ * Por ejemplo: entero + entero = entero; entero + real = real
+ */
+function calculate_type(exp) {
+    var stack = [];
+    var errors = [];
+    for (var _i = 0, exp_1 = exp; _i < exp_1.length; _i++) {
+        var e = exp_1[_i];
+        switch (e.type) {
+            case 'literal':
+                stack.push(type_literal(e));
+                break;
+            case 'invocation':
+                stack.push(e.typings.type);
+                break;
+            case 'call':
+                stack.push(e.typings.return);
+                break;
+            case 'operator':
+                {
+                    var op_report = operate(stack, e.name);
+                    if (op_report.error) {
+                        errors = errors.concat(op_report.result);
+                    }
+                    else {
+                        stack = op_report.result;
+                    }
+                }
+                break;
+        }
+    }
+    if (errors.length > 0) {
+        return { error: true, result: errors };
+    }
+    else {
+        return { error: false, result: stack.pop() };
+    }
+}
+function operate(s, op) {
+    switch (op) {
+        case 'plus':
+        case 'times':
+        case 'minus':
+        case 'power':
+            return plus_times(s, op);
+        case 'minor':
+        case 'minor-eq':
+        case 'major':
+        case 'major-eq':
+        case 'equal':
+        case 'different':
+            return comparison(s, op);
+    }
+}
+/**
+ * Los operadores se implementan como funciones que toman una pila,
+ * desapilan tantos elementos como necesiten, operan con ellos,
+ * apilan el resultado y devuelven la nueva pila.
+ *
+ * Tambien pueden devolver un error en caso de que no haya suficientes
+ * elementos en la pila o los tipos de estos no sean compatibles entre
+ * si o con el operador.
+ */
+/**
+ * plus_times calcula el tipo producido por: una suma, una resta, una multiplicacion,
+ * y una potencia
+ */
+function plus_times(s, op) {
+    var supported = ['entero', 'real'];
+    if (s.length >= 2) {
+        /**
+         * Si la expresion era "2 + 3" entonces: a = 3 y b = 2
+         */
+        var a = helpers_1.stringify(s.pop());
+        var b = helpers_1.stringify(s.pop());
+        if (supported.indexOf(a) == -1 || supported.indexOf(b) == -1) {
+            /**
+             * ERROR: este operador no opera sobre el tipo de alguno de sus operandos
+             */
+            if (supported.indexOf(a) == -1 && supported.indexOf(b) == -1) {
+                var result = { reason: 'incompatible-operands', where: 'typer', bad_type_a: a, bad_type_b: b, operator: op };
+                return { error: true, result: result };
+            }
+            else if (supported.indexOf(a) == -1) {
+                var result = { reason: 'incompatible-operand', where: 'typer', bad_type: a, operator: op };
+                return { error: true, result: result };
+            }
+            else {
+                var result = { reason: 'incompatible-operand', where: 'typer', bad_type: b, operator: op };
+                return { error: true, result: result };
+            }
+        }
+        switch (a) {
+            case 'entero':
+                switch (b) {
+                    case 'entero':
+                        s.push(new interfaces_1.Typed.AtomicType('entero'));
+                        break;
+                    case 'real':
+                        s.push(new interfaces_1.Typed.AtomicType('real'));
+                        break;
+                }
+                break;
+            case 'real':
+                s.push(new interfaces_1.Typed.AtomicType('real'));
+                break;
+        }
+        return { error: false, result: s };
+    }
+    else {
+        var result = { reason: 'missing-operands', where: 'typer', operator: op, required: 2 };
+        return { error: true, result: result };
+    }
+}
+function comparison(s, op) {
+    if (s.length >= 2) {
+        var a = s.pop();
+        var b = s.pop();
+        var atomic_cond = a.kind == 'atomic' && b.kind == 'atomic';
+        var a_float_or_int = a.typename == 'entero' || a.typename == 'real';
+        var b_float_or_int = b.typename == 'entero' || b.typename == 'real';
+        if (!(((helpers_1.types_are_equal(a, b) && atomic_cond) || (atomic_cond && a_float_or_int && b_float_or_int)))) {
+            /**
+             * Este error se detecta cuando se intenta comparar datos de tipos incompatibles
+             * o cuando alguno de los operandos es un arreglo.
+             */
+            var result = { reason: '@comparison-bad-operands', where: 'typer', left: helpers_1.stringify(b), right: helpers_1.stringify(a) };
+            return { error: true, result: result };
+        }
+        else {
+            s.push(new interfaces_1.Typed.AtomicType('logico'));
+            return { error: false, result: s };
+        }
+    }
+    else {
+        var result = { reason: 'missing-operands', where: 'typer', operator: op, required: 2 };
+        return { error: true, result: result };
     }
 }
 
@@ -24821,6 +25071,7 @@ exports.default = transform;
 "use strict";
 
 var interfaces_1 = __webpack_require__(0);
+var helpers_1 = __webpack_require__(2);
 function check(p) {
     var errors = [];
     for (var mn in p) {
@@ -24859,19 +25110,13 @@ function check_statement(s) {
 }
 function check_simple_loop(l) {
     var errors = [];
-    var condition = calculate_type(l.condition);
-    if (condition.error) {
-        errors = errors.concat(condition.result);
-    }
-    else {
-        if (!types_are_equal(condition.result, new interfaces_1.Typed.AtomicType('logico'))) {
-            var error = {
-                reason: 'bad-condition',
-                where: 'typechecker',
-                received: stringify(condition.result)
-            };
-            errors.push(error);
-        }
+    if (!helpers_1.types_are_equal(l.typings.condition, new interfaces_1.Typed.AtomicType('logico'))) {
+        var error = {
+            reason: 'bad-condition',
+            where: 'typechecker',
+            received: helpers_1.stringify(l.typings.condition)
+        };
+        errors.push(error);
     }
     for (var _i = 0, _a = l.body; _i < _a.length; _i++) {
         var s = _a[_i];
@@ -24884,47 +25129,33 @@ function check_simple_loop(l) {
 }
 function check_for(f) {
     var errors = [];
-    var counter = check_invocation(f.counter_init.left);
-    if (counter.error) {
-        errors = errors.concat(counter.result);
+    var init_report = check_assignment(f.counter_init);
+    if (init_report.length > 0) {
+        errors = errors.concat(init_report);
     }
-    else {
-        if (!types_are_equal(counter.result, new interfaces_1.Typed.AtomicType('entero'))) {
-            var error = {
-                reason: '@for-bad-counter',
-                where: 'typechecker',
-                received: stringify(counter.result)
-            };
-            errors.push(error);
-        }
+    if (!helpers_1.types_are_equal(f.counter_init.typings.left, new interfaces_1.Typed.AtomicType('entero'))) {
+        var error = {
+            reason: '@for-bad-counter',
+            where: 'typechecker',
+            received: helpers_1.stringify(f.counter_init.typings.left)
+        };
+        errors.push(error);
     }
-    var init_v = calculate_type(f.counter_init.right);
-    if (init_v.error) {
-        errors = errors.concat(init_v.result);
+    if (!helpers_1.types_are_equal(f.typings.init_value, new interfaces_1.Typed.AtomicType('entero'))) {
+        var error = {
+            reason: '@for-bad-init',
+            where: 'typechecker',
+            received: helpers_1.stringify(f.typings.init_value)
+        };
+        errors.push(error);
     }
-    else {
-        if (!types_are_equal(init_v.result, new interfaces_1.Typed.AtomicType('entero'))) {
-            var error = {
-                reason: '@for-bad-init',
-                where: 'typechecker',
-                received: stringify(init_v.result)
-            };
-            errors.push(error);
-        }
-    }
-    var last_v = calculate_type(f.counter_init.right);
-    if (last_v.error) {
-        errors = errors.concat(last_v.result);
-    }
-    else {
-        if (!types_are_equal(last_v.result, new interfaces_1.Typed.AtomicType('entero'))) {
-            var error = {
-                reason: '@for-bad-last',
-                where: 'typechecker',
-                received: stringify(last_v.result)
-            };
-            errors.push(error);
-        }
+    if (!helpers_1.types_are_equal(f.typings.last_value, new interfaces_1.Typed.AtomicType('entero'))) {
+        var error = {
+            reason: '@for-bad-last',
+            where: 'typechecker',
+            received: helpers_1.stringify(f.typings.last_value)
+        };
+        errors.push(error);
     }
     for (var _i = 0, _a = f.body; _i < _a.length; _i++) {
         var s = _a[_i];
@@ -24937,38 +25168,26 @@ function check_for(f) {
 }
 function check_return(r) {
     var errors = [];
-    var exp = calculate_type(r.actual);
-    if (exp.error) {
-        errors = exp.result;
-    }
-    else {
-        if (!types_are_equal(exp.result, r.expected)) {
-            var error = {
-                reason: 'bad-return',
-                where: 'typechecker',
-                declared: stringify(r.expected),
-                received: stringify(exp.result)
-            };
-            errors.push(error);
-        }
+    if (!helpers_1.types_are_equal(r.typings.actual, r.typings.expected)) {
+        var error = {
+            reason: 'bad-return',
+            where: 'typechecker',
+            declared: helpers_1.stringify(r.typings.expected),
+            received: helpers_1.stringify(r.typings.actual)
+        };
+        errors.push(error);
     }
     return errors;
 }
 function check_if(i) {
     var errors = [];
-    var condition = calculate_type(i.condition);
-    if (condition.error) {
-        errors = errors.concat(condition.result);
-    }
-    else {
-        if (!types_are_equal(condition.result, new interfaces_1.Typed.AtomicType('logico'))) {
-            var error = {
-                reason: 'bad-condition',
-                where: 'typechecker',
-                received: stringify(condition.result)
-            };
-            errors.push(error);
-        }
+    if (!helpers_1.types_are_equal(i.typings.condition, new interfaces_1.Typed.AtomicType('logico'))) {
+        var error = {
+            reason: 'bad-condition',
+            where: 'typechecker',
+            received: helpers_1.stringify(i.typings.condition)
+        };
+        errors.push(error);
     }
     for (var _i = 0, _a = i.true_branch; _i < _a.length; _i++) {
         var s = _a[_i];
@@ -25002,41 +25221,37 @@ function check_call(c) {
          * Ver si la cantidad de argumentos coincide con la cantidad
          * de parametros
          */
-        if (c.argtypes.length != c.paramtypes.length) {
-        }
-        /**
-         * Calcular el tipo de cada argumento
-         */
-        var argtypes = [];
-        for (var i = 0; i < c.argtypes.length; i++) {
-            var report = calculate_type(c.argtypes[i]);
-            if (report.error) {
-                errors = errors.concat(errors);
-            }
-            else {
-                argtypes.push({ index: i, type: report.result });
-            }
+        if (c.typings.args.length != c.typings.parameters.length) {
+            var error = {
+                expected: c.typings.parameters.length,
+                received: c.typings.args.length,
+                name: c.name,
+                reason: '@call-wrong-arg-amount',
+                where: 'typechecker'
+            };
+            errors.push(error);
         }
         /**
          * Comparar los tipos de los argumentos con los
          * de los parametros
          */
-        for (var _i = 0, argtypes_1 = argtypes; _i < argtypes_1.length; _i++) {
-            var arg = argtypes_1[_i];
+        var arg_types = c.typings.args.map(function (a, i) { return { index: i, type: a }; });
+        for (var _i = 0, arg_types_1 = arg_types; _i < arg_types_1.length; _i++) {
+            var arg = arg_types_1[_i];
             /**
              * Revisar que la expresion a asignar sea del mismo tipo
              * que la variable a la cual se asigna, a menos que la
              * expresion sea de tipo entero y la variable de tipo real.
              */
-            var param = c.paramtypes[arg.index];
+            var param = c.typings.parameters[arg.index];
             var cond_a = param.kind == 'atomic' || arg.type.kind == 'atomic';
             var cond_b = param.typename == 'real' && arg.type.typename == 'entero';
-            if (!(types_are_equal(arg.type, param) || (cond_a && cond_b))) {
+            if (!(helpers_1.types_are_equal(arg.type, param) || (cond_a && cond_b))) {
                 var error = {
                     reason: '@call-incompatible-argument',
                     where: 'typechecker',
-                    expected: stringify(param),
-                    received: stringify(arg.type),
+                    expected: helpers_1.stringify(param),
+                    received: helpers_1.stringify(arg.type),
                     index: arg.index + 1
                 };
                 errors.push(error);
@@ -25046,7 +25261,7 @@ function check_call(c) {
             return { error: true, result: errors };
         }
         else {
-            return { error: false, result: c.datatype };
+            return { error: false, result: c.typings.return };
         }
     }
 }
@@ -25058,27 +25273,21 @@ function check_io(c) {
      * atomicos o cadenas.
      */
     var errors = [];
-    for (var i = 0; i < c.argtypes.length; i++) {
-        var report = calculate_type(c.argtypes[i]);
-        if (report.error) {
-            errors = errors.concat(errors);
-        }
-        else {
-            var type = report.result;
-            /**
-             * condiciones para el siguiente error
-             */
-            var cond_a = type.kind == 'atomic' && type.typename == 'ninguno';
-            var cond_b = type.kind != 'atomic' && !(type instanceof interfaces_1.Typed.StringType);
-            if (cond_a || cond_b) {
-                var e = {
-                    index: i,
-                    reason: 'bad-io-argument',
-                    received: stringify(type),
-                    where: 'typechecker'
-                };
-                errors.push(e);
-            }
+    for (var i = 0; i < c.typings.args.length; i++) {
+        var type = c.typings.args[i];
+        /**
+         * condiciones para el siguiente error
+         */
+        var cond_a = type.kind == 'atomic' && type.typename == 'ninguno';
+        var cond_b = type.kind != 'atomic' && !(type instanceof interfaces_1.Typed.StringType);
+        if (cond_a || cond_b) {
+            var e = {
+                index: i,
+                reason: 'bad-io-argument',
+                received: helpers_1.stringify(type),
+                where: 'typechecker'
+            };
+            errors.push(e);
         }
     }
     if (errors.length > 0) {
@@ -25091,27 +25300,23 @@ function check_io(c) {
 function check_assignment(a) {
     var errors = [];
     var inv_report = check_invocation(a.left);
-    var exp_report = calculate_type(a.right);
     if (inv_report.error) {
         errors = errors.concat(inv_report.result);
     }
-    if (exp_report.error) {
-        errors = errors.concat(exp_report.result);
-    }
-    if (inv_report.error == false && exp_report.error == false) {
+    if (inv_report.error == false) {
         /**
          * Revisar que la expresion a asignar sea del mismo tipo
          * que la variable a la cual se asigna, a menos que la
          * expresion sea de tipo entero y la variable de tipo real.
          */
-        var cond_a = inv_report.result.kind == 'atomic' && exp_report.result.kind == 'atomic';
-        var cond_b = inv_report.result.typename == 'real' && exp_report.result.typename == 'entero';
-        if (!(types_are_equal(inv_report.result, exp_report.result) || (cond_a && cond_b))) {
+        var cond_a = inv_report.result.kind == 'atomic' && a.typings.right.kind == 'atomic';
+        var cond_b = inv_report.result.typename == 'real' && a.typings.right.typename == 'entero';
+        if (!(helpers_1.types_are_equal(inv_report.result, a.typings.right) || (cond_a && cond_b))) {
             var error = {
                 reason: '@assignment-incompatible-types',
                 where: 'typechecker',
-                expected: stringify(inv_report.result),
-                received: stringify(exp_report.result)
+                expected: helpers_1.stringify(inv_report.result),
+                received: helpers_1.stringify(a.typings.right)
             };
             errors.push(error);
         }
@@ -25125,212 +25330,29 @@ function check_assignment(a) {
  */
 function check_invocation(i) {
     var errors = [];
-    for (var _i = 0, _a = i.indextypes; _i < _a.length; _i++) {
-        var index = _a[_i];
-        var exp_report = calculate_type(index);
-        if (exp_report.error) {
-            errors = errors.concat(exp_report.result);
-        }
-    }
-    if (errors.length > 0) {
-        return { error: true, result: errors };
-    }
-    else {
-        return { error: false, result: i.datatype };
-    }
-}
-/**
- * calculate_type
- * "ejecuta" una expresion de tipos y calcula el tipo resultante
- *
- * Por ejemplo: entero + entero = entero; entero + real = real
- */
-function calculate_type(exp) {
-    var stack = [];
-    var errors = [];
-    for (var _i = 0, exp_1 = exp; _i < exp_1.length; _i++) {
-        var e = exp_1[_i];
-        switch (e.type) {
-            case 'type':
-                stack.push(e);
-                break;
-            case 'invocation':
-                {
-                    var inv_report = check_invocation(e);
-                    if (inv_report.error) {
-                        errors = errors.concat(inv_report.result);
-                    }
-                    else {
-                        stack.push(inv_report.result);
-                    }
-                }
-                break;
-            case 'call':
-                {
-                    if (e.name == 'escribir' || e.name == 'escribir_linea' || e.name == 'leer') {
-                    }
-                    else {
-                        var report = check_call(e);
-                        if (report.error) {
-                            errors = errors.concat(report.result);
-                        }
-                        else {
-                            stack.push(report.result);
-                        }
-                    }
-                }
-                break;
-            case 'operator':
-                {
-                    var op_report = operate(stack, e.name);
-                    if (op_report.error) {
-                        errors = errors.concat(op_report.result);
-                    }
-                    else {
-                        stack = op_report.result;
-                    }
-                }
-                break;
-        }
-    }
-    if (errors.length > 0) {
-        return { error: true, result: errors };
-    }
-    else {
-        return { error: false, result: stack.pop() };
-    }
-}
-function operate(s, op) {
-    switch (op) {
-        case 'plus':
-        case 'times':
-        case 'minus':
-        case 'power':
-            return plus_times(s, op);
-        case 'minor':
-        case 'minor-eq':
-        case 'major':
-        case 'major-eq':
-        case 'equal':
-        case 'different':
-            return comparison(s, op);
-    }
-}
-/**
- * Los operadores se implementan como funciones que toman una pila,
- * desapilan tantos elementos como necesiten, operan con ellos,
- * apilan el resultado y devuelven la nueva pila.
- *
- * Tambien pueden devolver un error en caso de que no haya suficientes
- * elementos en la pila o los tipos de estos no sean compatibles entre
- * si o con el operador.
- */
-function plus_times(s, op) {
-    var supported = ['entero', 'real'];
-    if (s.length >= 2) {
-        /**
-         * Si la expresion era "2 + 3" entonces: a = 3 y b = 2
-         */
-        var a = stringify(s.pop());
-        var b = stringify(s.pop());
-        if (supported.indexOf(a) == -1 || supported.indexOf(b) == -1) {
-            /**
-             * ERROR: este operador no opera sobre el tipo de alguno de sus operandos
-             */
-            if (supported.indexOf(a) == -1 && supported.indexOf(b) == -1) {
-                var result = { reason: 'incompatible-operands', where: 'typechecker', bad_type_a: a, bad_type_b: b, operator: op };
-                return { error: true, result: result };
-            }
-            else if (supported.indexOf(a) == -1) {
-                var result = { reason: 'incompatible-operand', where: 'typechecker', bad_type: a, operator: op };
-                return { error: true, result: result };
-            }
-            else {
-                var result = { reason: 'incompatible-operand', where: 'typechecker', bad_type: b, operator: op };
-                return { error: true, result: result };
-            }
-        }
-        switch (a) {
-            case 'entero':
-                switch (b) {
-                    case 'entero':
-                        s.push(new interfaces_1.Typed.AtomicType('entero'));
-                        break;
-                    case 'real':
-                        s.push(new interfaces_1.Typed.AtomicType('real'));
-                        break;
-                }
-                break;
-            case 'real':
-                s.push(new interfaces_1.Typed.AtomicType('real'));
-                break;
-        }
-        return { error: false, result: s };
-    }
-    else {
-        var result = { reason: 'missing-operands', where: 'typechecker', operator: op, required: 2 };
-        return { error: true, result: result };
-    }
-}
-function comparison(s, op) {
-    if (s.length >= 2) {
-        var a = s.pop();
-        var b = s.pop();
-        var atomic_cond = a.kind == 'atomic' && b.kind == 'atomic';
-        var a_float_or_int = a.typename == 'entero' || a.typename == 'real';
-        var b_float_or_int = b.typename == 'entero' || b.typename == 'real';
-        if (!(((types_are_equal(a, b) && atomic_cond) || (atomic_cond && a_float_or_int && b_float_or_int)))) {
-            /**
-             * Este error se detecta cuando se intenta comparar datos de tipos incompatibles
-             * o cuando alguno de los operandos es un arreglo.
-             */
-            var result = { reason: '@comparison-bad-operands', where: 'typechecker', left: stringify(b), right: stringify(a) };
-            return { error: true, result: result };
+    var entero = new interfaces_1.Typed.AtomicType('entero');
+    var j = 0;
+    for (var _i = 0, _a = i.typings.indexes; _i < _a.length; _i++) {
+        var index_type = _a[_i];
+        if (!helpers_1.types_are_equal(index_type, entero)) {
+            var error = {
+                at: j,
+                name: i.name,
+                reason: '@invocation-bad-index',
+                received: helpers_1.stringify(index_type),
+                where: 'typechecker'
+            };
+            errors.push(error);
         }
         else {
-            s.push(new interfaces_1.Typed.AtomicType('logico'));
-            return { error: false, result: s };
+            j++;
         }
     }
-    else {
-        var result = { reason: 'missing-operands', where: 'typechecker', operator: op, required: 2 };
-        return { error: true, result: result };
-    }
-}
-function types_are_equal(a, b) {
-    if (a.kind == b.kind) {
-        switch (a.kind) {
-            case 'array':
-                if (a.length == b.length) {
-                    return types_are_equal(a.cell_type, b.cell_type);
-                }
-                else {
-                    return false;
-                }
-            case 'atomic':
-                return a.typename == b.typename;
-        }
+    if (errors.length > 0) {
+        return { error: true, result: errors };
     }
     else {
-        return false;
-    }
-}
-function stringify(type) {
-    if (type.kind == 'array') {
-        var dimensions = '';
-        var ct = type;
-        while (ct.kind == 'array') {
-            dimensions += ct.length;
-            if (ct.cell_type.kind == 'array') {
-                dimensions += ', ';
-            }
-            ct = ct.cell_type;
-        }
-        var atomic = ct.typename;
-        return atomic + "[" + dimensions + "]";
-    }
-    else {
-        return type.typename;
+        return { error: false, result: i.typings.type };
     }
 }
 
@@ -25533,7 +25555,7 @@ var templates = {
 
 var CodeMirror = __webpack_require__(10);
 var $ = __webpack_require__(1);
-var interprete_pl_1 = __webpack_require__(3);
+var interprete_pl_1 = __webpack_require__(4);
 var StatusBar_1 = __webpack_require__(12);
 var MessagePanel_1 = __webpack_require__(11);
 var Window_1 = __webpack_require__(13);
