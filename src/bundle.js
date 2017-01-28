@@ -23363,13 +23363,15 @@ function transform_for(statement, ast, module_name) {
 }
 function transform_return(ret_statement, ast, module_name) {
     var exp_returned = transform_expression(ret_statement.expression, ast, module_name);
+    var ret_typename = ast.modules.user_modules[module_name].return_type;
     if (exp_returned.error) {
         return exp_returned;
     }
     else {
         var new_return = {
             type: 'return',
-            expression: exp_returned.result
+            expression: exp_returned.result,
+            expected: ret_typename
         };
         return { error: false, result: new_return };
     }
@@ -24334,11 +24336,164 @@ function transform_statement(a, mn, p) {
             return transform_assignment(a, mn, p);
         case 'call':
             return type_call(a, mn, p);
-        case 'for':
-        case 'while':
-        case 'until':
         case 'if':
-            break;
+            return transform_if(a, mn, p);
+        case 'for':
+            return transform_for(a, mn, p);
+        case 'while':
+            return transform_while(a, mn, p);
+        case 'until':
+            return transform_until(a, mn, p);
+        case 'return':
+            return transform_return(a, mn, p);
+    }
+}
+function transform_if(a, mn, p) {
+    var errors = [];
+    var c_report = type_expression(a.condition, mn, p);
+    if (c_report.error) {
+        errors = errors.concat(c_report.result);
+    }
+    var typed_tb = [];
+    for (var _i = 0, _a = a.true_branch; _i < _a.length; _i++) {
+        var e = _a[_i];
+        var report = transform_statement(e, mn, p);
+        if (report.error) {
+            errors = errors.concat(report.result);
+        }
+        else {
+            typed_tb.push(report.result);
+        }
+    }
+    var typed_fb = [];
+    for (var _b = 0, _c = a.true_branch; _b < _c.length; _b++) {
+        var e = _c[_b];
+        var report = transform_statement(e, mn, p);
+        if (report.error) {
+            errors = errors.concat(report.result);
+        }
+        else {
+            typed_fb.push(report.result);
+        }
+    }
+    if (errors.length > 0) {
+        return { error: true, result: errors };
+    }
+    else {
+        var result = {
+            type: 'if',
+            condition: c_report.result,
+            true_branch: typed_tb,
+            false_branch: typed_fb
+        };
+        return { error: false, result: result };
+    }
+}
+function transform_for(f, mn, p) {
+    var errors = [];
+    var init = transform_assignment(f.counter_init, mn, p);
+    if (init.error) {
+        errors = errors.concat(init.result);
+    }
+    var last = type_expression(f.last_value, mn, p);
+    if (last.error) {
+        errors = errors.concat(last.result);
+    }
+    var body = [];
+    for (var _i = 0, _a = f.body; _i < _a.length; _i++) {
+        var e = _a[_i];
+        var report = transform_statement(e, mn, p);
+        if (report.error) {
+            errors = errors.concat(report.result);
+        }
+        else {
+            body.push(report.result);
+        }
+    }
+    if (errors.length > 0) {
+        return { error: true, result: errors };
+    }
+    else {
+        var result = {
+            type: 'for',
+            counter_init: init.result,
+            body: body,
+            last_value: last.result
+        };
+        return { error: false, result: result };
+    }
+}
+function transform_while(w, mn, p) {
+    var errors = [];
+    var c_report = type_expression(w.condition, mn, p);
+    if (c_report.error) {
+        errors = errors.concat(c_report.result);
+    }
+    var body = [];
+    for (var _i = 0, _a = w.body; _i < _a.length; _i++) {
+        var e = _a[_i];
+        var report = transform_statement(e, mn, p);
+        if (report.error) {
+            errors = errors.concat(report.result);
+        }
+        else {
+            body.push(report.result);
+        }
+    }
+    if (errors.length > 0) {
+        return { error: true, result: errors };
+    }
+    else {
+        var result = {
+            type: 'while',
+            condition: c_report.result,
+            body: body
+        };
+        return { error: false, result: result };
+    }
+}
+function transform_until(w, mn, p) {
+    var errors = [];
+    var c_report = type_expression(w.condition, mn, p);
+    if (c_report.error) {
+        errors = errors.concat(c_report.result);
+    }
+    var body = [];
+    for (var _i = 0, _a = w.body; _i < _a.length; _i++) {
+        var e = _a[_i];
+        var report = transform_statement(e, mn, p);
+        if (report.error) {
+            errors = errors.concat(report.result);
+        }
+        else {
+            body.push(report.result);
+        }
+    }
+    if (errors.length > 0) {
+        return { error: true, result: errors };
+    }
+    else {
+        var result = {
+            type: 'until',
+            condition: c_report.result,
+            body: body
+        };
+        return { error: false, result: result };
+    }
+}
+function transform_return(r, mn, p) {
+    var errors = [];
+    var exp = type_expression(r.expression, mn, p);
+    if (exp.error) {
+        return exp;
+    }
+    else {
+        var result = {
+            type: 'return',
+            actual: exp.result,
+            expected: new interfaces_1.Typed.AtomicType(r.expected)
+        };
+        return { error: false, result: result };
     }
 }
 function type_call(a, mn, p) {
@@ -24691,10 +24846,145 @@ function check_statement(s) {
                 var report = check_call(s);
                 return report.error ? report.result : [];
             }
-        default:
-            console.log("El chequeo de enunciados '" + s.type + "' todavia no fue implementado.");
-            break;
+        case 'if':
+            return check_if(s);
+        case 'while':
+        case 'until':
+            return check_simple_loop(s);
+        case 'for':
+            return check_for(s);
+        case 'return':
+            return check_return(s);
     }
+}
+function check_simple_loop(l) {
+    var errors = [];
+    var condition = calculate_type(l.condition);
+    if (condition.error) {
+        errors = errors.concat(condition.result);
+    }
+    else {
+        if (!types_are_equal(condition.result, new interfaces_1.Typed.AtomicType('logico'))) {
+            var error = {
+                reason: 'bad-condition',
+                where: 'typechecker',
+                received: stringify(condition.result)
+            };
+            errors.push(error);
+        }
+    }
+    for (var _i = 0, _a = l.body; _i < _a.length; _i++) {
+        var s = _a[_i];
+        var statement_errors = check_statement(s);
+        if (statement_errors.length > 0) {
+            errors = errors.concat(statement_errors);
+        }
+    }
+    return errors;
+}
+function check_for(f) {
+    var errors = [];
+    var counter = check_invocation(f.counter_init.left);
+    if (counter.error) {
+        errors = errors.concat(counter.result);
+    }
+    else {
+        if (!types_are_equal(counter.result, new interfaces_1.Typed.AtomicType('entero'))) {
+            var error = {
+                reason: '@for-bad-counter',
+                where: 'typechecker',
+                received: stringify(counter.result)
+            };
+            errors.push(error);
+        }
+    }
+    var init_v = calculate_type(f.counter_init.right);
+    if (init_v.error) {
+        errors = errors.concat(init_v.result);
+    }
+    else {
+        if (!types_are_equal(init_v.result, new interfaces_1.Typed.AtomicType('entero'))) {
+            var error = {
+                reason: '@for-bad-init',
+                where: 'typechecker',
+                received: stringify(init_v.result)
+            };
+            errors.push(error);
+        }
+    }
+    var last_v = calculate_type(f.counter_init.right);
+    if (last_v.error) {
+        errors = errors.concat(last_v.result);
+    }
+    else {
+        if (!types_are_equal(last_v.result, new interfaces_1.Typed.AtomicType('entero'))) {
+            var error = {
+                reason: '@for-bad-last',
+                where: 'typechecker',
+                received: stringify(last_v.result)
+            };
+            errors.push(error);
+        }
+    }
+    for (var _i = 0, _a = f.body; _i < _a.length; _i++) {
+        var s = _a[_i];
+        var statement_errors = check_statement(s);
+        if (statement_errors.length > 0) {
+            errors = errors.concat(statement_errors);
+        }
+    }
+    return errors;
+}
+function check_return(r) {
+    var errors = [];
+    var exp = calculate_type(r.actual);
+    if (exp.error) {
+        errors = exp.result;
+    }
+    else {
+        if (!types_are_equal(exp.result, r.expected)) {
+            var error = {
+                reason: 'bad-return',
+                where: 'typechecker',
+                declared: stringify(r.expected),
+                received: stringify(exp.result)
+            };
+            errors.push(error);
+        }
+    }
+    return errors;
+}
+function check_if(i) {
+    var errors = [];
+    var condition = calculate_type(i.condition);
+    if (condition.error) {
+        errors = errors.concat(condition.result);
+    }
+    else {
+        if (!types_are_equal(condition.result, new interfaces_1.Typed.AtomicType('logico'))) {
+            var error = {
+                reason: 'bad-condition',
+                where: 'typechecker',
+                received: stringify(condition.result)
+            };
+            errors.push(error);
+        }
+    }
+    for (var _i = 0, _a = i.true_branch; _i < _a.length; _i++) {
+        var s = _a[_i];
+        var statement_errors = check_statement(s);
+        if (statement_errors.length > 0) {
+            errors = errors.concat(statement_errors);
+        }
+    }
+    for (var _b = 0, _c = i.false_branch; _b < _c.length; _b++) {
+        var s = _c[_b];
+        var statement_errors = check_statement(s);
+        if (statement_errors.length > 0) {
+            errors = errors.concat(statement_errors);
+        }
+    }
+    return errors;
 }
 function check_call(c) {
     /**
@@ -24739,9 +25029,9 @@ function check_call(c) {
              * expresion sea de tipo entero y la variable de tipo real.
              */
             var param = c.paramtypes[arg.index];
-            var cond_a = param.kind != 'atomic' || arg.type.kind != 'atomic';
-            var cond_b = param.typename != 'real' && arg.type.typename != 'entero';
-            if (!(types_are_equal(arg.type, param) && (cond_a || cond_b))) {
+            var cond_a = param.kind == 'atomic' || arg.type.kind == 'atomic';
+            var cond_b = param.typename == 'real' && arg.type.typename == 'entero';
+            if (!(types_are_equal(arg.type, param) || (cond_a && cond_b))) {
                 var error = {
                     reason: '@call-incompatible-argument',
                     where: 'typechecker',
@@ -24892,7 +25182,7 @@ function calculate_type(exp) {
                 break;
             case 'operator':
                 {
-                    var op_report = operators[e.name](stack);
+                    var op_report = operate(stack, e.name);
                     if (op_report.error) {
                         errors = errors.concat(op_report.result);
                     }
@@ -24910,59 +25200,103 @@ function calculate_type(exp) {
         return { error: false, result: stack.pop() };
     }
 }
-var operators = {
-    plus: function (s) {
-        var supported = ['entero', 'real'];
-        if (s.length >= 2) {
-            var a = stringify(s.pop());
-            var b = stringify(s.pop());
+function operate(s, op) {
+    switch (op) {
+        case 'plus':
+        case 'times':
+        case 'minus':
+        case 'power':
+            return plus_times(s, op);
+        case 'minor':
+        case 'minor-eq':
+        case 'major':
+        case 'major-eq':
+        case 'equal':
+        case 'different':
+            return comparison(s, op);
+    }
+}
+/**
+ * Los operadores se implementan como funciones que toman una pila,
+ * desapilan tantos elementos como necesiten, operan con ellos,
+ * apilan el resultado y devuelven la nueva pila.
+ *
+ * Tambien pueden devolver un error en caso de que no haya suficientes
+ * elementos en la pila o los tipos de estos no sean compatibles entre
+ * si o con el operador.
+ */
+function plus_times(s, op) {
+    var supported = ['entero', 'real'];
+    if (s.length >= 2) {
+        /**
+         * Si la expresion era "2 + 3" entonces: a = 3 y b = 2
+         */
+        var a = stringify(s.pop());
+        var b = stringify(s.pop());
+        if (supported.indexOf(a) == -1 || supported.indexOf(b) == -1) {
             /**
-             * Hay arriba falta considerar el caso en el que una expresion
-             * mal escrita hace que (al llamar a un operador) en la pila
-             * haya otros operadores en el medio de los operandos...
-             *
-             * Una expresion como "2 + *" causaria ese error...
+             * ERROR: este operador no opera sobre el tipo de alguno de sus operandos
              */
-            if (supported.indexOf(a) == -1 || supported.indexOf(b) == -1) {
-                /**
-                 * ERROR: este operador no opera sobre el tipo de alguno de sus operandos
-                 */
-                if (supported.indexOf(a) == -1 && supported.indexOf(b) == -1) {
-                    var result = { reason: 'incompatible-operands', where: 'typechecker', bad_type_a: a, bad_type_b: b, operator: '+' };
-                    return { error: true, result: result };
-                }
-                else if (supported.indexOf(a) == -1) {
-                    var result = { reason: 'incompatible-operand', where: 'typechecker', bad_type: a, operator: '+' };
-                    return { error: true, result: result };
-                }
-                else {
-                    var result = { reason: 'incompatible-operand', where: 'typechecker', bad_type: b, operator: '+' };
-                    return { error: true, result: result };
-                }
+            if (supported.indexOf(a) == -1 && supported.indexOf(b) == -1) {
+                var result = { reason: 'incompatible-operands', where: 'typechecker', bad_type_a: a, bad_type_b: b, operator: op };
+                return { error: true, result: result };
             }
-            switch (a) {
-                case 'entero':
-                    switch (b) {
-                        case 'entero':
-                            s.push(new interfaces_1.Typed.AtomicType('entero'));
-                            break;
-                        case 'real':
-                            s.push(new interfaces_1.Typed.AtomicType('real'));
-                            break;
-                    }
-                    break;
-                case 'real':
-                    s.push(new interfaces_1.Typed.AtomicType('real'));
-                    break;
+            else if (supported.indexOf(a) == -1) {
+                var result = { reason: 'incompatible-operand', where: 'typechecker', bad_type: a, operator: op };
+                return { error: true, result: result };
             }
-            return { error: false, result: s };
+            else {
+                var result = { reason: 'incompatible-operand', where: 'typechecker', bad_type: b, operator: op };
+                return { error: true, result: result };
+            }
         }
-        else {
-            var result = { reason: 'missing-operands', where: 'typechecker', operator: '+', required: 2 };
+        switch (a) {
+            case 'entero':
+                switch (b) {
+                    case 'entero':
+                        s.push(new interfaces_1.Typed.AtomicType('entero'));
+                        break;
+                    case 'real':
+                        s.push(new interfaces_1.Typed.AtomicType('real'));
+                        break;
+                }
+                break;
+            case 'real':
+                s.push(new interfaces_1.Typed.AtomicType('real'));
+                break;
+        }
+        return { error: false, result: s };
+    }
+    else {
+        var result = { reason: 'missing-operands', where: 'typechecker', operator: op, required: 2 };
+        return { error: true, result: result };
+    }
+}
+function comparison(s, op) {
+    if (s.length >= 2) {
+        var a = s.pop();
+        var b = s.pop();
+        var atomic_cond = a.kind == 'atomic' && b.kind == 'atomic';
+        var a_float_or_int = a.typename == 'entero' || a.typename == 'real';
+        var b_float_or_int = b.typename == 'entero' || b.typename == 'real';
+        if (!(((types_are_equal(a, b) && atomic_cond) || (atomic_cond && a_float_or_int && b_float_or_int)))) {
+            /**
+             * Este error se detecta cuando se intenta comparar datos de tipos incompatibles
+             * o cuando alguno de los operandos es un arreglo.
+             */
+            var result = { reason: '@comparison-bad-operands', where: 'typechecker', left: stringify(b), right: stringify(a) };
             return { error: true, result: result };
         }
+        else {
+            s.push(new interfaces_1.Typed.AtomicType('logico'));
+            return { error: false, result: s };
+        }
     }
-};
+    else {
+        var result = { reason: 'missing-operands', where: 'typechecker', operator: op, required: 2 };
+        return { error: true, result: result };
+    }
+}
 function types_are_equal(a, b) {
     if (a.kind == b.kind) {
         switch (a.kind) {
