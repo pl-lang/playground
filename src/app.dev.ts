@@ -1,10 +1,9 @@
 import * as CodeMirror from 'codemirror'
 import * as $ from 'jquery'
-import {Parser, transform} from 'interprete-pl'
+import {Parser, transform, fr_writer} from 'interprete-pl'
 import StatusBar from './StatusBar'
 import MessagePanel from './MessagePanel'
 import Window from './Window'
-import ir_writer from 'ir_writer'
 
 // crear el panel de mensajes
 // crear el editor
@@ -14,7 +13,7 @@ const status_bar = new StatusBar($('#message_panel'))
 
 const message_panel = new MessagePanel($('#message_panel'), editor)
 
-const panel_compilado = $('ir-pre')
+const panel_compilado = $('#ir-pre')
 
 const pWindow = new Window($('#window'))
 
@@ -56,7 +55,7 @@ function ejecutar_codigo (): void {
                 /**
                  * mostrar el programa compilado
                  */
-                panel_compilado.val(ir_writer(transformed.result))
+                panel_compilado.text(fr_writer(transformed.result))
                 /**
                  * ejecutar el programa!
                  */
