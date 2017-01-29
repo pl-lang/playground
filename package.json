@@ -6,6 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack --display-error-details",
+    "buildmap": "webpack --config webpack.map.config.js --display-error-details",
     "dev": "webpack --config webpack.dev.config.js --display-error-details"
   },
   "repository": {
