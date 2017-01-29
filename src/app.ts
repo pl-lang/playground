@@ -50,35 +50,28 @@ function ejecutar_codigo (): void {
             const transformed = transform(parsed.result)
 
             if (transformed.error == false) {
-                const checked = typecheck(transformed.result.typed_program)
-
-                if (checked.length > 0) {
-                    /**
-                     * se encontraron errores de tipado
-                     */
-                    for (let error of checked) {
-                        error_count++
-                        message_panel.add_message(error)
-                    }
-
-                    status_bar.error_count = error_count
-                }
-                else {
-                    /**
-                     * ejecutar el programa!
-                     */
-                    pWindow.run(transformed.result.program)
-                }
+                /**
+                 * ejecutar el programa!
+                 */
+                pWindow.run(transformed.result)
             }
-            else {
+            else if (transformed.error) {
+                /**
+                 * se encontraron errores de transformacion
+                 * o de tipado
+                 */
                 for (let error of transformed.result) {
                     error_count++
                     message_panel.add_message(error)
                 }
+
                 status_bar.error_count = error_count
             }
         }
         else {
+            /**
+             * Se encontraron errores lexicos o sintacticos
+             */
             for (let error of parsed.result) {
                 error_count++
                 message_panel.add_message(error)
