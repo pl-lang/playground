@@ -188,6 +188,7 @@ var S3;
         StatementKinds[StatementKinds["ReadCall"] = 26] = "ReadCall";
         StatementKinds[StatementKinds["WriteCall"] = 27] = "WriteCall";
         StatementKinds[StatementKinds["Return"] = 28] = "Return";
+        StatementKinds[StatementKinds["Concat"] = 29] = "Concat";
     })(StatementKinds = S3.StatementKinds || (S3.StatementKinds = {}));
     var BaseStatement = (function () {
         function BaseStatement() {
@@ -213,6 +214,17 @@ var S3;
         return BaseStatement;
     }());
     S3.BaseStatement = BaseStatement;
+    var Concat = (function (_super) {
+        tslib_1.__extends(Concat, _super);
+        function Concat(length) {
+            var _this = _super.call(this) || this;
+            _this.kind = StatementKinds.Concat;
+            _this.length = length;
+            return _this;
+        }
+        return Concat;
+    }(BaseStatement));
+    S3.Concat = Concat;
     var Return = (function (_super) {
         tslib_1.__extends(Return, _super);
         function Return() {
@@ -13203,21 +13215,39 @@ function check_assignment(a) {
         errors = errors.concat(inv_report.result);
     }
     if (inv_report.error == false) {
-        /**
-         * Revisar que la expresion a asignar sea del mismo tipo
-         * que la variable a la cual se asigna, a menos que la
-         * expresion sea de tipo entero y la variable de tipo real.
-         */
-        var cond_a = inv_report.result.kind == 'atomic' && a.typings.right.kind == 'atomic';
-        var cond_b = inv_report.result.typename == 'real' && a.typings.right.typename == 'entero';
-        if (!(helpers_1.types_are_equal(inv_report.result, a.typings.right) || (cond_a && cond_b))) {
-            var error = {
-                reason: '@assignment-incompatible-types',
-                where: 'typechecker',
-                expected: helpers_1.stringify(inv_report.result),
-                received: helpers_1.stringify(a.typings.right)
-            };
-            errors.push(error);
+        if (inv_report.result instanceof interfaces_1.Typed.StringType && a.typings.right instanceof interfaces_1.Typed.StringType) {
+            /**
+             * Si se esta asignando una cadena a un vector solo hay que
+             * revisar que la cadena quepa.
+             */
+            if (!(inv_report.result.length >= a.typings.right.length)) {
+                var error = {
+                    length: inv_report.result.length,
+                    name: a.left.name,
+                    reason: '@assignment-long-string',
+                    type: helpers_1.stringify(inv_report.result),
+                    where: 'typechecker'
+                };
+                errors.push(error);
+            }
+        }
+        else {
+            /**
+             * Revisar que la expresion a asignar sea del mismo tipo
+             * que la variable a la cual se asigna, a menos que la
+             * expresion sea de tipo entero y la variable de tipo real.
+             */
+            var cond_a = inv_report.result.kind == 'atomic' && a.typings.right.kind == 'atomic';
+            var cond_b = inv_report.result.typename == 'real' && a.typings.right.typename == 'entero';
+            if (!(helpers_1.types_are_equal(inv_report.result, a.typings.right) || (cond_a && cond_b))) {
+                var error = {
+                    reason: '@assignment-incompatible-types',
+                    where: 'typechecker',
+                    expected: helpers_1.stringify(inv_report.result),
+                    received: helpers_1.stringify(a.typings.right)
+                };
+                errors.push(error);
+            }
         }
     }
     return errors;
@@ -22647,7 +22677,7 @@ var interfaces_1 = __webpack_require__(0);
   devuelve a traves de la funcion run.
 */
 /*
-  Los evaluadores son eleiminados cuando terminan de ejecutar su modulo. Son de
+  Los evaluadores son eliminados cuando terminan de ejecutar su modulo. Son de
   un solo uso.
 */
 var Evaluator = (function () {
@@ -22824,7 +22854,17 @@ var Evaluator = (function () {
                  */
                 this.state.next_statement = null;
                 return { error: false, result: { action: 'none', done: this.state.done } };
+            case interfaces_1.S3.StatementKinds.Concat:
+                return this.concat(s);
         }
+    };
+    Evaluator.prototype.concat = function (s) {
+        var string = [];
+        for (var i = 0; i < s.length; i++) {
+            string.push(this.state.value_stack.pop());
+        }
+        this.state.value_stack.push(string.join(''));
+        return { error: false, result: { action: 'none', done: this.state.done } };
     };
     Evaluator.prototype.push = function (s) {
         this.state.value_stack.push(s.value);
@@ -24168,7 +24208,7 @@ function transform_for(statement) {
     /**
      * Y al cuerpo del bucle le sigue el incremento del contador
      */
-    var increment_value = { type: 'literal', value: 1 };
+    var increment_value = create_literal_number_exp(1);
     var right = [left, increment_value, { type: 'operator', name: 'plus' }];
     /**
      * Enunciado S2 del incremento
@@ -24228,15 +24268,25 @@ function transform_write(wc) {
      */
     var first_arg = transform_expression(wc.args[0]);
     var last_statement = interfaces_1.S3.get_last(first_arg);
+    if (wc.typings.args[0] instanceof interfaces_1.Typed.StringType) {
+        var concat = new interfaces_1.S3.Concat(wc.typings.args[0].length);
+        last_statement.exit_point = concat;
+        last_statement = concat;
+    }
     var escribir_call = new interfaces_1.S3.WriteCall();
     last_statement.exit_point = escribir_call;
     last_statement = escribir_call;
-    for (var i = 0; i < wc.args.length - 1; i++) {
-        var next_arg = transform_expression(wc.args[i + 1]);
-        var next_arg_last = interfaces_1.S3.get_last(next_arg);
+    for (var i = 1; i < wc.args.length; i++) {
+        var next_arg = transform_expression(wc.args[i]);
         last_statement.exit_point = next_arg;
+        last_statement = interfaces_1.S3.get_last(next_arg);
+        if (wc.typings.args[0] instanceof interfaces_1.Typed.StringType) {
+            var concat = new interfaces_1.S3.Concat(wc.typings.args[0].length);
+            last_statement.exit_point = concat;
+            last_statement = concat;
+        }
         var wcall = new interfaces_1.S3.WriteCall();
-        next_arg_last.exit_point = wcall;
+        last_statement.exit_point = wcall;
         last_statement = wcall;
     }
     return first_arg;
@@ -24275,38 +24325,34 @@ function create_assignment(v) {
     if (v.is_array) {
         if (v.dimensions.length > v.indexes.length) {
             /**
-             * "grados de libertad"
-             */
-            var g = v.dimensions.length - v.indexes.length;
-            /**
              * tamaño de las dimensiones cuyos indices van a ir variando
              */
-            var dv = helpers_1.drop(v.indexes.length, v.dimensions);
+            var missing_indexes = helpers_1.drop(v.indexes.length, v.dimensions);
+            var smallest_index = helpers_1.arr_counter(missing_indexes.length, 1);
             var first_index = void 0;
             var last_statement = void 0;
-            for (var i = helpers_1.arr_counter(g, 1); helpers_1.arr_minor(i, dv) || helpers_1.arr_equal(i, dv); helpers_1.arr_counter_inc(i, dv, 1)) {
+            for (var i = missing_indexes.slice(0); helpers_1.arr_major(i, smallest_index) || helpers_1.arr_equal(i, smallest_index); helpers_1.arr_counter_dec(i, missing_indexes)) {
                 /**
                  * Los indices que no fueron proprocionados seran completados con los del
                  * contador `i`
                  */
-                var missing_indexes = i.map(create_literal_number_exp);
-                var final_indexes = v.indexes.concat(missing_indexes);
+                var final_indexes = v.indexes.concat(i.map(function (index) { return [create_literal_number_exp(index)]; }));
                 for (var j = 0; j < final_indexes.length; j++) {
                     var index_exp = transform_expression(final_indexes[j]);
                     /**
                      * Si esta es la primer iteracion de ambos bucles...
                      */
-                    if (helpers_1.arr_equal(i, helpers_1.arr_counter(i.length, 1))) {
+                    if (helpers_1.arr_equal(i, missing_indexes) && j == 0) {
                         first_index = index_exp;
                     }
                     else {
                         last_statement.exit_point = index_exp;
                     }
                     last_statement = interfaces_1.S3.get_last(index_exp);
-                    var assignment = new interfaces_1.S3.AssignV(final_indexes.length, v.dimensions, v.name);
-                    last_statement.exit_point = assignment;
-                    last_statement = assignment;
                 }
+                var assignment = new interfaces_1.S3.AssignV(final_indexes.length, v.dimensions, v.name);
+                last_statement.exit_point = assignment;
+                last_statement = assignment;
             }
             return first_index;
         }
@@ -24329,7 +24375,7 @@ function create_assignment(v) {
     }
 }
 function create_literal_number_exp(n) {
-    return [{ type: 'literal', value: n }];
+    return { type: 'literal', value: n, typings: { type: new interfaces_1.Typed.AtomicType('entero') } };
 }
 function transform_return(ret) {
     /**
@@ -24384,36 +24430,58 @@ function transform_statement(statement) {
             return transform_return(statement);
     }
 }
-function transform_assignment(assignment) {
+function transform_assignment(a) {
     /**
      * Primer enunciado de la evaluacion de la expresion que se debe asignar
      */
-    var entry_point = transform_expression(assignment.right);
+    var entry_point = transform_expression(a.right);
     /**
      * Este enunciado es el que finalmente pone el valor de la expresion en la
      * pila. Seguido de este va el enunciado de asignacion.
      */
     var last_statement = interfaces_1.S3.get_last(entry_point);
-    if (assignment.left.dimensions.length > 0 && assignment.left.indexes.length < assignment.left.dimensions.length) {
+    if (a.left.dimensions.length > 0 && a.left.indexes.length < a.left.dimensions.length) {
         /**
-         * Asignacion vectorial: copiar los contenidos de un vector a otro.
-         * En este caso esta garantizado que del lado derecho de la asignacion hay un vector
-         * con menos indices que dimensiones.
-         * Hay que hacer una lista de enunciados que metan los valores que deben copiarse
-         * seguidos de los indices de la celda donde deben ser insertados y, por ultimo, el
-         * enunciado de asignacion vectorial. Las expresiones de los indices que fueron provistos
-         * para el vector de la derecha deben evaluarse y ponerse al tope de la pila.
-         * Los indices que falten deben rellenarse con numeros del 1...n donde n es el tamaño de
-         * la dimension faltante.
+         * Asignacion vectorial: copiar los contenidos de un vector a otro o asignar
+         * una cadena a un vector.
          */
-        for (var i = 0; i < assignment.left.indexes.length; i++) {
-            var index_entry = transform_expression(assignment.left.indexes[i]);
-            var index_last = interfaces_1.S3.get_last(index_entry);
+        /**
+         * tamaño de las dimensiones cuyos indices van a ir variando
+         */
+        var missing_indexes = helpers_1.drop(a.left.indexes.length, a.left.dimensions);
+        if (a.typings.right instanceof interfaces_1.Typed.StringType) {
             /**
-             * Luego de apilar el valor de la expresion, hay que apilar el valor del indice
+             * Esto permite asignar cadenas mas cortas que el vector que las recibe
              */
-            last_statement.exit_point = index_entry;
+            missing_indexes[missing_indexes.length - 1] = a.typings.right.length;
         }
+        var smallest_index = helpers_1.arr_counter(missing_indexes.length, 1);
+        var first_index = void 0;
+        var last = void 0;
+        for (var i = missing_indexes.slice(0); helpers_1.arr_major(i, smallest_index) || helpers_1.arr_equal(i, smallest_index); helpers_1.arr_counter_dec(i, missing_indexes)) {
+            /**
+             * Los indices que no fueron proprocionados seran completados con los del
+             * contador `i`
+             */
+            var final_indexes = a.left.indexes.concat(i.map(function (index) { return [create_literal_number_exp(index)]; }));
+            for (var j = 0; j < final_indexes.length; j++) {
+                var index_exp = transform_expression(final_indexes[j]);
+                /**
+                 * Si esta es la primer iteracion de ambos bucles...
+                 */
+                if (helpers_1.arr_equal(i, missing_indexes) && j == 0) {
+                    first_index = index_exp;
+                }
+                else {
+                    last.exit_point = index_exp;
+                }
+                last = interfaces_1.S3.get_last(index_exp);
+            }
+            var assignment = new interfaces_1.S3.AssignV(final_indexes.length, a.left.dimensions, a.left.name);
+            last.exit_point = assignment;
+            last = assignment;
+        }
+        last_statement.exit_point = first_index;
     }
     else {
         /**
@@ -24424,8 +24492,8 @@ function transform_assignment(assignment) {
          * Si la asignacion es a una celda de un vector, primero hay que la expresion a asignar
          * en la pila, luego los indices de la celda, y por ultimo el enunciado de asignacion.
          */
-        if (assignment.left.is_array) {
-            var v = assignment.left;
+        if (a.left.is_array) {
+            var v = a.left;
             var first_index = transform_expression(v.indexes[0]);
             var index_last_st = interfaces_1.S3.get_last(first_index);
             for (var i = 0; i < v.indexes.length - 1; i++) {
@@ -24438,7 +24506,7 @@ function transform_assignment(assignment) {
             last_statement.exit_point = first_index;
         }
         else {
-            var assign = new interfaces_1.S3.Assign(assignment.left.name);
+            var assign = new interfaces_1.S3.Assign(a.left.name);
             last_statement.exit_point = assign;
         }
     }
@@ -24448,45 +24516,40 @@ function transform_invocation(i) {
     if (i.is_array) {
         if (i.dimensions.length > i.indexes.length) {
             /**
-             * "grados de libertad"
-             */
-            var g = i.dimensions.length - i.indexes.length;
-            /**
              * tamaño de las dimensiones cuyos indices van a ir variando
              */
-            var dv = helpers_1.drop(i.indexes.length, i.dimensions);
+            var missing_indexes = helpers_1.drop(i.indexes.length, i.dimensions);
             /**
              * el indice mas pequeño posible
              */
-            var smallest_index = helpers_1.arr_counter(g, 1);
+            var smallest_index = helpers_1.arr_counter(i.dimensions.length - i.indexes.length, 1);
             var first_index = void 0;
             var last_statement = void 0;
             /**
-             * dv.slice(0) hace una copia de dv
+             * smallest_index.slice(0) hace una copia de dv
              */
-            for (var j = dv.slice(0); helpers_1.arr_major(j, smallest_index) || helpers_1.arr_equal(j, smallest_index); helpers_1.arr_counter_dec(j, dv)) {
+            for (var j = smallest_index.slice(0); helpers_1.arr_minor(j, missing_indexes) || helpers_1.arr_equal(j, missing_indexes); helpers_1.arr_counter_inc(j, missing_indexes, 1)) {
                 /**
                  * Los indices que no fueron proprocionados seran completados con los del
                  * contador `i`
                  */
-                var missing_indexes = j.map(create_literal_number_exp);
-                var final_indexes = i.indexes.concat(missing_indexes);
+                var final_indexes = i.indexes.concat(j.map(function (index) { return [create_literal_number_exp(index)]; }));
                 for (var k = 0; k < final_indexes.length; k++) {
                     var index_exp = transform_expression(final_indexes[k]);
                     /**
                      * Si esta es la primer iteracion de ambos bucles...
                      */
-                    if (helpers_1.arr_equal(j, dv)) {
+                    if (helpers_1.arr_equal(j, smallest_index) && k == 0) {
                         first_index = index_exp;
                     }
                     else {
                         last_statement.exit_point = index_exp;
                     }
                     last_statement = interfaces_1.S3.get_last(index_exp);
-                    var invocation = new interfaces_1.S3.GetV(final_indexes.length, i.dimensions, i.name);
-                    last_statement.exit_point = invocation;
-                    last_statement = invocation;
                 }
+                var invocation = new interfaces_1.S3.GetV(final_indexes.length, i.dimensions, i.name);
+                last_statement.exit_point = invocation;
+                last_statement = invocation;
             }
             return first_index;
         }
@@ -24506,6 +24569,32 @@ function transform_invocation(i) {
     else {
         var geti = new interfaces_1.S3.Get(i.name);
         return geti;
+    }
+}
+function transform_literal(l) {
+    if (l.typings.type instanceof interfaces_1.Typed.StringType) {
+        var length = l.typings.type.length;
+        /**
+         * Apilar la cadena de atras para adelante para que cuando
+         * sea asignada a un vector aparezca en el orden correcto.
+         */
+        var first = void 0;
+        var last = void 0;
+        for (var i = length - 1; i >= 0; i--) {
+            if (i == length - 1) {
+                first = new interfaces_1.S3.Push(l.value[i]);
+                last = first;
+            }
+            else {
+                var next = new interfaces_1.S3.Push(l.value[i]);
+                last.exit_point = next;
+                last = next;
+            }
+        }
+        return first;
+    }
+    else {
+        return new interfaces_1.S3.Push(l.value);
     }
 }
 function transform_expression(expression) {
@@ -24555,8 +24644,9 @@ function transform_exp_element(element) {
                 case 'or':
                     return new interfaces_1.S3.Operation(interfaces_1.S3.StatementKinds.Or);
             }
+            break;
         case 'literal':
-            return new interfaces_1.S3.Push(element.value);
+            return transform_literal(element);
         case 'invocation':
             return transform_invocation(element);
         case 'call':
@@ -24925,7 +25015,7 @@ function type_params(params) {
         if (param.is_array) {
             var type = void 0;
             for (var i = params.length - 1; i >= 0; i--) {
-                if (i == params.length) {
+                if (i == params.length - 1) {
                     type = new interfaces_1.Typed.ArrayType(new interfaces_1.Typed.AtomicType(param.type), param.dimensions[i]);
                 }
                 else {
@@ -25013,7 +25103,7 @@ function type_expression(es, mn, p) {
                 }
                 break;
             case 'literal':
-                typed_exp.push(e);
+                typed_exp.push(type_literal(e));
                 break;
             case 'call':
                 {
@@ -25076,7 +25166,12 @@ function type_invocation(i, mn, p) {
             var last_type = void 0;
             for (var j = remaining_dimensions.length - 1; j >= 0; j--) {
                 if (j == remaining_dimensions.length - 1) {
-                    last_type = new interfaces_1.Typed.ArrayType(new interfaces_1.Typed.AtomicType(i.datatype), remaining_dimensions[j]);
+                    if (i.datatype == 'caracter') {
+                        last_type = new interfaces_1.Typed.StringType(remaining_dimensions[j]);
+                    }
+                    else {
+                        last_type = new interfaces_1.Typed.ArrayType(new interfaces_1.Typed.AtomicType(i.datatype), remaining_dimensions[j]);
+                    }
                 }
                 else {
                     last_type = new interfaces_1.Typed.ArrayType(last_type, remaining_dimensions[j]);
@@ -25165,15 +25260,21 @@ function type_indexes(indexes, mn, p) {
     }
 }
 function type_literal(l) {
+    var type = l.type, value = l.value;
+    var datatype;
     switch (typeof l.value) {
         case 'boolean':
-            return new interfaces_1.Typed.AtomicType('logico');
+            datatype = new interfaces_1.Typed.AtomicType('logico');
+            break;
         case 'string':
-            return l.value.length > 1 ? new interfaces_1.Typed.StringType(l.value.length) : new interfaces_1.Typed.AtomicType('caracter');
+            datatype = l.value.length > 1 ? new interfaces_1.Typed.StringType(l.value.length) : new interfaces_1.Typed.AtomicType('caracter');
+            break;
         case 'number': {
-            return l.value - Math.trunc(l.value) > 0 ? new interfaces_1.Typed.AtomicType('real') : new interfaces_1.Typed.AtomicType('entero');
+            datatype = l.value - Math.trunc(l.value) > 0 ? new interfaces_1.Typed.AtomicType('real') : new interfaces_1.Typed.AtomicType('entero');
+            break;
         }
     }
+    return { type: type, value: value, typings: { type: datatype } };
 }
 /**
  * calculate_type
@@ -25188,7 +25289,7 @@ function calculate_type(exp) {
         var e = exp_1[_i];
         switch (e.type) {
             case 'literal':
-                stack.push(type_literal(e));
+                stack.push(e.typings.type);
                 break;
             case 'invocation':
                 stack.push(e.typings.type);
@@ -25500,6 +25601,8 @@ function procesar_enunciado(e, nivel) {
             return repetir(' ', nivel * espacios) + "ESCRIBIR";
         case interfaces_1.S3.StatementKinds.Return:
             return repetir(' ', nivel * espacios) + "RETORNAR";
+        case interfaces_1.S3.StatementKinds.Concat:
+            return repetir(' ', nivel * espacios) + "CONCATENAR " + e.length;
     }
 }
 function procesar_si(e, nivel) {
@@ -25531,7 +25634,7 @@ function procesar_mientras(e, nivel) {
      * Procesar rama verdadera
      */
     var c = e.entry_point;
-    while (c != null) {
+    while (c != e) {
         s += procesar_enunciado(c, nivel + 1) + '\n';
         c = c.exit_point;
     }
