@@ -24280,8 +24280,8 @@ function transform_write(wc) {
         var next_arg = transform_expression(wc.args[i]);
         last_statement.exit_point = next_arg;
         last_statement = interfaces_1.S3.get_last(next_arg);
-        if (wc.typings.args[0] instanceof interfaces_1.Typed.StringType) {
-            var concat = new interfaces_1.S3.Concat(wc.typings.args[0].length);
+        if (wc.typings.args[i] instanceof interfaces_1.Typed.StringType) {
+            var concat = new interfaces_1.S3.Concat(wc.typings.args[i].length);
             last_statement.exit_point = concat;
             last_statement = concat;
         }
