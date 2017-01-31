@@ -21,6 +21,8 @@ status_bar.error_count = 0
 
 const ejecutar = document.getElementById('ejecutar') as HTMLButtonElement
 
+const compilar = document.getElementById('compilar') as HTMLButtonElement
+
 let error_count = 0
 
 const parser = new Parser()
@@ -44,6 +46,7 @@ function ejecutar_codigo (): void {
 
     const codigo = editor.getValue()
     ejecutar.disabled = true
+    compilar.disabled = true
 
     try {
         const parsed = parser.parse(codigo)
@@ -90,13 +93,86 @@ function ejecutar_codigo (): void {
          */
         console.log(error)
         ejecutar.disabled = false
+        compilar.disabled = false
+        status_bar.error_count = 0
+        error_count = 0
+        message_panel.reset()
+    }
+
+    compilar.disabled = false
+    ejecutar.disabled = false
+    error_count = 0
+}
+
+function compilar_codigo (): void {
+    /**
+     * Limpiar los restos de la ejecucion anterior...
+     */
+    panel_compilado.text('')
+    status_bar.error_count = 0
+    pWindow.clear()
+    if (message_panel.dirty) {
+        message_panel.reset()
+    }
+    else if (message_panel.collapsed == false) {
+        message_panel.collapse()
+    }
+
+    const codigo = editor.getValue()
+    ejecutar.disabled = true
+    compilar.disabled = true
+
+    try {
+        const parsed = parser.parse(codigo)
+
+        if (parsed.error == false) {
+            const transformed = transform(parsed.result)
+
+            if (transformed.error == false) {
+                /**
+                 * mostrar el programa compilado
+                 */
+                panel_compilado.text(fr_writer(transformed.result))
+            }
+            else if (transformed.error) {
+                /**
+                 * Se encontraron errores durante la transformacion
+                 * o el chequeo de tipos
+                 */
+                for (let error of transformed.result) {
+                    error_count++
+                    message_panel.add_message(error)
+                }
+
+                status_bar.error_count = error_count
+            }
+        }
+        else {
+            /**
+             * Se encontraron errores lexicos o sintacticos
+             */
+            for (let error of parsed.result) {
+                error_count++
+                message_panel.add_message(error)
+            }
+            status_bar.error_count = error_count
+        }
+    } catch (error) {
+        /**
+         * En caso de que haya alguna excepcion...
+         */
+        console.log(error)
+        ejecutar.disabled = false
+        compilar.disabled = false
         status_bar.error_count = 0
         error_count = 0
         message_panel.reset()
     }
 
     ejecutar.disabled = false
+    compilar.disabled = false
     error_count = 0
 }
 
 ejecutar.onclick = ejecutar_codigo
+compilar.onclick = compilar_codigo

@@ -48,6 +48,26 @@ pre {
   background-color: red;
 }
 
+/* Boton 'compilar' */
+
+.boton-compilar {
+  background-color: hsl(119.9, 10.7%, 80.2%);
+  color: black;
+  border: 1px solid hsl(119.9, 4.8%, 60%);
+}
+
+.boton-compilar:hover {
+  background-color: hsl(119.9, 10.7%, 70%);
+}
+
+.boton-compilar:active {
+  background-color: hsl(119.9, 10.7%, 50%);
+}
+
+.boton-compilar:disabled {
+  background-color: red;
+}
+
 /* ---------------- */
 
 
