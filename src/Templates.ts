@@ -160,7 +160,7 @@ function split_at_styles (s: string): {pieces: string[], styles: Style[]} {
 }
 
 const templates: { default: Template, [t: string]: Template } = {
-    default: { title: 'Tu programa contiene un error' },
+    default: { title: 'Tu programa contiene un error: $code{@where}::$code{@reason}' },
 
     '@assignment-incompatible-types': {
         title: 'Se intento asignar un valor de tipo $code{@received} a una variable de tipo $code{@expected}.',
@@ -190,5 +190,11 @@ const templates: { default: Template, [t: string]: Template } = {
         title: 'Se invocó una variable con demasiados indices',
         description: 'La variable $code{@name} fue invocada con @indexes indice/s pero solo tiene @dimensions dimension/es.',
         suggestion: 'Si una variable tiene $code{@dimensions} dimensiones entonces solo puede ser invocada con hasta $code{@dimensions} indices.'
+    },
+
+    '@assignment-long-string': {
+        title: 'Cadena demasiado larga',
+        description: 'Se intentó asignar una cadena @string_length caracteres en un vector de longitud @vector_length.',
+        suggestion: 'La longitud de una cadena no puede superar la longitud del vector que la contiene.'
     }
 }
