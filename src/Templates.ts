@@ -160,7 +160,7 @@ function split_at_styles (s: string): {pieces: string[], styles: Style[]} {
 }
 
 const templates: { default: Template, [t: string]: Template } = {
-    default: { title: 'Tu programa contiene un error: $code{@where}::$code{@reason}' },
+    default: { title: 'Tu programa contiene un error: $code{@where::@reason}' },
 
     '@assignment-incompatible-types': {
         title: 'Se intento asignar un valor de tipo $code{@received} a una variable de tipo $code{@expected}.',
@@ -194,7 +194,19 @@ const templates: { default: Template, [t: string]: Template } = {
 
     '@assignment-long-string': {
         title: 'Cadena demasiado larga',
-        description: 'Se intentó asignar una cadena @string_length caracteres en un vector de longitud @vector_length.',
+        description: 'Se intentó asignar una cadena de @string_length caracteres al vector $code{@name} que es de longitud @vector_length.',
         suggestion: 'La longitud de una cadena no puede superar la longitud del vector que la contiene.'
+    },
+
+    '@read-long-string': {
+        title: 'Se leyó una cadena demasiado larga',
+        description: 'Se intentó asignar una cadena de @string_length caracteres al vector $code{@name} que es de longitud @vector_length.',
+        suggestion: 'La longitud de una cadena no puede superar la longitud del vector que la contiene.'
+    },
+
+    '@read-incompatible-types': {
+        title: 'Se leyó un valor del tipo equivocado',
+        description: 'Ingresaste un valor del tipo equivocado. El programa esperaba recibir un valor de tipo $code{@expected} pero ingresaste un valor de tipo $code{@received}.',
+        suggestion: 'Para solucionar este error vuelve a ejecutar el programa e ingresa un valor del tipo adecuado. Para mas informacion sobre los tipos de las variables haz click [aqui].'
     }
 }
