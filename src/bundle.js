@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 28);
+/******/ 	return __webpack_require__(__webpack_require__.s = 29);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -249,11 +249,12 @@ var S3;
     S3.UserModuleCall = UserModuleCall;
     var ReadCall = (function (_super) {
         tslib_1.__extends(ReadCall, _super);
-        function ReadCall(varname) {
+        function ReadCall(varname, type) {
             var _this = _super.call(this) || this;
             _this.varname = varname;
             _this.kind = StatementKinds.ReadCall;
             _this.name = 'leer';
+            _this.type = type;
             return _this;
         }
         return ReadCall;
@@ -10672,6 +10673,7 @@ return jQuery;
 
 "use strict";
 
+var interfaces_1 = __webpack_require__(0);
 // flatten :: [any] -> [[any]] -> [any]
 function flatten(accumulator, arr) {
     for (var _i = 0, arr_1 = arr; _i < arr_1.length; _i++) {
@@ -10893,6 +10895,24 @@ function stringify(type) {
     }
 }
 exports.stringify = stringify;
+function type_literal(l) {
+    var type = l.type, value = l.value;
+    var datatype;
+    switch (typeof l.value) {
+        case 'boolean':
+            datatype = new interfaces_1.Typed.AtomicType('logico');
+            break;
+        case 'string':
+            datatype = l.value.length > 1 ? new interfaces_1.Typed.StringType(l.value.length) : new interfaces_1.Typed.AtomicType('caracter');
+            break;
+        case 'number': {
+            datatype = l.value - Math.trunc(l.value) > 0 ? new interfaces_1.Typed.AtomicType('real') : new interfaces_1.Typed.AtomicType('entero');
+            break;
+        }
+    }
+    return { type: type, value: value, typings: { type: datatype } };
+}
+exports.type_literal = type_literal;
 
 
 /***/ }),
@@ -13222,7 +13242,8 @@ function check_assignment(a) {
              */
             if (!(inv_report.result.length >= a.typings.right.length)) {
                 var error = {
-                    length: inv_report.result.length,
+                    vector_length: inv_report.result.length,
+                    string_length: a.typings.right.length,
                     name: a.left.name,
                     reason: '@assignment-long-string',
                     type: helpers_1.stringify(inv_report.result),
@@ -22495,7 +22516,7 @@ return CodeMirror;
 "use strict";
 
 var $ = __webpack_require__(1);
-var Templates_1 = __webpack_require__(27);
+var Templates_1 = __webpack_require__(28);
 var MessagePanel = (function () {
     function MessagePanel(container, editor_instance) {
         this.container = container;
@@ -22630,13 +22651,18 @@ exports.default = StatusBar;
 
 "use strict";
 
+var tslib_1 = __webpack_require__(3);
 var interprete_pl_1 = __webpack_require__(4);
-var Prompt_1 = __webpack_require__(26);
+var Emitter_1 = __webpack_require__(26);
+var Prompt_1 = __webpack_require__(27);
 var $ = __webpack_require__(1);
-var Window = (function () {
+var Window = (function (_super) {
+    tslib_1.__extends(Window, _super);
     function Window(container) {
-        this.container = container;
-        this.container.append($('<div class="line"></div>'));
+        var _this = _super.call(this, ['evaluation-error']) || this;
+        _this.container = container;
+        _this.container.append($('<div class="line"></div>'));
+        return _this;
     }
     Window.prototype.write = function (v) {
         this.container.append($("<div class=\"line\"><span>" + v + "</span></div>"));
@@ -22649,6 +22675,11 @@ var Window = (function () {
         this.interpreter = new interprete_pl_1.Interpreter(p);
         this.interpreter.on('write', function (v) { return _this.write(v); });
         this.interpreter.on('read', function () { _this.read(); });
+        this.interpreter.on('evaluation-error', function (error_info) {
+            _this.container.append($('<br>'));
+            _this.container.append($('<div class="line"><span>Programa finalizado debido a un error</span></div>'));
+            _this.emit('evaluation-error', error_info);
+        });
         this.interpreter.on('program-finished', function () {
             _this.container.append($('<br>'));
             _this.container.append($('<div class="line"><span>Programa finalizado</span></div>'));
@@ -22659,7 +22690,7 @@ var Window = (function () {
         this.container.empty();
     };
     return Window;
-}());
+}(Emitter_1.default));
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = Window;
 
@@ -22980,7 +23011,7 @@ var Evaluator = (function () {
     };
     Evaluator.prototype.read = function (s) {
         this.state.paused = true;
-        return { error: false, result: { action: 'read', done: this.state.done } };
+        return { error: false, result: { action: 'read', type: s.type, name: s.varname, done: this.state.done } };
     };
     Evaluator.prototype.if_st = function (s) {
         var condition_result = this.state.value_stack.pop();
@@ -23183,6 +23214,8 @@ var tslib_1 = __webpack_require__(3);
  */
 var Evaluator_1 = __webpack_require__(16);
 var Emitter_js_1 = __webpack_require__(10);
+var interfaces_1 = __webpack_require__(0);
+var helpers_1 = __webpack_require__(2);
 var Interpreter = (function (_super) {
     tslib_1.__extends(Interpreter, _super);
     function Interpreter(p) {
@@ -23191,6 +23224,7 @@ var Interpreter = (function (_super) {
         _this.running = true;
         _this.paused = false;
         _this.data_read = false;
+        _this.read_stack = [];
         return _this;
     }
     Interpreter.prototype.run = function () {
@@ -23216,6 +23250,7 @@ var Interpreter = (function (_super) {
                 switch (evaluation_report.result.action) {
                     case 'read':
                         this.emit('read');
+                        this.read_stack.push({ name: evaluation_report.result.name, type: evaluation_report.result.type });
                         break;
                     case 'write':
                         this.emit('write', evaluation_report.result.value);
@@ -23246,7 +23281,105 @@ var Interpreter = (function (_super) {
         }
     };
     Interpreter.prototype.send = function (value) {
-        this.evaluator.input(value);
+        /**
+         * tipar value
+         * revisar que coincida con el tipo que el evaluador espera
+         *  si no coincide: finaliza la ejecucion el programa y se devuelve un error
+         *  si coincide: se envia el valor al evaluador como se venia haciendo hasta ahora
+         */
+        var l = this.parse(value);
+        var literal_type = helpers_1.type_literal(l).typings.type;
+        var var_info = this.read_stack.pop();
+        var cond_a = literal_type.kind == 'atomic' && var_info.type.kind == 'atomic';
+        var cond_b = var_info.type.typename == 'real' && literal_type.typename == 'entero';
+        if (!(helpers_1.types_are_equal(literal_type, var_info.type) || (cond_a && cond_b))) {
+            if (var_info.type instanceof interfaces_1.Typed.StringType && literal_type instanceof interfaces_1.Typed.StringType) {
+                if (var_info.type.length < literal_type.length) {
+                    var error = {
+                        vector_length: var_info.type.length,
+                        string_length: literal_type.length,
+                        name: var_info.name,
+                        reason: '@read-long-string',
+                        type: helpers_1.stringify(var_info.type),
+                        where: 'interpreter'
+                    };
+                    /**
+                     * Terminar la ejecucion de este programa debido al error
+                     */
+                    this.running = false;
+                    /**
+                     * Emitir el error
+                     */
+                    this.emit('evaluation-error', error);
+                }
+                else {
+                    /**
+                     * Los tipos son compatibles! Hay que enviarlos al evaluador...
+                     * pero como el valor enviado es una cadena, hay que enviarlo
+                     * letra por letra. De atras para adelante.
+                     */
+                    for (var i = value.length - 1; i >= 0; i--) {
+                        this.evaluator.input(value[i]);
+                    }
+                    /**
+                     * Por ultimo hay que enviar '\0' para marcar el final de la cadena
+                     */
+                    this.evaluator.input('\0');
+                    this.data_read = true;
+                }
+            }
+            else {
+                var error = {
+                    reason: '@read-incompatible-types',
+                    where: 'interpreter',
+                    expected: helpers_1.stringify(var_info.type),
+                    received: helpers_1.stringify(literal_type)
+                };
+                /**
+                 * Terminar la ejecucion de este programa debido al error
+                 */
+                this.running = false;
+                /**
+                 * Emitir el error
+                 */
+                this.emit('evaluation-error', error);
+            }
+        }
+        else {
+            /**
+             * Los tipos son compatibles! Hay que enviarlos al evaluador
+             */
+            this.evaluator.input(l.value);
+            this.data_read = true;
+        }
+    };
+    Interpreter.prototype.parse = function (value) {
+        var v = null;
+        if (/^\d+$/.test(value)) {
+            /**
+             * es un entero
+             */
+            v = parseInt(value);
+        }
+        else if (/^\d+(\.\d+)?$/.test(value)) {
+            /**
+             * es un real
+             */
+            v = parseFloat(value);
+        }
+        else if (/^(verdadero|falso)$/.test(value)) {
+            /**
+             * es un booleano
+             */
+            v = value == 'verdadero';
+        }
+        else {
+            /**
+             * es una cadena
+             */
+            v = value;
+        }
+        return { type: 'literal', value: v };
     };
     return Interpreter;
 }(Emitter_js_1.default));
@@ -23765,6 +23898,7 @@ function transform_invocation(invocation, ast, module_name) {
         var varinfo = get_variable_info(invocation.name, ast.local_variables, module_name);
         if (varinfo.error) {
             errors_found.push.apply(errors_found, varinfo.result);
+            return { error: true, result: errors_found };
         }
         else if (varinfo.error == false) {
             if (errors_found.length == 0) {
@@ -23819,6 +23953,7 @@ function transform_invocation_exp(invocation, ast, module_name) {
         var varinfo = get_variable_info(invocation.name, ast.local_variables, module_name);
         if (varinfo.error) {
             errors_found.push.apply(errors_found, varinfo.result);
+            return { error: true, result: errors_found };
         }
         else if (varinfo.error == false) {
             if (errors_found.length == 0) {
@@ -24088,6 +24223,7 @@ function transform_module(old_module, current_module) {
      */
     var first_init;
     var last_statement;
+    var first_statement_initialized = false;
     for (var i = old_module.parameters.length - 1; i >= 0; i--) {
         var param = old_module.parameters[i];
         var fake_inv = {
@@ -24103,6 +24239,7 @@ function transform_module(old_module, current_module) {
         };
         var assignment = create_assignment(fake_inv);
         if (i == old_module.parameters.length - 1) {
+            first_statement_initialized = true;
             first_init = assignment;
         }
         else {
@@ -24112,11 +24249,21 @@ function transform_module(old_module, current_module) {
     }
     var body_entry = transform_body(old_module.body);
     /**
-     * Enlazar la ultima inicializacion al primer enunciado del cuerpo
+     * Punto de entrada (primer enunciado) del modulo
      */
-    last_statement.exit_point = body_entry;
+    var entry_point = null;
+    if (first_statement_initialized) {
+        entry_point = first_init;
+        /**
+         * Enlazar la ultima inicializacion al primer enunciado del cuerpo
+         */
+        last_statement.exit_point = body_entry;
+    }
+    else {
+        entry_point = body_entry;
+    }
     var new_module = {
-        entry_point: first_init,
+        entry_point: entry_point,
         name: current_module,
         parameters: parameters
     };
@@ -24308,7 +24455,7 @@ function transform_read(rc) {
          * son todos Invocation. O va a estar garantizado...
          */
         current_var = rc.args[i][0];
-        var lcall = new interfaces_1.S3.ReadCall(current_var.name);
+        var lcall = new interfaces_1.S3.ReadCall(current_var.name, current_var.typings.type);
         if (i == 0) {
             first_call = lcall;
         }
@@ -24708,15 +24855,21 @@ function transfor_module(m, p) {
         };
     }
     else {
+        var parameters = [];
+        var ptypes = type_params(p.modules.user_modules[m.name].parameters);
+        for (var i = 0; i < ptypes.length; i++) {
+            var _a = p.modules.user_modules[m.name].parameters[i], name = _a.name, by_ref = _a.by_ref, is_array = _a.is_array, dimensions = _a.dimensions;
+            parameters.push({ name: name, by_ref: by_ref, is_array: is_array, dimensions: dimensions, type: ptypes[i] });
+        }
         typed_module = {
             body: [],
             module_type: p.modules.user_modules[m.name].module_type,
             return_type: p.modules.user_modules[m.name].return_type,
-            parameters: p.modules.user_modules[m.name].parameters
+            parameters: parameters
         };
     }
-    for (var _i = 0, _a = m.body; _i < _a.length; _i++) {
-        var a = _a[_i];
+    for (var _i = 0, _b = m.body; _i < _b.length; _i++) {
+        var a = _b[_i];
         var report = transform_statement(a, m.name, p);
         if (report.error) {
             errors = errors.concat(report.result);
@@ -24768,7 +24921,7 @@ function transform_if(a, mn, p) {
         }
     }
     var typed_fb = [];
-    for (var _b = 0, _c = a.true_branch; _b < _c.length; _b++) {
+    for (var _b = 0, _c = a.false_branch; _b < _c.length; _b++) {
         var e = _c[_b];
         var report = transform_statement(e, mn, p);
         if (report.error) {
@@ -25103,7 +25256,7 @@ function type_expression(es, mn, p) {
                 }
                 break;
             case 'literal':
-                typed_exp.push(type_literal(e));
+                typed_exp.push(helpers_1.type_literal(e));
                 break;
             case 'call':
                 {
@@ -25259,23 +25412,6 @@ function type_indexes(indexes, mn, p) {
         return { error: false, result: indextypes };
     }
 }
-function type_literal(l) {
-    var type = l.type, value = l.value;
-    var datatype;
-    switch (typeof l.value) {
-        case 'boolean':
-            datatype = new interfaces_1.Typed.AtomicType('logico');
-            break;
-        case 'string':
-            datatype = l.value.length > 1 ? new interfaces_1.Typed.StringType(l.value.length) : new interfaces_1.Typed.AtomicType('caracter');
-            break;
-        case 'number': {
-            datatype = l.value - Math.trunc(l.value) > 0 ? new interfaces_1.Typed.AtomicType('real') : new interfaces_1.Typed.AtomicType('entero');
-            break;
-        }
-    }
-    return { type: type, value: value, typings: { type: datatype } };
-}
 /**
  * calculate_type
  * "ejecuta" una expresion de tipos y calcula el tipo resultante
@@ -25323,6 +25459,7 @@ function operate(s, op) {
         case 'times':
         case 'minus':
         case 'power':
+        case 'mod':
             return plus_times(s, op);
         case 'minor':
         case 'minor-eq':
@@ -25344,7 +25481,7 @@ function operate(s, op) {
  */
 /**
  * plus_times calcula el tipo producido por: una suma, una resta, una multiplicacion,
- * y una potencia
+ * una potencia, y modulo (mod)
  */
 function plus_times(s, op) {
     var supported = ['entero', 'real'];
@@ -25656,6 +25793,79 @@ function repetir(c, n) {
 
 "use strict";
 
+var Emitter = (function () {
+    function Emitter(public_event_list) {
+        this.public_events = public_event_list;
+        this.callbacks = {};
+    }
+    Emitter.prototype.on = function (event_name, callback) {
+        if (event_name in this.callbacks) {
+            this.callbacks[event_name].push(callback);
+        }
+        else {
+            this.callbacks[event_name] = [callback];
+        }
+    };
+    /**
+     * Se encarga de llamar a los callbacks de los eventos.
+     * Si se registro un callback para 'any' entonces se lo llama para cada evento que sea emitido. Es el callback por defecto.
+     * Si un evento tiene registrado un callback entonces este se ejecuta despues del callback por defecto.
+     */
+    Emitter.prototype.emit = function (event_name) {
+        var args = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            args[_i - 1] = arguments[_i];
+        }
+        if (this.callbacks.hasOwnProperty('any')) {
+            for (var _a = 0, _b = this.callbacks.any; _a < _b.length; _a++) {
+                var callback = _b[_a];
+                callback.apply(void 0, args);
+            }
+        }
+        if (this.callbacks.hasOwnProperty(event_name)) {
+            for (var _c = 0, _d = this.callbacks[event_name]; _c < _d.length; _c++) {
+                var callback = _d[_c];
+                callback.apply(void 0, args);
+            }
+        }
+    };
+    /**
+     * Repite un evento de otro emisor como si fuera propio. El evento puede registrar como publico o no.
+     */
+    Emitter.prototype.repeat = function (event_name, emitter, make_public) {
+        var args = [];
+        for (var _i = 3; _i < arguments.length; _i++) {
+            args[_i - 3] = arguments[_i];
+        }
+        if (make_public === true) {
+            this.public_events.push(event_name);
+        }
+        var self = this;
+        emitter.on(event_name, function () {
+            self.emit.apply(self, [event_name].concat(args));
+        });
+    };
+    /**
+     * Emitir los eventos de otro emisor como si fueran propios.
+     */
+    Emitter.prototype.repeatAllPublicEvents = function (emitter) {
+        for (var _i = 0, _a = emitter.public_events; _i < _a.length; _i++) {
+            var event_name = _a[_i];
+            this.repeat(event_name, emitter, true);
+        }
+    };
+    return Emitter;
+}());
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = Emitter;
+
+
+/***/ }),
+/* 27 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
 var $ = __webpack_require__(1);
 var Prompt = (function () {
     function Prompt(container, i) {
@@ -25684,7 +25894,7 @@ exports.default = Prompt;
 
 
 /***/ }),
-/* 27 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -25811,7 +26021,7 @@ function split_at_styles(s) {
     return { pieces: pieces, styles: styles };
 }
 var templates = {
-    default: { title: 'Tu programa contiene un error' },
+    default: { title: 'Tu programa contiene un error: $code{@where::@reason}' },
     '@assignment-incompatible-types': {
         title: 'Se intento asignar un valor de tipo $code{@received} a una variable de tipo $code{@expected}.',
         description: 'Las variables de tipo $code{@expected} no pueden contener datos de tipo $code{@received}.',
@@ -25836,12 +26046,27 @@ var templates = {
         title: 'Se invocó una variable con demasiados indices',
         description: 'La variable $code{@name} fue invocada con @indexes indice/s pero solo tiene @dimensions dimension/es.',
         suggestion: 'Si una variable tiene $code{@dimensions} dimensiones entonces solo puede ser invocada con hasta $code{@dimensions} indices.'
+    },
+    '@assignment-long-string': {
+        title: 'Cadena demasiado larga',
+        description: 'Se intentó asignar una cadena de @string_length caracteres al vector $code{@name} que es de longitud @vector_length.',
+        suggestion: 'La longitud de una cadena no puede superar la longitud del vector que la contiene.'
+    },
+    '@read-long-string': {
+        title: 'Se leyó una cadena demasiado larga',
+        description: 'Se intentó asignar una cadena de @string_length caracteres al vector $code{@name} que es de longitud @vector_length.',
+        suggestion: 'La longitud de una cadena no puede superar la longitud del vector que la contiene.'
+    },
+    '@read-incompatible-types': {
+        title: 'Se leyó un valor del tipo equivocado',
+        description: 'Ingresaste un valor del tipo equivocado. El programa esperaba recibir un valor de tipo $code{@expected} pero ingresaste un valor de tipo $code{@received}.',
+        suggestion: 'Para solucionar este error vuelve a ejecutar el programa e ingresa un valor del tipo adecuado. Para mas informacion sobre los tipos de las variables haz click [aqui].'
     }
 };
 
 
 /***/ }),
-/* 28 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -25862,6 +26087,11 @@ status_bar.error_count = 0;
 var ejecutar = document.getElementById('ejecutar');
 var error_count = 0;
 var parser = new interprete_pl_1.Parser();
+pWindow.on('evaluation-error', function (error) {
+    error_count++;
+    status_bar.error_count = error_count;
+    message_panel.add_message(error);
+});
 /**
  * Falta asignar callbacks a los eventos de parser
  */
