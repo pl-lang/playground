@@ -13194,6 +13194,7 @@ function check_call(c) {
             if (!(helpers_1.types_are_equal(arg.type, param) || (cond_a && cond_b))) {
                 var error = {
                     reason: '@call-incompatible-argument',
+                    name: c.name,
                     where: 'typechecker',
                     expected: helpers_1.stringify(param),
                     received: helpers_1.stringify(arg.type),
@@ -26141,6 +26142,44 @@ var templates = {
         title: 'Se leyó un valor del tipo equivocado',
         description: 'Ingresaste un valor del tipo equivocado. El programa esperaba recibir un valor de tipo $code{@expected} pero ingresaste un valor de tipo $code{@received}.',
         suggestion: 'Para solucionar este error vuelve a ejecutar el programa e ingresa un valor del tipo adecuado. Para mas informacion sobre los tipos de las variables haz click [aqui].'
+    },
+    '@call-incompatible-argument': {
+        title: 'Se llamó un módulo con un argumento del tipo equivocado',
+        description: 'El módulo $code{@name} esperaba que su argumento numero @index sea de tipo $code{@expected} pero recibió un argumento de tipo $code{@received}',
+        suggestion: 'Al llamar al módulo asegurate de pasarle argumentos del tipo adecuado.'
+    },
+    'bad-condition': {
+        title: 'Se encontró una condición de un tipo invalido',
+        description: 'Una estructura de control tiene una condición de tipo $code{@received}.',
+        suggestion: 'La condición de una estructura de control siempre debe ser una expresión que devuelva un valor de tipo lógico.'
+    },
+    '@for-bad-counter': {
+        title: 'El contador de un bucle $code{para} es de un tipo invalido.',
+        suggestion: 'Se usó un contador de tipo $code{@received}, pero la variable que controla un bucle $code{para} siempre debe ser de tipo ${entero}'
+    },
+    '@for-bad-init': {
+        title: 'El contador de un bucle $code{para} fue inicializado con un valor de un tipo invalido',
+        suggestion: 'Se inicializó el contador con un valor del tipo $code{@received} pero el contador de un bucle para debe inicializarce con un valor de tipo $code{entero}',
+    },
+    '@for-bad-last': {
+        title: 'El valor final de un bucle $code{para} es de un tipo invalido',
+        description: 'El valor final declarado es de tipo $code{@received} pero debe ser de tipo $code{entero}.',
+        suggestion: 'Ademas, debes asegurarte de que el valor final sea superior al valor inicial, de otra forma el bucle $code{para} se convertirá en un bucle infinito.'
+    },
+    'bad-return': {
+        title: 'Una función de tipo $code{@declared} retorna un valor de tipo $code{@received}',
+        description: 'Las funciones siempre deben retornar datos del tipo que declaran. Si se declara que una funcion retorna datos de tipo $code{@entero} entonces todos sus enunciados $code{retornar} deben devolver valores de tipo $code{@entero}.',
+        suggestion: 'Cambia todos los enunciados de la funcion para que retornen datos de tipo $code{@declared}.'
+    },
+    '@call-wrong-arg-amount': {
+        title: 'Un modulo fue llamado con la cantidad equivocada de argumentos',
+        description: 'El modulo $code{@name} fue llamado con @received argumento/s pero esperaba recibir @expected.',
+        suggestion: 'Debes invocar al modulo $code{@name} con @expected argumento/s.'
+    },
+    '@invocation-bad-index': {
+        title: 'Se utilizó un índice del tipo equivocado',
+        description: 'Se invocó un arreglo con un índice de tipo $code{@received}.',
+        suggestion: 'Todos los índices de un arreglo deben ser de tipo $code{entero}.'
     }
 };
 
