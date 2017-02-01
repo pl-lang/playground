@@ -1,6 +1,6 @@
 import * as CodeMirror from 'codemirror'
 import * as $ from 'jquery'
-import {Parser, transform, fr_writer} from 'interprete-pl'
+import {Parser, transform, fr_writer, Errors} from 'interprete-pl'
 import StatusBar from './StatusBar'
 import MessagePanel from './MessagePanel'
 import Window from './Window'
@@ -26,6 +26,12 @@ const compilar = document.getElementById('compilar') as HTMLButtonElement
 let error_count = 0
 
 const parser = new Parser()
+
+pWindow.on('evaluation-error', (error: Errors.Base) => {
+    error_count++
+    status_bar.error_count = error_count
+    message_panel.add_message(error)
+})
 
 /**
  * Falta asignar callbacks a los eventos de parser
