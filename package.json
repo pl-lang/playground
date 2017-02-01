@@ -11,7 +11,7 @@
     "prebuildmap": "npm install --save ../interprete-pl",
     "predev": "npm install --save ../interprete-pl",
     "dev": "webpack --config webpack.dev.config.js --display-error-details",
-    "prepush": "git checkout master && git merge dev && npm run build",
+    "prepush": "git checkout master && git merge dev && npm run build && git commit -m \"bundle nuevo\"",
     "push": "git push",
     "postpush": "git checkout dev"
   },
