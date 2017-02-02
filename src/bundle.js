@@ -190,6 +190,7 @@ var S3;
         StatementKinds[StatementKinds["Return"] = 28] = "Return";
         StatementKinds[StatementKinds["Concat"] = 29] = "Concat";
         StatementKinds[StatementKinds["AssignString"] = 30] = "AssignString";
+        StatementKinds[StatementKinds["Alias"] = 31] = "Alias";
     })(StatementKinds = S3.StatementKinds || (S3.StatementKinds = {}));
     var BaseStatement = (function () {
         function BaseStatement() {
@@ -215,6 +216,21 @@ var S3;
         return BaseStatement;
     }());
     S3.BaseStatement = BaseStatement;
+    var Alias = (function (_super) {
+        tslib_1.__extends(Alias, _super);
+        function Alias(varname, indexes, dimensions, alias, module_name) {
+            var _this = _super.call(this) || this;
+            _this.kind = StatementKinds.Alias;
+            _this.varname = varname;
+            _this.var_indexes = indexes;
+            _this.local_alias = alias;
+            _this.dimensions = dimensions;
+            _this.module_name = module_name;
+            return _this;
+        }
+        return Alias;
+    }(BaseStatement));
+    S3.Alias = Alias;
     var AssignString = (function (_super) {
         tslib_1.__extends(AssignString, _super);
         function AssignString(varname, length, indexes) {
@@ -22717,15 +22733,6 @@ exports.default = Window;
 "use strict";
 
 var interfaces_1 = __webpack_require__(0);
-/*
-  Un evaluador sirve para ejecutar las acciones/enunciados de un modulo.
-  Se crea con la info necesaria para dicha tarea. El retorno de su modulo se
-  devuelve a traves de la funcion run.
-*/
-/*
-  Los evaluadores son eliminados cuando terminan de ejecutar su modulo. Son de
-  un solo uso.
-*/
 var Evaluator = (function () {
     function Evaluator(program) {
         this.entry_point = program.entry_point;
@@ -22733,6 +22740,7 @@ var Evaluator = (function () {
         this.globals = program.local_variables.main;
         this.locals = program.local_variables;
         this.locals_stack = [this.globals];
+        this.aliases = [];
         this.current_statement = this.entry_point;
         this.current_module = 'main';
         this.state = {
@@ -22904,7 +22912,23 @@ var Evaluator = (function () {
                 return this.concat(s);
             case interfaces_1.S3.StatementKinds.AssignString:
                 return this.assign_string(s);
+            case interfaces_1.S3.StatementKinds.Alias:
+                return this.alias(s);
         }
+    };
+    Evaluator.prototype.has_alias = function (name) {
+        for (var _i = 0, _a = this.aliases; _i < _a.length; _i++) {
+            var alias = _a[_i];
+            if (alias.local_name == name) {
+                return { error: false, result: alias };
+            }
+        }
+        return { error: true, result: 'no-alias' };
+    };
+    Evaluator.prototype.alias = function (s) {
+        var indexes = this.pop_indexes(s.var_indexes);
+        this.aliases.push({ varname: s.varname, indexes: indexes, local_name: s.local_alias, dimensions: s.dimensions, module: s.module_name });
+        return { error: false, result: { done: false, action: 'none' } };
     };
     Evaluator.prototype.assign_string = function (s) {
         var v = this.get_var(s.varname);
@@ -22971,14 +22995,54 @@ var Evaluator = (function () {
         return { error: false, result: { action: 'none', done: this.state.done } };
     };
     Evaluator.prototype.assign = function (s) {
-        var variable = this.get_var(s.varname);
-        variable.value = this.state.value_stack.pop();
-        return { error: false, result: { action: 'none', done: this.state.done } };
+        var alias_found = this.has_alias(s.varname);
+        /**
+         * Si no hay alias esta es una asignacion normal
+         */
+        if (alias_found.error) {
+            var variable = this.get_var(s.varname);
+            variable.value = this.state.value_stack.pop();
+            return { error: false, result: { action: 'none', done: this.state.done } };
+        }
+        else {
+            var alias = alias_found.result;
+            if (alias.dimensions.length > 0) {
+                var variable = this.get_var(alias.varname);
+                var index = this.calculate_index(alias.indexes.map(function (i) { return i - 1; }), alias.dimensions);
+                variable.values[index] = this.state.value_stack.pop();
+                return { error: false, result: { action: 'none', done: this.state.done } };
+            }
+            else {
+                var variable = this.get_var(alias.varname);
+                variable.value = this.state.value_stack.pop();
+                return { error: false, result: { action: 'none', done: this.state.done } };
+            }
+        }
     };
     Evaluator.prototype.get_value = function (s) {
-        var variable = this.get_var(s.varname);
-        this.state.value_stack.push(variable.value);
-        return { error: false, result: { action: 'none', done: this.state.done } };
+        var alias_found = this.has_alias(s.varname);
+        /**
+         * Si no hay alias solo hay que apilar el valor de la variable
+         */
+        if (alias_found.error) {
+            var variable = this.get_var(s.varname);
+            this.state.value_stack.push(variable.value);
+            return { error: false, result: { action: 'none', done: this.state.done } };
+        }
+        else {
+            var alias = alias_found.result;
+            if (alias.dimensions.length > 0) {
+                var variable = this.get_var(alias.varname);
+                var index = this.calculate_index(alias.indexes.map(function (i) { return i - 1; }), alias.dimensions);
+                this.state.value_stack.push(variable.values[index]);
+                return { error: false, result: { action: 'none', done: this.state.done } };
+            }
+            else {
+                var variable = this.get_var(alias.varname);
+                this.state.value_stack.push(variable.value);
+                return { error: false, result: { action: 'none', done: this.state.done } };
+            }
+        }
     };
     Evaluator.prototype.assignv = function (s) {
         var indexes = this.pop_indexes(s.total_indexes);
@@ -24288,32 +24352,38 @@ function transform_module(old_module, current_module) {
     var first_statement_initialized = false;
     for (var i = old_module.parameters.length - 1; i >= 0; i--) {
         var param = old_module.parameters[i];
-        var fake_inv = {
-            dimensions: param.dimensions,
-            indexes: [],
-            is_array: param.is_array,
-            name: param.name,
-            type: 'invocation',
-            typings: {
+        /**
+         * Saltear parametros tomados por referencia, no hace falta
+         * inicializarlos
+         */
+        if (!param.by_ref) {
+            var fake_inv = {
+                dimensions: param.dimensions,
                 indexes: [],
-                type: new interfaces_1.Typed.AtomicType('ninguno')
+                is_array: param.is_array,
+                name: param.name,
+                type: 'invocation',
+                typings: {
+                    indexes: [],
+                    type: new interfaces_1.Typed.AtomicType('ninguno')
+                }
+            };
+            var assignment = null;
+            if (param.type instanceof interfaces_1.Typed.StringType) {
+                assignment = new interfaces_1.S3.AssignString(param.name, param.type.length, 0);
             }
-        };
-        var assignment = null;
-        if (param.type instanceof interfaces_1.Typed.StringType) {
-            assignment = new interfaces_1.S3.AssignString(param.name, param.type.length, 0);
+            else {
+                assignment = create_assignment(fake_inv);
+            }
+            if (i == old_module.parameters.length - 1) {
+                first_statement_initialized = true;
+                first_init = assignment;
+            }
+            else {
+                last_statement.exit_point = assignment;
+            }
+            last_statement = interfaces_1.S3.get_last(assignment);
         }
-        else {
-            assignment = create_assignment(fake_inv);
-        }
-        if (i == old_module.parameters.length - 1) {
-            first_statement_initialized = true;
-            first_init = assignment;
-        }
-        else {
-            last_statement.exit_point = assignment;
-        }
-        last_statement = interfaces_1.S3.get_last(assignment);
     }
     var body_entry = transform_body(old_module.body);
     /**
@@ -24464,16 +24534,61 @@ function transform_call(call) {
      * la evaluacion de sus argumentos (en el orden en que aparecen)
      * con el Statement de llamada.
      */
-    var first_arg = transform_expression(call.args[0]);
-    var last_statement = interfaces_1.S3.get_last(first_arg);
-    for (var i = 0; i < call.args.length - 1; i++) {
-        var next_arg = transform_expression(call.args[i + 1]);
-        last_statement.exit_point = next_arg;
-        last_statement = interfaces_1.S3.get_last(next_arg);
+    var first_arg = null;
+    var last_statement = null;
+    var first_arg_initd = false;
+    for (var i = 0; i < call.args.length; i++) {
+        var next_arg = null;
+        if (call.parameters[i].by_ref) {
+            var invocation = call.args[i][0];
+            /**
+             * apilar los indices de la invocacion
+             */
+            var first_index = null;
+            var last_index_st = null;
+            var index_initd = false;
+            for (var j = 0; j < invocation.indexes.length; j++) {
+                var next_index = transform_expression(invocation.indexes[j]);
+                if (j == 0) {
+                    first_index = next_index;
+                    last_index_st = interfaces_1.S3.get_last(first_index);
+                    index_initd = true;
+                }
+                else {
+                    last_index_st.exit_point = next_index;
+                    last_index_st = next_index;
+                }
+            }
+            var make_alias = new interfaces_1.S3.Alias(invocation.name, invocation.indexes.length, invocation.dimensions, call.parameters[i].name, call.name);
+            if (index_initd) {
+                last_index_st.exit_point = make_alias;
+                next_arg = first_index;
+            }
+            else {
+                next_arg = make_alias;
+            }
+        }
+        else {
+            next_arg = transform_expression(call.args[i]);
+        }
+        if (i == 0) {
+            first_arg = next_arg;
+            last_statement = interfaces_1.S3.get_last(first_arg);
+            first_arg_initd = true;
+        }
+        else {
+            last_statement.exit_point = next_arg;
+            last_statement = interfaces_1.S3.get_last(next_arg);
+        }
     }
     var ucall = new interfaces_1.S3.UserModuleCall(call.name, call.args.length);
-    last_statement.exit_point = ucall;
-    return first_arg;
+    if (first_arg_initd) {
+        last_statement.exit_point = ucall;
+        return first_arg;
+    }
+    else {
+        return ucall;
+    }
 }
 function transform_write(wc) {
     /**
@@ -25821,6 +25936,8 @@ function procesar_enunciado(e, nivel) {
             return repetir(' ', nivel * espacios) + "CONCATENAR " + e.length;
         case interfaces_1.S3.StatementKinds.AssignString:
             return repetir(' ', nivel * espacios) + "ASIGNAR CADENA " + e.varname + " " + e.length + " " + e.indexes;
+        case interfaces_1.S3.StatementKinds.Alias:
+            return repetir(' ', nivel * espacios) + "ALIAS " + e.varname + " " + e.var_indexes + " " + e.dimensions + " " + e.local_alias;
     }
 }
 function procesar_si(e, nivel) {
