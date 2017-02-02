@@ -252,6 +252,11 @@ pre {
   border-left: 1px solid hsl(192, 15%, 70%);
 }
 
+#ir-pre {
+  margin-top: 4px;
+  margin-left: 4px;
+}
+
 #ir-textarea {
   height: 100%;
   width: 100%;
