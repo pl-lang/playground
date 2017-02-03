@@ -191,6 +191,7 @@ var S3;
         StatementKinds[StatementKinds["Concat"] = 29] = "Concat";
         StatementKinds[StatementKinds["AssignString"] = 30] = "AssignString";
         StatementKinds[StatementKinds["Alias"] = 31] = "Alias";
+        StatementKinds[StatementKinds["CopyVec"] = 32] = "CopyVec";
     })(StatementKinds = S3.StatementKinds || (S3.StatementKinds = {}));
     var BaseStatement = (function () {
         function BaseStatement(owner) {
@@ -217,6 +218,22 @@ var S3;
         return BaseStatement;
     }());
     S3.BaseStatement = BaseStatement;
+    var CopyVec = (function (_super) {
+        tslib_1.__extends(CopyVec, _super);
+        /**
+         * target datos del vector que recibe los datos;
+         * source datos del vector del cual se copian los datos;
+         */
+        function CopyVec(owner, target, source) {
+            var _this = _super.call(this, owner) || this;
+            _this.kind = StatementKinds.CopyVec;
+            _this.target = target;
+            _this.source = source;
+            return _this;
+        }
+        return CopyVec;
+    }(BaseStatement));
+    S3.CopyVec = CopyVec;
     var Alias = (function (_super) {
         tslib_1.__extends(Alias, _super);
         function Alias(owner, varname, indexes, dimensions, alias, module_name) {
@@ -475,6 +492,254 @@ var Typed;
 
 /***/ }),
 /* 1 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var interfaces_1 = __webpack_require__(0);
+// flatten :: [any] -> [[any]] -> [any]
+function flatten(accumulator, arr) {
+    for (var _i = 0, arr_1 = arr; _i < arr_1.length; _i++) {
+        var a = arr_1[_i];
+        for (var _a = 0, a_1 = a; _a < a_1.length; _a++) {
+            var element = a_1[_a];
+            accumulator.push(element);
+        }
+    }
+    return accumulator;
+}
+exports.flatten = flatten;
+// toma dos objetos y devuelve uno nuevo que contiene las propiedades (y valores)
+// de los dos anteriores. Si hay propiedades repetidas entre a y b, se toman las
+// de b
+function mergeObjs(a, b) {
+    var r = {};
+    for (var prop in a) {
+        r[prop] = a[prop];
+    }
+    for (var prop in b) {
+        r[prop] = b[prop];
+    }
+    return r;
+}
+exports.mergeObjs = mergeObjs;
+function clone_obj(a) {
+    return mergeObjs({}, a);
+}
+exports.clone_obj = clone_obj;
+// take, zip y zipObj estan basadas en funciones de haskell
+// crea un nuevo objeto dadas una lista de valores y una lista de cadenas.
+// Tendra tantos pares prop/valor como haya elementos en la lista mas
+// corta
+function zipObj(values, names) {
+    if (values.length > names.length) {
+        values = take(names.length, values);
+    }
+    else if (values.length < names.length) {
+        names = take(values.length, names);
+    }
+    var pairs = zip(names, values);
+    /**
+     * result es un objeto cuyas claves son cadenas y cuyos valores son de tipo A
+     */
+    var result = {};
+    for (var _i = 0, pairs_1 = pairs; _i < pairs_1.length; _i++) {
+        var _a = pairs_1[_i], prop = _a[0], value = _a[1];
+        result[prop] = value;
+    }
+    return result;
+}
+exports.zipObj = zipObj;
+// toma dos listas y devuelve una lista de pares donde el primer elemento
+// pertenece a "a" y el segundo a "b". La lista tendra tantos elementos
+// como la mas corta entre a y b
+function zip(a, b) {
+    if (a.length > b.length) {
+        a = take(b.length, a);
+    }
+    else if (a.length < b.length) {
+        b = take(a.length, b);
+    }
+    var result = [];
+    for (var i = 0; i < a.length; i++) {
+        result.push([a[i], b[i]]);
+    }
+    return result;
+}
+exports.zip = zip;
+// toma los primeros n elementos de un arreglo
+function take(n, list) {
+    return list.slice(0, n);
+}
+exports.take = take;
+/**
+ * drop
+ * quita los primeros n elementos de un arreglo
+ */
+function drop(n, list) {
+    return list.slice(n);
+}
+exports.drop = drop;
+/**
+ * arr_counter
+ * crea un arreglo numerico inicializado con una longitud especifica
+ * para ser usado como contador
+ */
+function arr_counter(length, init) {
+    var arr = new Array(length);
+    for (var i = 0; i < length; i++) {
+        arr[i] = init;
+    }
+    return arr;
+}
+exports.arr_counter = arr_counter;
+/**
+ * arr_equal
+ * compara dos arreglos para ver si son iguales
+ */
+function arr_equal(a, b) {
+    if (a.length != b.length) {
+        return false;
+    }
+    else {
+        for (var i = 0; i < a.length; i++) {
+            if (a[i] != b[i]) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+exports.arr_equal = arr_equal;
+/**
+ * arr_less
+ * compara dos arreglos numericos de la misma longitud
+ * para ver si el primero es menor que el segundo.
+ */
+function arr_minor(a, b) {
+    for (var i = 0; i < a.length; i++) {
+        if (a[i] > b[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+exports.arr_minor = arr_minor;
+/**
+ * arr_major
+ * compara dos arreglos numericos de la misma longitud
+ * para ver si el primero es mayor que el segundo
+ */
+function arr_major(a, b) {
+    for (var i = 0; i < a.length; i++) {
+        if (a[i] < b[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+exports.arr_major = arr_major;
+/**
+ * arr_counter_inc
+ * toma una arreglo de numeros usado como contador y lo incrementa `increment` unidades
+ */
+function arr_counter_inc(a, lengths, init) {
+    var done = false;
+    for (var i = a.length - 1; i >= 0 && !done; i--) {
+        a[i]++;
+        done = true;
+        /**
+         * Esto permite que el primer elemento del arreglo se incremente
+         * indefinidamente. Es el unico que no es reseteado.
+         */
+        if (i > 0) {
+            if (a[i] > lengths[i]) {
+                a[i] = init;
+                done = false;
+            }
+        }
+    }
+}
+exports.arr_counter_inc = arr_counter_inc;
+/**
+ * arr_counter_inc
+ * toma un arreglo numercio usado como contador y lo decrementa
+ * `dec` unidades.
+ */
+function arr_counter_dec(a, lengths) {
+    var done = false;
+    for (var i = a.length - 1; i >= 0 && !done; i--) {
+        a[i]--;
+        done = true;
+        if (i > 0) {
+            if (a[i] < 1) {
+                a[i] = lengths[i];
+                done = false;
+            }
+        }
+    }
+}
+exports.arr_counter_dec = arr_counter_dec;
+function types_are_equal(a, b) {
+    if (a.kind == b.kind) {
+        switch (a.kind) {
+            case 'array':
+                if (a.length == b.length) {
+                    return types_are_equal(a.cell_type, b.cell_type);
+                }
+                else {
+                    return false;
+                }
+            case 'atomic':
+                return a.typename == b.typename;
+        }
+    }
+    else {
+        return false;
+    }
+}
+exports.types_are_equal = types_are_equal;
+function stringify(type) {
+    if (type.kind == 'array') {
+        var dimensions = '';
+        var ct = type;
+        while (ct.kind == 'array') {
+            dimensions += ct.length;
+            if (ct.cell_type.kind == 'array') {
+                dimensions += ', ';
+            }
+            ct = ct.cell_type;
+        }
+        var atomic = ct.typename;
+        return atomic + "[" + dimensions + "]";
+    }
+    else {
+        return type.typename;
+    }
+}
+exports.stringify = stringify;
+function type_literal(l) {
+    var type = l.type, value = l.value;
+    var datatype;
+    switch (typeof l.value) {
+        case 'boolean':
+            datatype = new interfaces_1.Typed.AtomicType('literal', 'logico');
+            break;
+        case 'string':
+            datatype = l.value.length > 1 ? new interfaces_1.Typed.StringType(l.value.length, 'literal') : new interfaces_1.Typed.AtomicType('literal', 'caracter');
+            break;
+        case 'number': {
+            datatype = l.value - Math.trunc(l.value) > 0 ? new interfaces_1.Typed.AtomicType('literal', 'real') : new interfaces_1.Typed.AtomicType('literal', 'entero');
+            break;
+        }
+    }
+    return { type: type, value: value, typings: { type: datatype } };
+}
+exports.type_literal = type_literal;
+
+
+/***/ }),
+/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -10701,254 +10966,6 @@ return jQuery;
 
 
 /***/ }),
-/* 2 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var interfaces_1 = __webpack_require__(0);
-// flatten :: [any] -> [[any]] -> [any]
-function flatten(accumulator, arr) {
-    for (var _i = 0, arr_1 = arr; _i < arr_1.length; _i++) {
-        var a = arr_1[_i];
-        for (var _a = 0, a_1 = a; _a < a_1.length; _a++) {
-            var element = a_1[_a];
-            accumulator.push(element);
-        }
-    }
-    return accumulator;
-}
-exports.flatten = flatten;
-// toma dos objetos y devuelve uno nuevo que contiene las propiedades (y valores)
-// de los dos anteriores. Si hay propiedades repetidas entre a y b, se toman las
-// de b
-function mergeObjs(a, b) {
-    var r = {};
-    for (var prop in a) {
-        r[prop] = a[prop];
-    }
-    for (var prop in b) {
-        r[prop] = b[prop];
-    }
-    return r;
-}
-exports.mergeObjs = mergeObjs;
-function clone_obj(a) {
-    return mergeObjs({}, a);
-}
-exports.clone_obj = clone_obj;
-// take, zip y zipObj estan basadas en funciones de haskell
-// crea un nuevo objeto dadas una lista de valores y una lista de cadenas.
-// Tendra tantos pares prop/valor como haya elementos en la lista mas
-// corta
-function zipObj(values, names) {
-    if (values.length > names.length) {
-        values = take(names.length, values);
-    }
-    else if (values.length < names.length) {
-        names = take(values.length, names);
-    }
-    var pairs = zip(names, values);
-    /**
-     * result es un objeto cuyas claves son cadenas y cuyos valores son de tipo A
-     */
-    var result = {};
-    for (var _i = 0, pairs_1 = pairs; _i < pairs_1.length; _i++) {
-        var _a = pairs_1[_i], prop = _a[0], value = _a[1];
-        result[prop] = value;
-    }
-    return result;
-}
-exports.zipObj = zipObj;
-// toma dos listas y devuelve una lista de pares donde el primer elemento
-// pertenece a "a" y el segundo a "b". La lista tendra tantos elementos
-// como la mas corta entre a y b
-function zip(a, b) {
-    if (a.length > b.length) {
-        a = take(b.length, a);
-    }
-    else if (a.length < b.length) {
-        b = take(a.length, b);
-    }
-    var result = [];
-    for (var i = 0; i < a.length; i++) {
-        result.push([a[i], b[i]]);
-    }
-    return result;
-}
-exports.zip = zip;
-// toma los primeros n elementos de un arreglo
-function take(n, list) {
-    return list.slice(0, n);
-}
-exports.take = take;
-/**
- * drop
- * quita los primeros n elementos de un arreglo
- */
-function drop(n, list) {
-    return list.slice(n);
-}
-exports.drop = drop;
-/**
- * arr_counter
- * crea un arreglo numerico inicializado con una longitud especifica
- * para ser usado como contador
- */
-function arr_counter(length, init) {
-    var arr = new Array(length);
-    for (var i = 0; i < length; i++) {
-        arr[i] = init;
-    }
-    return arr;
-}
-exports.arr_counter = arr_counter;
-/**
- * arr_equal
- * compara dos arreglos para ver si son iguales
- */
-function arr_equal(a, b) {
-    if (a.length != b.length) {
-        return false;
-    }
-    else {
-        for (var i = 0; i < a.length; i++) {
-            if (a[i] != b[i]) {
-                return false;
-            }
-        }
-    }
-    return true;
-}
-exports.arr_equal = arr_equal;
-/**
- * arr_less
- * compara dos arreglos numericos de la misma longitud
- * para ver si el primero es menor que el segundo.
- */
-function arr_minor(a, b) {
-    for (var i = 0; i < a.length; i++) {
-        if (a[i] > b[i]) {
-            return false;
-        }
-    }
-    return true;
-}
-exports.arr_minor = arr_minor;
-/**
- * arr_major
- * compara dos arreglos numericos de la misma longitud
- * para ver si el primero es mayor que el segundo
- */
-function arr_major(a, b) {
-    for (var i = 0; i < a.length; i++) {
-        if (a[i] < b[i]) {
-            return false;
-        }
-    }
-    return true;
-}
-exports.arr_major = arr_major;
-/**
- * arr_counter_inc
- * toma una arreglo de numeros usado como contador y lo incrementa `increment` unidades
- */
-function arr_counter_inc(a, lengths, init) {
-    var done = false;
-    for (var i = a.length - 1; i >= 0 && !done; i--) {
-        a[i]++;
-        done = true;
-        /**
-         * Esto permite que el primer elemento del arreglo se incremente
-         * indefinidamente. Es el unico que no es reseteado.
-         */
-        if (i > 0) {
-            if (a[i] > lengths[i]) {
-                a[i] = init;
-                done = false;
-            }
-        }
-    }
-}
-exports.arr_counter_inc = arr_counter_inc;
-/**
- * arr_counter_inc
- * toma un arreglo numercio usado como contador y lo decrementa
- * `dec` unidades.
- */
-function arr_counter_dec(a, lengths) {
-    var done = false;
-    for (var i = a.length - 1; i >= 0 && !done; i--) {
-        a[i]--;
-        done = true;
-        if (i > 0) {
-            if (a[i] < 1) {
-                a[i] = lengths[i];
-                done = false;
-            }
-        }
-    }
-}
-exports.arr_counter_dec = arr_counter_dec;
-function types_are_equal(a, b) {
-    if (a.kind == b.kind) {
-        switch (a.kind) {
-            case 'array':
-                if (a.length == b.length) {
-                    return types_are_equal(a.cell_type, b.cell_type);
-                }
-                else {
-                    return false;
-                }
-            case 'atomic':
-                return a.typename == b.typename;
-        }
-    }
-    else {
-        return false;
-    }
-}
-exports.types_are_equal = types_are_equal;
-function stringify(type) {
-    if (type.kind == 'array') {
-        var dimensions = '';
-        var ct = type;
-        while (ct.kind == 'array') {
-            dimensions += ct.length;
-            if (ct.cell_type.kind == 'array') {
-                dimensions += ', ';
-            }
-            ct = ct.cell_type;
-        }
-        var atomic = ct.typename;
-        return atomic + "[" + dimensions + "]";
-    }
-    else {
-        return type.typename;
-    }
-}
-exports.stringify = stringify;
-function type_literal(l) {
-    var type = l.type, value = l.value;
-    var datatype;
-    switch (typeof l.value) {
-        case 'boolean':
-            datatype = new interfaces_1.Typed.AtomicType('literal', 'logico');
-            break;
-        case 'string':
-            datatype = l.value.length > 1 ? new interfaces_1.Typed.StringType(l.value.length, 'literal') : new interfaces_1.Typed.AtomicType('literal', 'caracter');
-            break;
-        case 'number': {
-            datatype = l.value - Math.trunc(l.value) > 0 ? new interfaces_1.Typed.AtomicType('literal', 'real') : new interfaces_1.Typed.AtomicType('literal', 'entero');
-            break;
-        }
-    }
-    return { type: type, value: value, typings: { type: datatype } };
-}
-exports.type_literal = type_literal;
-
-
-/***/ }),
 /* 3 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -13045,7 +13062,7 @@ function wtk(word) {
 "use strict";
 
 var interfaces_1 = __webpack_require__(0);
-var helpers_1 = __webpack_require__(2);
+var helpers_1 = __webpack_require__(1);
 function check(p) {
     var errors = [];
     for (var mn in p.modules) {
@@ -22605,7 +22622,7 @@ return CodeMirror;
 
 "use strict";
 
-var $ = __webpack_require__(1);
+var $ = __webpack_require__(2);
 var Templates_1 = __webpack_require__(28);
 var MessagePanel = (function () {
     function MessagePanel(container, editor_instance) {
@@ -22745,7 +22762,7 @@ var tslib_1 = __webpack_require__(3);
 var interprete_pl_1 = __webpack_require__(4);
 var Emitter_1 = __webpack_require__(26);
 var Prompt_1 = __webpack_require__(27);
-var $ = __webpack_require__(1);
+var $ = __webpack_require__(2);
 var Window = (function (_super) {
     tslib_1.__extends(Window, _super);
     function Window(container) {
@@ -22792,6 +22809,7 @@ exports.default = Window;
 "use strict";
 
 var interfaces_1 = __webpack_require__(0);
+var helpers_1 = __webpack_require__(1);
 var Evaluator = (function () {
     function Evaluator(program) {
         this.entry_point = program.entry_point;
@@ -22973,7 +22991,57 @@ var Evaluator = (function () {
                 return this.assign_string(s);
             case interfaces_1.S3.StatementKinds.Alias:
                 return this.alias(s);
+            case interfaces_1.S3.StatementKinds.CopyVec:
+                return this.copy_vec(s);
         }
+    };
+    Evaluator.prototype.pad = function (a, padder, desired_length) {
+        var padded_copy = new Array(desired_length);
+        for (var i = 0; i < desired_length; i++) {
+            if (i < a.length) {
+                padded_copy[i] = a[i];
+            }
+            else {
+                padded_copy[i] = padder;
+            }
+        }
+        return padded_copy;
+    };
+    Evaluator.prototype.copy_vec = function (s) {
+        /**
+         * Indices provistos para el vector del cual se copian los datos
+         */
+        var src_provided_indexes = this.pop_indexes(s.source.indexes);
+        /**
+         * Indices provistos para el vector que recibe los datos
+         */
+        var tgt_provided_indexes = this.pop_indexes(s.target.indexes);
+        /**
+         * Indice inicial: indices provistos rellenados con 1 hasta que haya tantos como dimensiones
+         * Aclaracion: se resta 1 a todos para que sean indices para que arranquen en 0 en lugar de 1
+         */
+        var tgt_start_indexes = this.pad(tgt_provided_indexes, 1, s.target.dimensions.length).map(function (i) { return i - 1; });
+        /**
+         * Indice final: indices provistos rellenados con el tamaño de las dimensiones que no tienen indice
+         */
+        var tgt_end_indexes = tgt_provided_indexes.concat(helpers_1.drop(s.target.indexes, s.target.dimensions)).map(function (i) { return i - 1; });
+        /**
+         * Los valores que me interesan
+         */
+        var tgt_start = this.calculate_index(tgt_start_indexes, s.target.dimensions);
+        var tgt_end = this.calculate_index(tgt_end_indexes, s.target.dimensions);
+        var src_start_indexes = this.pad(src_provided_indexes, 1, s.source.dimensions.length).map(function (i) { return i - 1; });
+        // const src_end_indexes = [...src_provided_indexes, ...drop(s.source.indexes, s.source.dimensions)].map(i => i - 1)
+        // const src_end = this.calculate_index(src_end_indexes, s.source.dimensions)
+        var src_start = this.calculate_index(src_start_indexes, s.source.dimensions);
+        var tgt_var = this.get_var(s.target.name);
+        var src_var = this.get_var(s.source.name);
+        var counter = 0;
+        while (tgt_start + counter <= tgt_end) {
+            tgt_var.values[tgt_start + counter] = src_var.values[src_start + counter];
+            counter++;
+        }
+        return { error: false, result: { done: false, action: 'none' } };
     };
     Evaluator.prototype.has_alias = function (name, module_name) {
         for (var _i = 0, _a = this.aliases; _i < _a.length; _i++) {
@@ -23004,20 +23072,17 @@ var Evaluator = (function () {
          * demasiado largas.
          */
         if (this.is_whithin_bounds(indexes, v.dimensions)) {
-            var i = 0;
+            var string = [];
             var char = this.state.value_stack.pop();
-            while (i < s.length && char != '\0') {
-                var index = this.calculate_index(indexes.concat([i]), v.dimensions);
-                v.values[index] = char;
+            while (char != '\0') {
+                string.unshift(char);
                 char = this.state.value_stack.pop();
-                i++;
             }
-            /**
-             * Si no se alcanzó  '\0' (porque la cadena y el vector
-             * tienen la misma longitud), quitarlo de la pila.
-             */
-            if (i == s.length) {
-                char = this.state.value_stack.pop();
+            var i = 0;
+            var start_index = this.calculate_index(indexes.concat([0]), v.dimensions);
+            while (i < s.length && i < string.length) {
+                v.values[start_index + i] = string[i];
+                i++;
             }
             return { error: false, result: { done: false, action: 'none' } };
         }
@@ -23173,7 +23238,6 @@ var Evaluator = (function () {
                  * (como los indices de JS) y no en 1
                  */
                 var index = this.calculate_index(indexes.map(function (i) { return i - 1; }), s.dimensions);
-                var value = this.state.value_stack.pop();
                 var variable = this.get_var(s.varname);
                 this.state.value_stack.push(variable.values[index]);
                 return { error: false, result: { action: 'none', done: false } };
@@ -23460,7 +23524,7 @@ var tslib_1 = __webpack_require__(3);
 var Evaluator_1 = __webpack_require__(16);
 var Emitter_js_1 = __webpack_require__(10);
 var interfaces_1 = __webpack_require__(0);
-var helpers_1 = __webpack_require__(2);
+var helpers_1 = __webpack_require__(1);
 var Interpreter = (function (_super) {
     tslib_1.__extends(Interpreter, _super);
     function Interpreter(p) {
@@ -24430,7 +24494,7 @@ function declare_variables(declarations) {
 "use strict";
 
 var interfaces_1 = __webpack_require__(0);
-var helpers_1 = __webpack_require__(2);
+var helpers_1 = __webpack_require__(1);
 function transform(p) {
     var result = {
         entry_point: null,
@@ -24758,7 +24822,7 @@ function transform_read(rc, module_name) {
         /**
          * El type assert es correcto porque esta garantizado por
          * el TypeChecker que los argumentos de un llamado a leer
-         * son todos Invocation. O va a estar garantizado...
+         * son todos Invocation.
          */
         current_var = rc.args[i][0];
         var lcall = new interfaces_1.S3.ReadCall(module_name, current_var.name, current_var.typings.type);
@@ -24890,64 +24954,87 @@ function transform_statement(statement, module_name) {
     }
 }
 function transform_assignment(a, module_name) {
-    /**
-     * Primer enunciado de la evaluacion de la expresion que se debe asignar
-     */
-    var entry_point = transform_expression(a.right, module_name);
-    /**
-     * Este enunciado es el que finalmente pone el valor de la expresion en la
-     * pila. Seguido de este va el enunciado de asignacion.
-     */
-    var last_statement = interfaces_1.S3.get_last(entry_point);
     if (a.left.dimensions.length > 0 && a.left.indexes.length < a.left.dimensions.length) {
         /**
          * Asignacion vectorial: copiar los contenidos de un vector a otro o asignar
          * una cadena a un vector.
          */
-        if (a.typings.left instanceof interfaces_1.Typed.StringType && a.typings.right instanceof interfaces_1.Typed.StringType) {
+        if (a.typings.left instanceof interfaces_1.Typed.StringType && a.typings.right instanceof interfaces_1.Typed.StringType && a.typings.right.represents == 'literal') {
             /**
-             * Asignar una cadena a un vector
+             * Enunciados que apilan la cadena
              */
-            var assignment = new interfaces_1.S3.AssignString(module_name, a.left.name, a.typings.left.length, a.left.indexes.length);
-            last_statement.exit_point = assignment;
-            return entry_point;
+            var stack_string = transform_expression(a.right, module_name);
+            interfaces_1.S3.get_last(stack_string).exit_point = new interfaces_1.S3.AssignString(module_name, a.left.name, a.typings.left.length, a.left.indexes.length);
+            return stack_string;
         }
         else {
             /**
-             * tamaño de las dimensiones cuyos indices van a ir variando
+             * Copiar contenidos de un vector a otro
              */
-            var missing_indexes = helpers_1.drop(a.left.indexes.length, a.left.dimensions);
-            var smallest_index = helpers_1.arr_counter(missing_indexes.length, 1);
-            var first_index = void 0;
-            var last = void 0;
-            for (var i = helpers_1.arr_counter(missing_indexes.length, 1); helpers_1.arr_minor(i, missing_indexes) || helpers_1.arr_equal(i, missing_indexes); helpers_1.arr_counter_inc(i, missing_indexes, 1)) {
-                /**
-                 * Los indices que no fueron proprocionados seran completados con los del
-                 * contador `i`
-                 */
-                var final_indexes = a.left.indexes.concat(i.map(function (index) { return [create_literal_number_exp(index)]; }));
-                for (var j = 0; j < final_indexes.length; j++) {
-                    var index_exp = transform_expression(final_indexes[j], module_name);
-                    /**
-                     * Si esta es la primer iteracion de ambos bucles...
-                     */
-                    if (helpers_1.arr_equal(i, smallest_index) && j == 0) {
-                        first_index = index_exp;
-                    }
-                    else {
-                        last.exit_point = index_exp;
-                    }
-                    last = interfaces_1.S3.get_last(index_exp);
+            /**
+             * Apilar indices del vector que recibe los datos
+             */
+            var entry = null;
+            var last = null;
+            var entry_initd = false;
+            for (var i = 0; i < a.left.indexes.length; i++) {
+                if (i == 0) {
+                    entry = transform_expression(a.left.indexes[i], module_name);
+                    last = interfaces_1.S3.get_last(entry);
+                    entry_initd = true;
                 }
-                var assignment = new interfaces_1.S3.AssignV(module_name, final_indexes.length, a.left.dimensions, a.left.name);
-                last.exit_point = assignment;
-                last = assignment;
+                else {
+                    var next = transform_expression(a.left.indexes[i], module_name);
+                    last.exit_point = next;
+                    last = interfaces_1.S3.get_last(next);
+                }
             }
-            last_statement.exit_point = first_index;
-            return entry_point;
+            /**
+             * Apilar indices del vector del cual se copian los datos
+             * Aclaracion el type assert para a.right es correcto porque ya se verifico
+             * (en TSChecker) que el primer y unico componente de esa expresion sea una
+             * invocacion de un vector.
+             */
+            for (var i = 0; i < a.right[0].indexes.length; i++) {
+                if (!entry_initd) {
+                    entry = transform_expression(a.right[0].indexes[i], module_name);
+                    last = interfaces_1.S3.get_last(entry);
+                }
+                else {
+                    var next = transform_expression(a.right[0].indexes[i], module_name);
+                    last.exit_point = next;
+                    last = interfaces_1.S3.get_last(next);
+                }
+            }
+            var target = {
+                name: a.left.name,
+                dimensions: a.left.dimensions,
+                indexes: a.left.indexes.length
+            };
+            var source = {
+                name: a.right[0].name,
+                dimensions: a.right[0].dimensions,
+                indexes: a.right[0].indexes.length
+            };
+            var copy_statement = new interfaces_1.S3.CopyVec(module_name, target, source);
+            if (!entry_initd) {
+                return copy_statement;
+            }
+            else {
+                last.exit_point = copy_statement;
+                return entry;
+            }
         }
     }
     else {
+        /**
+         * Primer enunciado de la evaluacion de la expresion que se debe asignar
+         */
+        var entry_point = transform_expression(a.right, module_name);
+        /**
+         * Ultimo enunciado de evaluacion de la expresion
+         */
+        var last_statement = interfaces_1.S3.get_last(entry_point);
         /**
          * Asignacion normal: hay que copiar un valor a una variable (o una celda de un vector).
          * Para hacer eso hay que poner la expresion que se va a asignar en la pila y luego hacer
@@ -25039,13 +25126,9 @@ function transform_invocation(i, module_name) {
 function transform_literal(l, module_name) {
     if (l.typings.type instanceof interfaces_1.Typed.StringType) {
         var length = l.typings.type.length;
-        /**
-         * Apilar la cadena de atras para adelante para que cuando
-         * sea asignada a un vector aparezca en el orden correcto.
-         */
         var first = new interfaces_1.S3.Push(module_name, '\0');
         var last = first;
-        for (var i = length - 1; i >= 0; i--) {
+        for (var i = 0; i < length; i++) {
             var next = new interfaces_1.S3.Push(module_name, l.value[i]);
             last.exit_point = next;
             last = next;
@@ -25125,7 +25208,7 @@ function transform_exp_element(element, module_name) {
 "use strict";
 
 var interfaces_1 = __webpack_require__(0);
-var helpers_1 = __webpack_require__(2);
+var helpers_1 = __webpack_require__(1);
 function transform(ast) {
     var errors = [];
     var typed_program = {
@@ -26066,6 +26149,8 @@ function procesar_enunciado(e, nivel) {
             return repetir(' ', nivel * espacios) + "ASIGNAR CADENA " + e.varname + " " + e.length + " " + e.indexes;
         case interfaces_1.S3.StatementKinds.Alias:
             return repetir(' ', nivel * espacios) + "ALIAS " + e.varname + " " + e.var_indexes + " " + e.dimensions + " " + e.local_alias;
+        case interfaces_1.S3.StatementKinds.CopyVec:
+            return repetir(' ', nivel * espacios) + "CPYVEC " + e.target.name + " " + e.target.dimensions + " " + e.target.indexes + " " + e.source.name + " " + e.source.dimensions + " " + e.source.indexes;
     }
 }
 function procesar_si(e, nivel) {
@@ -26192,7 +26277,7 @@ exports.default = Emitter;
 
 "use strict";
 
-var $ = __webpack_require__(1);
+var $ = __webpack_require__(2);
 var Prompt = (function () {
     function Prompt(container, i) {
         var _this = this;
@@ -26451,7 +26536,7 @@ var templates = {
 "use strict";
 
 var CodeMirror = __webpack_require__(12);
-var $ = __webpack_require__(1);
+var $ = __webpack_require__(2);
 var interprete_pl_1 = __webpack_require__(4);
 var StatusBar_1 = __webpack_require__(14);
 var MessagePanel_1 = __webpack_require__(13);
