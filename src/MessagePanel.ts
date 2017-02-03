@@ -26,7 +26,7 @@ export default class MessagePanel {
 
         const template = get_template(data)
         
-        const title = $(`<pre class="title small-title error-title">${template.title}</pre>`)
+        const title = $(`<div class="title small-title error-title">${template.title}</div>`)
 
         title_bar.append(title)
 

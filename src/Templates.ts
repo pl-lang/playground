@@ -78,7 +78,7 @@ function style(s: string): string {
 
             switch (styles[i].name) {
                 case 'code':
-                    styled_content = `<span class="code">${styles[i].content}</span>`
+                    styled_content = `<code class="code">${styles[i].content}</code>`
                     break
             }
 
@@ -163,7 +163,7 @@ const templates: { default: Template, [t: string]: Template } = {
     default: { title: 'Tu programa contiene un error: $code{@where::@reason}' },
 
     '@assignment-incompatible-types': {
-        title: 'Se intento asignar un valor de tipo $code{@received} a una variable de tipo $code{@expected}.',
+        title: 'Se intentó asignar un valor de tipo $code{@received} a una variable de tipo $code{@expected}.',
         description: 'Las variables de tipo $code{@expected} no pueden contener datos de tipo $code{@received}.',
         suggestion: 'Deberias cambiar el tipo de la variable o cambiar el valor que quieres asignarle.'
     },
@@ -254,5 +254,23 @@ const templates: { default: Template, [t: string]: Template } = {
         title: 'Se utilizó un índice del tipo equivocado',
         description: 'Se invocó un arreglo con un índice de tipo $code{@received}.',
         suggestion: 'Todos los índices de un arreglo deben ser de tipo $code{entero}.'
+    },
+
+    '@read-bad-arg': {
+        title: 'Argumento invalido en una llamada a $code{leer}',
+        description: 'Este error ocurrió porque el argumento número @index de una llamada a $code{leer} no representa a una variable si no a un valor literal.',
+        suggestion: 'Todos los argumentos de las llamadas a $code{leer} deben representar a una variable, a una cadena, o a una celda de un vector.'
+    },
+
+    '@call-bad-ref-arg': {
+        title: 'En una llamada a $code{@module}: se recibió un valor literal en lugar de una variable',
+        description: 'Este error ocurrió porque el argumento número @index de una llamada a $code{@module} no representa a una variable si no a un valor literal. El parametro $code{@param_name} del módulo esperaba recibir una variable de tipo $code{@param_expected}.',
+        suggestion: 'El argumento enviado a este parámetro tomado por referencia debe representar a un variable del tipo $code{@param_expected}.'
+    },
+
+    'bad-write-arg': {
+        title: 'En una llamada a $code{@name}: se recibió un valor que no se puede mostrar.',
+        description: 'Este error ocurrió porque el argumento número @index de una llamada a $code{@name} no representa un valor que se pueda mostrar en la pantalla. Los tipos de datos que pueden mostrarse son: $code{entero} $code{logico} $code{caracter} $code{real} $code{caracter[n]} (donde $code{n} es un numero entero).',
+        suggestion: 'Cuando llamas a $code{@name} asegura te pasarle argumentos de alguno de los tipos soportados.'
     }
 }
