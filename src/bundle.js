@@ -193,7 +193,8 @@ var S3;
         StatementKinds[StatementKinds["Alias"] = 31] = "Alias";
     })(StatementKinds = S3.StatementKinds || (S3.StatementKinds = {}));
     var BaseStatement = (function () {
-        function BaseStatement() {
+        function BaseStatement(owner) {
+            this.owner = owner;
             this._exit_point = null;
             this.exit_set = false;
         }
@@ -218,8 +219,8 @@ var S3;
     S3.BaseStatement = BaseStatement;
     var Alias = (function (_super) {
         tslib_1.__extends(Alias, _super);
-        function Alias(varname, indexes, dimensions, alias, module_name) {
-            var _this = _super.call(this) || this;
+        function Alias(owner, varname, indexes, dimensions, alias, module_name) {
+            var _this = _super.call(this, owner) || this;
             _this.kind = StatementKinds.Alias;
             _this.varname = varname;
             _this.var_indexes = indexes;
@@ -233,8 +234,8 @@ var S3;
     S3.Alias = Alias;
     var AssignString = (function (_super) {
         tslib_1.__extends(AssignString, _super);
-        function AssignString(varname, length, indexes) {
-            var _this = _super.call(this) || this;
+        function AssignString(owner, varname, length, indexes) {
+            var _this = _super.call(this, owner) || this;
             _this.kind = StatementKinds.AssignString;
             _this.varname = varname;
             _this.length = length;
@@ -246,8 +247,8 @@ var S3;
     S3.AssignString = AssignString;
     var Concat = (function (_super) {
         tslib_1.__extends(Concat, _super);
-        function Concat(length) {
-            var _this = _super.call(this) || this;
+        function Concat(owner, length) {
+            var _this = _super.call(this, owner) || this;
             _this.kind = StatementKinds.Concat;
             _this.length = length;
             return _this;
@@ -257,8 +258,8 @@ var S3;
     S3.Concat = Concat;
     var Return = (function (_super) {
         tslib_1.__extends(Return, _super);
-        function Return() {
-            var _this = _super.call(this) || this;
+        function Return(owner) {
+            var _this = _super.call(this, owner) || this;
             _this.kind = StatementKinds.Return;
             return _this;
         }
@@ -267,8 +268,8 @@ var S3;
     S3.Return = Return;
     var UserModuleCall = (function (_super) {
         tslib_1.__extends(UserModuleCall, _super);
-        function UserModuleCall(name, total_args) {
-            var _this = _super.call(this) || this;
+        function UserModuleCall(owner, name, total_args) {
+            var _this = _super.call(this, owner) || this;
             _this.name = name;
             _this.total_args = total_args;
             _this.kind = StatementKinds.UserModuleCall;
@@ -279,8 +280,8 @@ var S3;
     S3.UserModuleCall = UserModuleCall;
     var ReadCall = (function (_super) {
         tslib_1.__extends(ReadCall, _super);
-        function ReadCall(varname, type) {
-            var _this = _super.call(this) || this;
+        function ReadCall(owner, varname, type) {
+            var _this = _super.call(this, owner) || this;
             _this.varname = varname;
             _this.kind = StatementKinds.ReadCall;
             _this.name = 'leer';
@@ -292,8 +293,8 @@ var S3;
     S3.ReadCall = ReadCall;
     var WriteCall = (function (_super) {
         tslib_1.__extends(WriteCall, _super);
-        function WriteCall() {
-            var _this = _super.call(this) || this;
+        function WriteCall(owner) {
+            var _this = _super.call(this, owner) || this;
             _this.kind = StatementKinds.WriteCall;
             _this.name = 'escribir';
             return _this;
@@ -303,8 +304,8 @@ var S3;
     S3.WriteCall = WriteCall;
     var Assign = (function (_super) {
         tslib_1.__extends(Assign, _super);
-        function Assign(varname) {
-            var _this = _super.call(this) || this;
+        function Assign(owner, varname) {
+            var _this = _super.call(this, owner) || this;
             _this.varname = varname;
             _this.kind = StatementKinds.Assign;
             return _this;
@@ -314,8 +315,8 @@ var S3;
     S3.Assign = Assign;
     var AssignV = (function (_super) {
         tslib_1.__extends(AssignV, _super);
-        function AssignV(total_indexes, dimensions, varname) {
-            var _this = _super.call(this) || this;
+        function AssignV(owner, total_indexes, dimensions, varname) {
+            var _this = _super.call(this, owner) || this;
             _this.total_indexes = total_indexes;
             _this.dimensions = dimensions;
             _this.varname = varname;
@@ -327,8 +328,8 @@ var S3;
     S3.AssignV = AssignV;
     var Get = (function (_super) {
         tslib_1.__extends(Get, _super);
-        function Get(varname) {
-            var _this = _super.call(this) || this;
+        function Get(owner, varname) {
+            var _this = _super.call(this, owner) || this;
             _this.varname = varname;
             _this.kind = StatementKinds.Get;
             return _this;
@@ -338,8 +339,8 @@ var S3;
     S3.Get = Get;
     var GetV = (function (_super) {
         tslib_1.__extends(GetV, _super);
-        function GetV(total_indexes, dimensions, varname) {
-            var _this = _super.call(this) || this;
+        function GetV(owner, total_indexes, dimensions, varname) {
+            var _this = _super.call(this, owner) || this;
             _this.total_indexes = total_indexes;
             _this.dimensions = dimensions;
             _this.varname = varname;
@@ -351,8 +352,8 @@ var S3;
     S3.GetV = GetV;
     var Push = (function (_super) {
         tslib_1.__extends(Push, _super);
-        function Push(value) {
-            var _this = _super.call(this) || this;
+        function Push(owner, value) {
+            var _this = _super.call(this, owner) || this;
             _this.value = value;
             _this.kind = StatementKinds.Push;
             return _this;
@@ -362,8 +363,8 @@ var S3;
     S3.Push = Push;
     var Pop = (function (_super) {
         tslib_1.__extends(Pop, _super);
-        function Pop() {
-            var _this = _super.call(this) || this;
+        function Pop(owner) {
+            var _this = _super.call(this, owner) || this;
             _this.kind = StatementKinds.Pop;
             return _this;
         }
@@ -372,8 +373,8 @@ var S3;
     S3.Pop = Pop;
     var Operation = (function (_super) {
         tslib_1.__extends(Operation, _super);
-        function Operation(kind) {
-            var _this = _super.call(this) || this;
+        function Operation(owner, kind) {
+            var _this = _super.call(this, owner) || this;
             _this.kind = kind;
             return _this;
         }
@@ -382,8 +383,8 @@ var S3;
     S3.Operation = Operation;
     var While = (function (_super) {
         tslib_1.__extends(While, _super);
-        function While(entry_point) {
-            var _this = _super.call(this) || this;
+        function While(owner, entry_point) {
+            var _this = _super.call(this, owner) || this;
             _this.entry_point = entry_point;
             _this.kind = StatementKinds.While;
             return _this;
@@ -393,8 +394,8 @@ var S3;
     S3.While = While;
     var Until = (function (_super) {
         tslib_1.__extends(Until, _super);
-        function Until(entry_point) {
-            var _this = _super.call(this) || this;
+        function Until(owner, entry_point) {
+            var _this = _super.call(this, owner) || this;
             _this.entry_point = entry_point;
             _this.kind = StatementKinds.Until;
             return _this;
@@ -404,8 +405,8 @@ var S3;
     S3.Until = Until;
     var If = (function (_super) {
         tslib_1.__extends(If, _super);
-        function If(true_branch_entry, false_branch_entry) {
-            var _this = _super.call(this) || this;
+        function If(owner, true_branch_entry, false_branch_entry) {
+            var _this = _super.call(this, owner) || this;
             _this.true_branch_entry = true_branch_entry;
             _this.false_branch_entry = false_branch_entry;
             _this.kind = StatementKinds.If;
@@ -441,28 +442,30 @@ var S3;
 var Typed;
 (function (Typed) {
     var ArrayType = (function () {
-        function ArrayType(element_type, length) {
+        function ArrayType(represents, element_type, length) {
             this.kind = 'array';
             this.type = 'type';
             this.length = length;
             this.cell_type = element_type;
+            this.represents = represents;
         }
         return ArrayType;
     }());
     Typed.ArrayType = ArrayType;
     var AtomicType = (function () {
-        function AtomicType(tn) {
+        function AtomicType(represents, tn) {
             this.kind = 'atomic';
             this.type = 'type';
             this.typename = tn;
+            this.represents = represents;
         }
         return AtomicType;
     }());
     Typed.AtomicType = AtomicType;
     var StringType = (function (_super) {
         tslib_1.__extends(StringType, _super);
-        function StringType(length) {
-            return _super.call(this, new AtomicType('caracter'), length) || this;
+        function StringType(length, represents) {
+            return _super.call(this, represents, new AtomicType(represents, 'caracter'), length) || this;
         }
         return StringType;
     }(ArrayType));
@@ -10930,13 +10933,13 @@ function type_literal(l) {
     var datatype;
     switch (typeof l.value) {
         case 'boolean':
-            datatype = new interfaces_1.Typed.AtomicType('logico');
+            datatype = new interfaces_1.Typed.AtomicType('literal', 'logico');
             break;
         case 'string':
-            datatype = l.value.length > 1 ? new interfaces_1.Typed.StringType(l.value.length) : new interfaces_1.Typed.AtomicType('caracter');
+            datatype = l.value.length > 1 ? new interfaces_1.Typed.StringType(l.value.length, 'literal') : new interfaces_1.Typed.AtomicType('literal', 'caracter');
             break;
         case 'number': {
-            datatype = l.value - Math.trunc(l.value) > 0 ? new interfaces_1.Typed.AtomicType('real') : new interfaces_1.Typed.AtomicType('entero');
+            datatype = l.value - Math.trunc(l.value) > 0 ? new interfaces_1.Typed.AtomicType('literal', 'real') : new interfaces_1.Typed.AtomicType('literal', 'entero');
             break;
         }
     }
@@ -12251,17 +12254,22 @@ function FunctionModule(source) {
     for (var _i = 0, _a = parameters.result; _i < _a.length; _i++) {
         var par = _a[_i];
         /**
-         * Extraer las propiedades del parametro que son necesarias
-         * para crear la variable
+         * Crear declaraciones para todos los parametros que no se toman por referencia
          */
-        var name_1 = par.name;
-        var is_array = par.is_array;
-        var dimensions = par.dimensions;
-        var type = par.type;
-        /**
-         * Meter los datos de la variable en el arreglo del enunciado de declaracion.
-         */
-        par_declaration.variables.push({ name: name_1, is_array: is_array, dimensions: dimensions, datatype: type });
+        if (!par.by_ref) {
+            /**
+             * Extraer las propiedades del parametro que son necesarias
+             * para crear la variable
+             */
+            var name_1 = par.name;
+            var is_array = par.is_array;
+            var dimensions = par.dimensions;
+            var type = par.type;
+            /**
+             * Meter los datos de la variable en el arreglo del enunciado de declaracion.
+             */
+            par_declaration.variables.push({ name: name_1, is_array: is_array, dimensions: dimensions, datatype: type });
+        }
     }
     if (source.current().kind != interfaces_1.SymbolKind.RightPar)
         return UnexpectedTokenReport(source.current(), [')'], 'missing-right-par');
@@ -12333,17 +12341,22 @@ function ProcedureModule(source) {
     for (var _i = 0, _a = parameters.result; _i < _a.length; _i++) {
         var par = _a[_i];
         /**
-         * Extraer las propiedades del parametro que son necesarias
-         * para crear la variable
+         * Crear declaraciones para todos los parametros que no se toman por referencia
          */
-        var name_2 = par.name;
-        var is_array = par.is_array;
-        var dimensions = par.dimensions;
-        var type = par.type;
-        /**
-         * Meter los datos de la variable en el arreglo del enunciado de declaracion.
-         */
-        par_declaration.variables.push({ name: name_2, is_array: is_array, dimensions: dimensions, datatype: type });
+        if (!par.by_ref) {
+            /**
+             * Extraer las propiedades del parametro que son necesarias
+             * para crear la variable
+             */
+            var name_2 = par.name;
+            var is_array = par.is_array;
+            var dimensions = par.dimensions;
+            var type = par.type;
+            /**
+             * Meter los datos de la variable en el arreglo del enunciado de declaracion.
+             */
+            par_declaration.variables.push({ name: name_2, is_array: is_array, dimensions: dimensions, datatype: type });
+        }
     }
     if (source.current().kind != interfaces_1.SymbolKind.RightPar)
         return UnexpectedTokenReport(source.current(), [')'], 'missing-right-par');
@@ -13071,7 +13084,7 @@ function check_statement(s) {
 }
 function check_simple_loop(l) {
     var errors = [];
-    if (!helpers_1.types_are_equal(l.typings.condition, new interfaces_1.Typed.AtomicType('logico'))) {
+    if (!helpers_1.types_are_equal(l.typings.condition, new interfaces_1.Typed.AtomicType('literal', 'logico'))) {
         var error = {
             reason: 'bad-condition',
             where: 'typechecker',
@@ -13094,7 +13107,7 @@ function check_for(f) {
     if (init_report.length > 0) {
         errors = errors.concat(init_report);
     }
-    if (!helpers_1.types_are_equal(f.counter_init.typings.left, new interfaces_1.Typed.AtomicType('entero'))) {
+    if (!helpers_1.types_are_equal(f.counter_init.typings.left, new interfaces_1.Typed.AtomicType('literal', 'entero'))) {
         var error = {
             reason: '@for-bad-counter',
             where: 'typechecker',
@@ -13102,7 +13115,7 @@ function check_for(f) {
         };
         errors.push(error);
     }
-    if (!helpers_1.types_are_equal(f.typings.init_value, new interfaces_1.Typed.AtomicType('entero'))) {
+    if (!helpers_1.types_are_equal(f.typings.init_value, new interfaces_1.Typed.AtomicType('literal', 'entero'))) {
         var error = {
             reason: '@for-bad-init',
             where: 'typechecker',
@@ -13110,7 +13123,7 @@ function check_for(f) {
         };
         errors.push(error);
     }
-    if (!helpers_1.types_are_equal(f.typings.last_value, new interfaces_1.Typed.AtomicType('entero'))) {
+    if (!helpers_1.types_are_equal(f.typings.last_value, new interfaces_1.Typed.AtomicType('literal', 'entero'))) {
         var error = {
             reason: '@for-bad-last',
             where: 'typechecker',
@@ -13142,7 +13155,7 @@ function check_return(r) {
 }
 function check_if(i) {
     var errors = [];
-    if (!helpers_1.types_are_equal(i.typings.condition, new interfaces_1.Typed.AtomicType('logico'))) {
+    if (!helpers_1.types_are_equal(i.typings.condition, new interfaces_1.Typed.AtomicType('literal', 'logico'))) {
         var error = {
             reason: 'bad-condition',
             where: 'typechecker',
@@ -13204,19 +13217,56 @@ function check_call(c) {
              * que la variable a la cual se asigna, a menos que la
              * expresion sea de tipo entero y la variable de tipo real.
              */
-            var param = c.typings.parameters[arg.index];
-            var cond_a = param.kind == 'atomic' || arg.type.kind == 'atomic';
-            var cond_b = param.typename == 'real' && arg.type.typename == 'entero';
-            if (!(helpers_1.types_are_equal(arg.type, param) || (cond_a && cond_b))) {
+            var param_type = c.typings.parameters[arg.index];
+            var param = c.parameters[arg.index];
+            var cond_a = param_type.kind == 'atomic' || arg.type.kind == 'atomic';
+            var cond_b = param_type.typename == 'real' && arg.type.typename == 'entero';
+            if (!(helpers_1.types_are_equal(arg.type, param_type) || (cond_a && cond_b))) {
                 var error = {
                     reason: '@call-incompatible-argument',
                     name: c.name,
                     where: 'typechecker',
-                    expected: helpers_1.stringify(param),
+                    expected: helpers_1.stringify(param_type),
                     received: helpers_1.stringify(arg.type),
                     index: arg.index + 1
                 };
                 errors.push(error);
+            }
+            /**
+             * Si el parametro se toma por referencia hay que revisar que este recibiendo como argumento
+             * la invocacion de una variable/arreglo
+             */
+            if (param.by_ref) {
+                if (arg.type.represents != 'invocation') {
+                    /**
+                     * ERROR: se esta recibiendo un valor literal en un parametro por referencia
+                     */
+                    var error = {
+                        reason: '@call-bad-ref-arg',
+                        where: 'typechecker',
+                        /**
+                         * Tipo del parametro en cuestion
+                         */
+                        param_expected: helpers_1.stringify(param_type),
+                        /**
+                         * Nombre del parametro en cuestion
+                         */
+                        param_name: param.name,
+                        /**
+                         * Nombre del modulo al que pertenece
+                         */
+                        module: c.name,
+                        /**
+                         * Tipo del valor literal recibido como argumento
+                         */
+                        received: helpers_1.stringify(arg.type),
+                        /**
+                         * Indice (en la lista de parametros del modulo)
+                         */
+                        index: arg.index,
+                    };
+                    errors.push(error);
+                }
             }
         }
         if (errors.length > 0) {
@@ -13245,9 +13295,18 @@ function check_io(c) {
         if (cond_a || cond_b) {
             var e = {
                 index: i,
-                reason: 'bad-io-argument',
+                reason: 'bad-write-arg',
                 received: helpers_1.stringify(type),
-                where: 'typechecker'
+                where: 'typechecker',
+                name: c.name
+            };
+            errors.push(e);
+        }
+        else if (c.name == 'leer' && type.represents != 'invocation') {
+            var e = {
+                reason: '@read-bad-arg',
+                where: 'typechecker',
+                index: i
             };
             errors.push(e);
         }
@@ -13256,7 +13315,7 @@ function check_io(c) {
         return { error: true, result: errors };
     }
     else {
-        return { error: false, result: new interfaces_1.Typed.AtomicType('ninguno') };
+        return { error: false, result: new interfaces_1.Typed.AtomicType('literal', 'ninguno') };
     }
 }
 function check_assignment(a) {
@@ -13311,7 +13370,7 @@ function check_assignment(a) {
  */
 function check_invocation(i) {
     var errors = [];
-    var entero = new interfaces_1.Typed.AtomicType('entero');
+    var entero = new interfaces_1.Typed.AtomicType('literal', 'entero');
     var j = 0;
     for (var _i = 0, _a = i.typings.indexes; _i < _a.length; _i++) {
         var index_type = _a[_i];
@@ -22564,7 +22623,7 @@ var MessagePanel = (function () {
         message.on('click', function (ev) { ev.stopPropagation(); });
         var title_bar = $("<div class=\"bar flex-row space-between center-align error-bar\"></div>");
         var template = Templates_1.default(data);
-        var title = $("<pre class=\"title small-title error-title\">" + template.title + "</pre>");
+        var title = $("<div class=\"title small-title error-title\">" + template.title + "</div>");
         title_bar.append(title);
         message.append(title_bar);
         if ('description' in template || 'suggestion' in template) {
@@ -22916,10 +22975,10 @@ var Evaluator = (function () {
                 return this.alias(s);
         }
     };
-    Evaluator.prototype.has_alias = function (name) {
+    Evaluator.prototype.has_alias = function (name, module_name) {
         for (var _i = 0, _a = this.aliases; _i < _a.length; _i++) {
             var alias = _a[_i];
-            if (alias.local_name == name) {
+            if (alias.local_name == name && alias.module == module_name) {
                 return { error: false, result: alias };
             }
         }
@@ -22995,7 +23054,7 @@ var Evaluator = (function () {
         return { error: false, result: { action: 'none', done: this.state.done } };
     };
     Evaluator.prototype.assign = function (s) {
-        var alias_found = this.has_alias(s.varname);
+        var alias_found = this.has_alias(s.varname, s.owner);
         /**
          * Si no hay alias esta es una asignacion normal
          */
@@ -23020,7 +23079,7 @@ var Evaluator = (function () {
         }
     };
     Evaluator.prototype.get_value = function (s) {
-        var alias_found = this.has_alias(s.varname);
+        var alias_found = this.has_alias(s.varname, s.owner);
         /**
          * Si no hay alias solo hay que apilar el valor de la variable
          */
@@ -23045,59 +23104,119 @@ var Evaluator = (function () {
         }
     };
     Evaluator.prototype.assignv = function (s) {
-        var indexes = this.pop_indexes(s.total_indexes);
-        if (this.is_whithin_bounds(indexes, s.dimensions)) {
-            /**
-             * Calcular indice final y asignar el valor a la variable.
-             *
-             * Nota: hay que restarle 1 a cada indice para que inicien en 0
-             * (como los indices de JS) y no en 1
-             */
-            var index = this.calculate_index(indexes.map(function (i) { return i - 1; }), s.dimensions);
-            var value = this.state.value_stack.pop();
-            var variable = this.get_var(s.varname);
-            variable.values[index] = value;
-            return { error: false, result: { action: 'none', done: false } };
+        var alias_found = this.has_alias(s.varname, s.owner);
+        if (alias_found.error) {
+            var indexes = this.pop_indexes(s.total_indexes);
+            if (this.is_whithin_bounds(indexes, s.dimensions)) {
+                /**
+                 * Calcular indice final y asignar el valor a la variable.
+                 *
+                 * Nota: hay que restarle 1 a cada indice para que inicien en 0
+                 * (como los indices de JS) y no en 1
+                 */
+                var index = this.calculate_index(indexes.map(function (i) { return i - 1; }), s.dimensions);
+                var value = this.state.value_stack.pop();
+                var variable = this.get_var(s.varname);
+                variable.values[index] = value;
+                return { error: false, result: { action: 'none', done: false } };
+            }
+            else {
+                var bad_index = this.get_bad_index(indexes, s.dimensions);
+                var result = {
+                    bad_index: bad_index,
+                    dimensions: s.dimensions,
+                    name: s.varname,
+                    reason: 'index-out-of-bounds',
+                    where: 'evaluator',
+                    done: true
+                };
+                return { error: true, result: result };
+            }
         }
         else {
-            var bad_index = this.get_bad_index(indexes, s.dimensions);
-            var result = {
-                bad_index: bad_index,
-                dimensions: s.dimensions,
-                name: s.varname,
-                reason: 'index-out-of-bounds',
-                where: 'evaluator',
-                done: true
-            };
-            return { error: true, result: result };
+            var alias = alias_found.result;
+            /**
+             * Los indices usados para asignar el valor al alias (al parametro tomado por referencia)
+             */
+            var partial_indexes = this.pop_indexes(s.total_indexes);
+            var indexes = alias.indexes.concat(partial_indexes);
+            var dimensions = alias.dimensions;
+            if (this.is_whithin_bounds(indexes, dimensions)) {
+                var index = this.calculate_index(indexes.map(function (i) { return i - 1; }), dimensions);
+                var variable = this.get_var(alias.varname);
+                variable.values[index] = this.state.value_stack.pop();
+                return { error: false, result: { action: 'none', done: false } };
+            }
+            else {
+                var bad_index = this.get_bad_index(partial_indexes, s.dimensions);
+                var result = {
+                    bad_index: bad_index,
+                    dimensions: s.dimensions,
+                    name: s.varname,
+                    reason: 'index-out-of-bounds',
+                    where: 'evaluator',
+                    done: true
+                };
+                return { error: true, result: result };
+            }
         }
     };
     Evaluator.prototype.getv_value = function (s) {
-        var indexes = this.pop_indexes(s.total_indexes);
-        if (this.is_whithin_bounds(indexes, s.dimensions)) {
-            /**
-             * Calcular indice final y apilar el valor de la variable.
-             *
-             * Nota: hay que restarle 1 a cada indice para que inicien en 0
-             * (como los indices de JS) y no en 1
-             */
-            var index = this.calculate_index(indexes.map(function (i) { return i - 1; }), s.dimensions);
-            var variable = this.get_var(s.varname);
-            var value = variable.values[index];
-            this.state.value_stack.push(value);
-            return { error: false, result: { action: 'none', done: false } };
+        var alias_found = this.has_alias(s.varname, s.owner);
+        if (alias_found.error) {
+            var indexes = this.pop_indexes(s.total_indexes);
+            if (this.is_whithin_bounds(indexes, s.dimensions)) {
+                /**
+                 * Calcular indice final y asignar el valor a la variable.
+                 *
+                 * Nota: hay que restarle 1 a cada indice para que inicien en 0
+                 * (como los indices de JS) y no en 1
+                 */
+                var index = this.calculate_index(indexes.map(function (i) { return i - 1; }), s.dimensions);
+                var value = this.state.value_stack.pop();
+                var variable = this.get_var(s.varname);
+                this.state.value_stack.push(variable.values[index]);
+                return { error: false, result: { action: 'none', done: false } };
+            }
+            else {
+                var bad_index = this.get_bad_index(indexes, s.dimensions);
+                var result = {
+                    bad_index: bad_index,
+                    dimensions: s.dimensions,
+                    name: s.varname,
+                    reason: 'index-out-of-bounds',
+                    where: 'evaluator',
+                    done: true
+                };
+                return { error: true, result: result };
+            }
         }
         else {
-            var bad_index = this.get_bad_index(indexes, s.dimensions);
-            var result = {
-                bad_index: bad_index,
-                dimensions: s.dimensions,
-                name: s.varname,
-                reason: 'index-out-of-bounds',
-                where: 'evaluator',
-                done: true
-            };
-            return { error: true, result: result };
+            var alias = alias_found.result;
+            /**
+             * Los indices usados para asignar el valor al alias (al parametro tomado por referencia)
+             */
+            var partial_indexes = this.pop_indexes(s.total_indexes);
+            var indexes = alias.indexes.concat(partial_indexes);
+            var dimensions = alias.dimensions;
+            if (this.is_whithin_bounds(indexes, dimensions)) {
+                var index = this.calculate_index(indexes.map(function (i) { return i - 1; }), dimensions);
+                var variable = this.get_var(alias.varname);
+                this.state.value_stack.push(variable.values[index]);
+                return { error: false, result: { action: 'none', done: false } };
+            }
+            else {
+                var bad_index = this.get_bad_index(partial_indexes, s.dimensions);
+                var result = {
+                    bad_index: bad_index,
+                    dimensions: s.dimensions,
+                    name: s.varname,
+                    reason: 'index-out-of-bounds',
+                    where: 'evaluator',
+                    done: true
+                };
+                return { error: true, result: result };
+            }
         }
     };
     Evaluator.prototype.get_bad_index = function (indexes, dimensions) {
@@ -24331,7 +24450,7 @@ function transform(p) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = transform;
 function transform_main(old_module) {
-    return transform_body(old_module.body);
+    return transform_body(old_module.body, 'main');
 }
 function transform_module(old_module, current_module) {
     /**
@@ -24365,15 +24484,19 @@ function transform_module(old_module, current_module) {
                 type: 'invocation',
                 typings: {
                     indexes: [],
-                    type: new interfaces_1.Typed.AtomicType('ninguno')
+                    /**
+                     * este tipo no sirve para nada, esta aca solo para cumplir
+                     * con la interfaz
+                     */
+                    type: new interfaces_1.Typed.AtomicType('literal', 'ninguno')
                 }
             };
             var assignment = null;
             if (param.type instanceof interfaces_1.Typed.StringType) {
-                assignment = new interfaces_1.S3.AssignString(param.name, param.type.length, 0);
+                assignment = new interfaces_1.S3.AssignString(current_module, param.name, param.type.length, 0);
             }
             else {
-                assignment = create_assignment(fake_inv);
+                assignment = create_assignment(fake_inv, current_module);
             }
             if (i == old_module.parameters.length - 1) {
                 first_statement_initialized = true;
@@ -24385,7 +24508,7 @@ function transform_module(old_module, current_module) {
             last_statement = interfaces_1.S3.get_last(assignment);
         }
     }
-    var body_entry = transform_body(old_module.body);
+    var body_entry = transform_body(old_module.body, current_module);
     /**
      * Punto de entrada (primer enunciado) del modulo
      */
@@ -24407,54 +24530,54 @@ function transform_module(old_module, current_module) {
     };
     return new_module;
 }
-function transform_if(statement) {
+function transform_if(statement, module_name) {
     /**
      * La condicion del if debe insertarse antes del propio if
      */
-    var entry = transform_expression(statement.condition);
+    var entry = transform_expression(statement.condition, module_name);
     /**
      * Ultimo enunciado de la condicion del if
      */
     var last_statement = interfaces_1.S3.get_last(entry);
-    var true_entry = transform_body(statement.true_branch);
-    var false_entry = transform_body(statement.false_branch);
-    var sif = new interfaces_1.S3.If(true_entry, false_entry);
+    var true_entry = transform_body(statement.true_branch, module_name);
+    var false_entry = transform_body(statement.false_branch, module_name);
+    var sif = new interfaces_1.S3.If(module_name, true_entry, false_entry);
     /**
      * Hacer que la evaluacion de la condicion venga seguida del if
      */
     last_statement.exit_point = sif;
     return entry;
 }
-function transform_while(statement) {
+function transform_while(statement, module_name) {
     /**
      * condicion
      * bucle
      * condicion
      */
-    var condition_entry = transform_expression(statement.condition);
+    var condition_entry = transform_expression(statement.condition, module_name);
     var cond_last_st = interfaces_1.S3.get_last(condition_entry);
-    var loop_body = transform_body(statement.body);
+    var loop_body = transform_body(statement.body, module_name);
     var body_last_st = interfaces_1.S3.get_last(loop_body);
-    var swhile = new interfaces_1.S3.While(loop_body);
+    var swhile = new interfaces_1.S3.While(module_name, loop_body);
     cond_last_st.exit_point = swhile;
     body_last_st.exit_point = condition_entry;
     return condition_entry;
 }
-function transform_until(statement) {
-    var body = transform_body(statement.body);
+function transform_until(statement, module_name) {
+    var body = transform_body(statement.body, module_name);
     var body_last_st = interfaces_1.S3.get_last(body);
-    var condition = transform_expression(statement.condition);
+    var condition = transform_expression(statement.condition, module_name);
     /**
      * La condicion del bucle se evalua luego del ultimo enunciado
      * que este contiene.
      */
     body_last_st.exit_point = condition;
     var last_st_condition = interfaces_1.S3.get_last(condition);
-    var suntil = new interfaces_1.S3.Until(body);
+    var suntil = new interfaces_1.S3.Until(module_name, body);
     last_st_condition.exit_point = suntil;
     return body;
 }
-function transform_for(statement) {
+function transform_for(statement, module_name) {
     /**
      * Los bucles para tienen la siguiente estructura
      *
@@ -24475,7 +24598,7 @@ function transform_for(statement) {
     /**
      * Este es el enunciado de asignacion que inicializa el contador.
      */
-    var init = transform_assignment(statement.counter_init);
+    var init = transform_assignment(statement.counter_init, module_name);
     var init_last = interfaces_1.S3.get_last(init);
     /**
      * Ese debe engancharse con la condicion del while.
@@ -24483,12 +24606,12 @@ function transform_for(statement) {
      */
     var left = statement.counter_init.left;
     var condition_exp = [left].concat(statement.last_value, [{ type: 'operator', name: 'minor-eq' }]);
-    var condition_entry = transform_expression(condition_exp);
+    var condition_entry = transform_expression(condition_exp, module_name);
     var conditon_last = interfaces_1.S3.get_last(condition_entry);
     /**
      * A la evaluacion de la condicion le sigue el cuerpo del bucle
      */
-    var body = transform_body(statement.body);
+    var body = transform_body(statement.body, module_name);
     var body_last = interfaces_1.S3.get_last(body);
     /**
      * Y al cuerpo del bucle le sigue el incremento del contador
@@ -24510,7 +24633,7 @@ function transform_for(statement) {
     /**
      * Ahora ese enunciado de S2 debe convertirse en uno de Program
      */
-    var incremement_entry = transform_assignment(assingment);
+    var incremement_entry = transform_assignment(assingment, module_name);
     var increment_last = interfaces_1.S3.get_last(incremement_entry);
     /**
      * Y ahora hay que enganchar todo:
@@ -24521,14 +24644,14 @@ function transform_for(statement) {
      * -    incremento
      * -    condicion
      */
-    var swhile = new interfaces_1.S3.While(body);
+    var swhile = new interfaces_1.S3.While(module_name, body);
     init_last.exit_point = condition_entry;
     conditon_last.exit_point = swhile;
     body_last.exit_point = incremement_entry;
     increment_last.exit_point = condition_entry;
     return init;
 }
-function transform_call(call) {
+function transform_call(call, module_name) {
     /**
      * Para transformar las llamadas solo hay que encadenar
      * la evaluacion de sus argumentos (en el orden en que aparecen)
@@ -24548,7 +24671,7 @@ function transform_call(call) {
             var last_index_st = null;
             var index_initd = false;
             for (var j = 0; j < invocation.indexes.length; j++) {
-                var next_index = transform_expression(invocation.indexes[j]);
+                var next_index = transform_expression(invocation.indexes[j], module_name);
                 if (j == 0) {
                     first_index = next_index;
                     last_index_st = interfaces_1.S3.get_last(first_index);
@@ -24559,7 +24682,7 @@ function transform_call(call) {
                     last_index_st = next_index;
                 }
             }
-            var make_alias = new interfaces_1.S3.Alias(invocation.name, invocation.indexes.length, invocation.dimensions, call.parameters[i].name, call.name);
+            var make_alias = new interfaces_1.S3.Alias(module_name, invocation.name, invocation.indexes.length, invocation.dimensions, call.parameters[i].name, call.name);
             if (index_initd) {
                 last_index_st.exit_point = make_alias;
                 next_arg = first_index;
@@ -24569,7 +24692,7 @@ function transform_call(call) {
             }
         }
         else {
-            next_arg = transform_expression(call.args[i]);
+            next_arg = transform_expression(call.args[i], module_name);
         }
         if (i == 0) {
             first_arg = next_arg;
@@ -24581,7 +24704,7 @@ function transform_call(call) {
             last_statement = interfaces_1.S3.get_last(next_arg);
         }
     }
-    var ucall = new interfaces_1.S3.UserModuleCall(call.name, call.args.length);
+    var ucall = new interfaces_1.S3.UserModuleCall(module_name, call.name, call.args.length);
     if (first_arg_initd) {
         last_statement.exit_point = ucall;
         return first_arg;
@@ -24590,38 +24713,38 @@ function transform_call(call) {
         return ucall;
     }
 }
-function transform_write(wc) {
+function transform_write(wc, module_name) {
     /**
      * Escribir es un procedimiento que toma solo un argumento,
      * en realidad.
      * Hay que hacer una llamada por cada argumento evaluado.
      */
-    var first_arg = transform_expression(wc.args[0]);
+    var first_arg = transform_expression(wc.args[0], module_name);
     var last_statement = interfaces_1.S3.get_last(first_arg);
     if (wc.typings.args[0] instanceof interfaces_1.Typed.StringType) {
-        var concat = new interfaces_1.S3.Concat(wc.typings.args[0].length);
+        var concat = new interfaces_1.S3.Concat(module_name, wc.typings.args[0].length);
         last_statement.exit_point = concat;
         last_statement = concat;
     }
-    var escribir_call = new interfaces_1.S3.WriteCall();
+    var escribir_call = new interfaces_1.S3.WriteCall(module_name);
     last_statement.exit_point = escribir_call;
     last_statement = escribir_call;
     for (var i = 1; i < wc.args.length; i++) {
-        var next_arg = transform_expression(wc.args[i]);
+        var next_arg = transform_expression(wc.args[i], module_name);
         last_statement.exit_point = next_arg;
         last_statement = interfaces_1.S3.get_last(next_arg);
         if (wc.typings.args[i] instanceof interfaces_1.Typed.StringType) {
-            var concat = new interfaces_1.S3.Concat(wc.typings.args[i].length);
+            var concat = new interfaces_1.S3.Concat(module_name, wc.typings.args[i].length);
             last_statement.exit_point = concat;
             last_statement = concat;
         }
-        var wcall = new interfaces_1.S3.WriteCall();
+        var wcall = new interfaces_1.S3.WriteCall(module_name);
         last_statement.exit_point = wcall;
         last_statement = wcall;
     }
     return first_arg;
 }
-function transform_read(rc) {
+function transform_read(rc, module_name) {
     /**
      * Leer tambien es un procedimiento de un solo argumento.
      * Por cada argumento hay que crear una llamada a leer y una asignacion.
@@ -24638,7 +24761,7 @@ function transform_read(rc) {
          * son todos Invocation. O va a estar garantizado...
          */
         current_var = rc.args[i][0];
-        var lcall = new interfaces_1.S3.ReadCall(current_var.name, current_var.typings.type);
+        var lcall = new interfaces_1.S3.ReadCall(module_name, current_var.name, current_var.typings.type);
         if (i == 0) {
             first_call = lcall;
         }
@@ -24647,17 +24770,17 @@ function transform_read(rc) {
         }
         var target_assignment = null;
         if (current_var.typings.type instanceof interfaces_1.Typed.StringType) {
-            target_assignment = new interfaces_1.S3.AssignString(current_var.name, current_var.typings.type.length, current_var.indexes.length);
+            target_assignment = new interfaces_1.S3.AssignString(module_name, current_var.name, current_var.typings.type.length, current_var.indexes.length);
         }
         else {
-            target_assignment = create_assignment(current_var);
+            target_assignment = create_assignment(current_var, module_name);
         }
         lcall.exit_point = target_assignment;
         last_statement = interfaces_1.S3.get_last(target_assignment);
     }
     return first_call;
 }
-function create_assignment(v) {
+function create_assignment(v, module_name) {
     if (v.is_array) {
         if (v.dimensions.length > v.indexes.length) {
             /**
@@ -24674,7 +24797,7 @@ function create_assignment(v) {
                  */
                 var final_indexes = v.indexes.concat(i.map(function (index) { return [create_literal_number_exp(index)]; }));
                 for (var j = 0; j < final_indexes.length; j++) {
-                    var index_exp = transform_expression(final_indexes[j]);
+                    var index_exp = transform_expression(final_indexes[j], module_name);
                     /**
                      * Si esta es la primer iteracion de ambos bucles...
                      */
@@ -24686,34 +24809,34 @@ function create_assignment(v) {
                     }
                     last_statement = interfaces_1.S3.get_last(index_exp);
                 }
-                var assignment = new interfaces_1.S3.AssignV(final_indexes.length, v.dimensions, v.name);
+                var assignment = new interfaces_1.S3.AssignV(module_name, final_indexes.length, v.dimensions, v.name);
                 last_statement.exit_point = assignment;
                 last_statement = assignment;
             }
             return first_index;
         }
         else {
-            var first_index = transform_expression(v.indexes[0]);
+            var first_index = transform_expression(v.indexes[0], module_name);
             var last_statement = interfaces_1.S3.get_last(first_index);
             for (var i = 0; i < v.indexes.length - 1; i++) {
-                var next_index = transform_expression(v.indexes[i + 1]);
+                var next_index = transform_expression(v.indexes[i + 1], module_name);
                 last_statement.exit_point = next_index;
                 last_statement = interfaces_1.S3.get_last(next_index);
             }
-            var assignment = new interfaces_1.S3.AssignV(v.indexes.length, v.dimensions, v.name);
+            var assignment = new interfaces_1.S3.AssignV(module_name, v.indexes.length, v.dimensions, v.name);
             last_statement.exit_point = assignment;
             return first_index;
         }
     }
     else {
-        var assignment = new interfaces_1.S3.Assign(v.name);
+        var assignment = new interfaces_1.S3.Assign(module_name, v.name);
         return assignment;
     }
 }
 function create_literal_number_exp(n) {
-    return { type: 'literal', value: n, typings: { type: new interfaces_1.Typed.AtomicType('entero') } };
+    return { type: 'literal', value: n, typings: { type: new interfaces_1.Typed.AtomicType('literal', 'entero') } }; // este tipo solo esta aca para cumplir con la interfaz
 }
-function transform_return(ret) {
+function transform_return(ret, module_name) {
     /**
      * Para transformar 'retornar' solo hay que transformar
      * su expresion. Una vez que se evalue eso, el retorno de
@@ -24721,17 +24844,17 @@ function transform_return(ret) {
      * viene el enunciado 'retornar' que termina la ejecucion
      * de la funcion donde se encuentra.
      */
-    var entry = transform_expression(ret.expression);
-    var ret_statement = new interfaces_1.S3.Return();
+    var entry = transform_expression(ret.expression, module_name);
+    var ret_statement = new interfaces_1.S3.Return(module_name);
     interfaces_1.S3.get_last(entry).exit_point = ret_statement;
     return entry;
 }
-function transform_body(body) {
+function transform_body(body, module_name) {
     if (body.length > 0) {
-        var entry_point = transform_statement(body[0]);
+        var entry_point = transform_statement(body[0], module_name);
         var last_statement = interfaces_1.S3.get_last(entry_point);
         for (var i = 0; i < body.length - 1; i++) {
-            var next_statement = transform_statement(body[i + 1]);
+            var next_statement = transform_statement(body[i + 1], module_name);
             last_statement.exit_point = next_statement;
             last_statement = interfaces_1.S3.get_last(next_statement);
         }
@@ -24741,36 +24864,36 @@ function transform_body(body) {
         return null;
     }
 }
-function transform_statement(statement) {
+function transform_statement(statement, module_name) {
     switch (statement.type) {
         case 'assignment':
-            return transform_assignment(statement);
+            return transform_assignment(statement, module_name);
         case 'if':
-            return transform_if(statement);
+            return transform_if(statement, module_name);
         case 'while':
-            return transform_while(statement);
+            return transform_while(statement, module_name);
         case 'until':
-            return transform_until(statement);
+            return transform_until(statement, module_name);
         case 'for':
-            return transform_for(statement);
+            return transform_for(statement, module_name);
         case 'call':
             switch (statement.name) {
                 case 'leer':
-                    return transform_read(statement);
+                    return transform_read(statement, module_name);
                 case 'escribir':
-                    return transform_write(statement);
+                    return transform_write(statement, module_name);
                 default:
-                    return transform_call(statement);
+                    return transform_call(statement, module_name);
             }
         case 'return':
-            return transform_return(statement);
+            return transform_return(statement, module_name);
     }
 }
-function transform_assignment(a) {
+function transform_assignment(a, module_name) {
     /**
      * Primer enunciado de la evaluacion de la expresion que se debe asignar
      */
-    var entry_point = transform_expression(a.right);
+    var entry_point = transform_expression(a.right, module_name);
     /**
      * Este enunciado es el que finalmente pone el valor de la expresion en la
      * pila. Seguido de este va el enunciado de asignacion.
@@ -24785,7 +24908,7 @@ function transform_assignment(a) {
             /**
              * Asignar una cadena a un vector
              */
-            var assignment = new interfaces_1.S3.AssignString(a.left.name, a.typings.left.length, a.left.indexes.length);
+            var assignment = new interfaces_1.S3.AssignString(module_name, a.left.name, a.typings.left.length, a.left.indexes.length);
             last_statement.exit_point = assignment;
             return entry_point;
         }
@@ -24804,7 +24927,7 @@ function transform_assignment(a) {
                  */
                 var final_indexes = a.left.indexes.concat(i.map(function (index) { return [create_literal_number_exp(index)]; }));
                 for (var j = 0; j < final_indexes.length; j++) {
-                    var index_exp = transform_expression(final_indexes[j]);
+                    var index_exp = transform_expression(final_indexes[j], module_name);
                     /**
                      * Si esta es la primer iteracion de ambos bucles...
                      */
@@ -24816,7 +24939,7 @@ function transform_assignment(a) {
                     }
                     last = interfaces_1.S3.get_last(index_exp);
                 }
-                var assignment = new interfaces_1.S3.AssignV(final_indexes.length, a.left.dimensions, a.left.name);
+                var assignment = new interfaces_1.S3.AssignV(module_name, final_indexes.length, a.left.dimensions, a.left.name);
                 last.exit_point = assignment;
                 last = assignment;
             }
@@ -24835,26 +24958,26 @@ function transform_assignment(a) {
          */
         if (a.left.is_array) {
             var v = a.left;
-            var first_index = transform_expression(v.indexes[0]);
+            var first_index = transform_expression(v.indexes[0], module_name);
             var index_last_st = interfaces_1.S3.get_last(first_index);
             for (var i = 0; i < v.indexes.length - 1; i++) {
-                var next_index = transform_expression(v.indexes[i + 1]);
+                var next_index = transform_expression(v.indexes[i + 1], module_name);
                 index_last_st.exit_point = next_index;
                 index_last_st = interfaces_1.S3.get_last(next_index);
             }
-            var assignv = new interfaces_1.S3.AssignV(v.indexes.length, v.dimensions, v.name);
+            var assignv = new interfaces_1.S3.AssignV(module_name, v.indexes.length, v.dimensions, v.name);
             index_last_st.exit_point = assignv;
             last_statement.exit_point = first_index;
             return entry_point;
         }
         else {
-            var assign = new interfaces_1.S3.Assign(a.left.name);
+            var assign = new interfaces_1.S3.Assign(module_name, a.left.name);
             last_statement.exit_point = assign;
             return entry_point;
         }
     }
 }
-function transform_invocation(i) {
+function transform_invocation(i, module_name) {
     if (i.is_array) {
         if (i.dimensions.length > i.indexes.length) {
             /**
@@ -24877,7 +25000,7 @@ function transform_invocation(i) {
                  */
                 var final_indexes = i.indexes.concat(j.map(function (index) { return [create_literal_number_exp(index)]; }));
                 for (var k = 0; k < final_indexes.length; k++) {
-                    var index_exp = transform_expression(final_indexes[k]);
+                    var index_exp = transform_expression(final_indexes[k], module_name);
                     /**
                      * Si esta es la primer iteracion de ambos bucles...
                      */
@@ -24889,52 +25012,56 @@ function transform_invocation(i) {
                     }
                     last_statement = interfaces_1.S3.get_last(index_exp);
                 }
-                var invocation = new interfaces_1.S3.GetV(final_indexes.length, i.dimensions, i.name);
+                var invocation = new interfaces_1.S3.GetV(module_name, final_indexes.length, i.dimensions, i.name);
                 last_statement.exit_point = invocation;
                 last_statement = invocation;
             }
             return first_index;
         }
         else {
-            var first_index = transform_expression(i.indexes[0]);
+            var first_index = transform_expression(i.indexes[0], module_name);
             var last_statement = interfaces_1.S3.get_last(first_index);
             for (var j = 1; j < i.indexes.length; j++) {
-                var next_index = transform_expression(i.indexes[j]);
+                var next_index = transform_expression(i.indexes[j], module_name);
                 last_statement.exit_point = next_index;
                 last_statement = interfaces_1.S3.get_last(next_index);
             }
-            var getv = new interfaces_1.S3.GetV(i.indexes.length, i.dimensions, i.name);
+            var getv = new interfaces_1.S3.GetV(module_name, i.indexes.length, i.dimensions, i.name);
             last_statement.exit_point = getv;
             return first_index;
         }
     }
     else {
-        var geti = new interfaces_1.S3.Get(i.name);
+        var geti = new interfaces_1.S3.Get(module_name, i.name);
         return geti;
     }
 }
-function transform_literal(l) {
+function transform_literal(l, module_name) {
     if (l.typings.type instanceof interfaces_1.Typed.StringType) {
         var length = l.typings.type.length;
         /**
          * Apilar la cadena de atras para adelante para que cuando
          * sea asignada a un vector aparezca en el orden correcto.
          */
-        var first = new interfaces_1.S3.Push('\0');
+        var first = new interfaces_1.S3.Push(module_name, '\0');
         var last = first;
         for (var i = length - 1; i >= 0; i--) {
-            var next = new interfaces_1.S3.Push(l.value[i]);
+            var next = new interfaces_1.S3.Push(module_name, l.value[i]);
             last.exit_point = next;
             last = next;
         }
         return first;
     }
     else {
-        return new interfaces_1.S3.Push(l.value);
+        return new interfaces_1.S3.Push(module_name, l.value);
     }
 }
-function transform_expression(expression) {
-    var statements = expression.map(transform_exp_element);
+function transform_expression(expression, module_name) {
+    var statements = [];
+    for (var _i = 0, expression_1 = expression; _i < expression_1.length; _i++) {
+        var e = expression_1[_i];
+        statements.push(transform_exp_element(e, module_name));
+    }
     var entry = statements[0];
     var last_statement = interfaces_1.S3.get_last(entry);
     for (var i = 0; i < statements.length - 1; i++) {
@@ -24943,50 +25070,50 @@ function transform_expression(expression) {
     }
     return entry;
 }
-function transform_exp_element(element) {
+function transform_exp_element(element, module_name) {
     switch (element.type) {
         case 'operator':
             switch (element.name) {
                 case 'times':
-                    return new interfaces_1.S3.Operation(interfaces_1.S3.StatementKinds.Times);
+                    return new interfaces_1.S3.Operation(module_name, interfaces_1.S3.StatementKinds.Times);
                 case 'slash':
-                    return new interfaces_1.S3.Operation(interfaces_1.S3.StatementKinds.Slash);
+                    return new interfaces_1.S3.Operation(module_name, interfaces_1.S3.StatementKinds.Slash);
                 case 'power':
-                    return new interfaces_1.S3.Operation(interfaces_1.S3.StatementKinds.Power);
+                    return new interfaces_1.S3.Operation(module_name, interfaces_1.S3.StatementKinds.Power);
                 case 'div':
-                    return new interfaces_1.S3.Operation(interfaces_1.S3.StatementKinds.Div);
+                    return new interfaces_1.S3.Operation(module_name, interfaces_1.S3.StatementKinds.Div);
                 case 'mod':
-                    return new interfaces_1.S3.Operation(interfaces_1.S3.StatementKinds.Mod);
+                    return new interfaces_1.S3.Operation(module_name, interfaces_1.S3.StatementKinds.Mod);
                 case 'minus':
-                    return new interfaces_1.S3.Operation(interfaces_1.S3.StatementKinds.Minus);
+                    return new interfaces_1.S3.Operation(module_name, interfaces_1.S3.StatementKinds.Minus);
                 case 'plus':
-                    return new interfaces_1.S3.Operation(interfaces_1.S3.StatementKinds.Plus);
+                    return new interfaces_1.S3.Operation(module_name, interfaces_1.S3.StatementKinds.Plus);
                 case 'minor':
-                    return new interfaces_1.S3.Operation(interfaces_1.S3.StatementKinds.Minor);
+                    return new interfaces_1.S3.Operation(module_name, interfaces_1.S3.StatementKinds.Minor);
                 case 'minor-eq':
-                    return new interfaces_1.S3.Operation(interfaces_1.S3.StatementKinds.MinorEq);
+                    return new interfaces_1.S3.Operation(module_name, interfaces_1.S3.StatementKinds.MinorEq);
                 case 'major':
-                    return new interfaces_1.S3.Operation(interfaces_1.S3.StatementKinds.Major);
+                    return new interfaces_1.S3.Operation(module_name, interfaces_1.S3.StatementKinds.Major);
                 case 'major-eq':
-                    return new interfaces_1.S3.Operation(interfaces_1.S3.StatementKinds.MajorEq);
+                    return new interfaces_1.S3.Operation(module_name, interfaces_1.S3.StatementKinds.MajorEq);
                 case 'equal':
-                    return new interfaces_1.S3.Operation(interfaces_1.S3.StatementKinds.Equal);
+                    return new interfaces_1.S3.Operation(module_name, interfaces_1.S3.StatementKinds.Equal);
                 case 'not':
-                    return new interfaces_1.S3.Operation(interfaces_1.S3.StatementKinds.Not);
+                    return new interfaces_1.S3.Operation(module_name, interfaces_1.S3.StatementKinds.Not);
                 case 'different':
-                    return new interfaces_1.S3.Operation(interfaces_1.S3.StatementKinds.Different);
+                    return new interfaces_1.S3.Operation(module_name, interfaces_1.S3.StatementKinds.Different);
                 case 'and':
-                    return new interfaces_1.S3.Operation(interfaces_1.S3.StatementKinds.And);
+                    return new interfaces_1.S3.Operation(module_name, interfaces_1.S3.StatementKinds.And);
                 case 'or':
-                    return new interfaces_1.S3.Operation(interfaces_1.S3.StatementKinds.Or);
+                    return new interfaces_1.S3.Operation(module_name, interfaces_1.S3.StatementKinds.Or);
             }
             break;
         case 'literal':
-            return transform_literal(element);
+            return transform_literal(element, module_name);
         case 'invocation':
-            return transform_invocation(element);
+            return transform_invocation(element, module_name);
         case 'call':
-            return transform_call(element);
+            return transform_call(element, module_name);
     }
 }
 
@@ -25285,7 +25412,7 @@ function transform_return(r, mn, p) {
                 expression: exp.result,
                 typings: {
                     actual: report.result,
-                    expected: new interfaces_1.Typed.AtomicType(expected)
+                    expected: new interfaces_1.Typed.AtomicType('literal', expected)
                 }
             };
             return { error: false, result: result };
@@ -25333,7 +25460,7 @@ function type_call(a, mn, p) {
         }
         else {
             var paramtypes = type_params(a.parameters);
-            var ret = new interfaces_1.Typed.AtomicType(a.return_type);
+            var ret = new interfaces_1.Typed.AtomicType('literal', a.return_type);
             var type = a.type, name = a.name, parameters = a.parameters;
             var result = {
                 type: type,
@@ -25354,25 +25481,26 @@ function type_params(params) {
     var paramtypes = [];
     for (var _i = 0, params_1 = params; _i < params_1.length; _i++) {
         var param = params_1[_i];
+        var inv_or_lit = param.by_ref ? 'invocation' : 'literal';
         if (param.is_array) {
             var type = null;
             if (param.type == 'caracter' && param.dimensions.length == 1) {
-                type = new interfaces_1.Typed.StringType(param.dimensions[0]);
+                type = new interfaces_1.Typed.StringType(param.dimensions[0], inv_or_lit);
             }
             else {
-                for (var i = params.length - 1; i >= 0; i--) {
-                    if (i == params.length - 1) {
-                        type = new interfaces_1.Typed.ArrayType(new interfaces_1.Typed.AtomicType(param.type), param.dimensions[i]);
+                for (var i = param.dimensions.length - 1; i >= 0; i--) {
+                    if (i == param.dimensions.length - 1) {
+                        type = new interfaces_1.Typed.ArrayType(inv_or_lit, new interfaces_1.Typed.AtomicType(inv_or_lit, param.type), param.dimensions[i]);
                     }
                     else {
-                        type = new interfaces_1.Typed.ArrayType(type, param.dimensions[i]);
+                        type = new interfaces_1.Typed.ArrayType(inv_or_lit, type, param.dimensions[i]);
                     }
                 }
             }
             paramtypes.push(type);
         }
         else {
-            paramtypes.push(new interfaces_1.Typed.AtomicType(param.type));
+            paramtypes.push(new interfaces_1.Typed.AtomicType(inv_or_lit, param.type));
         }
     }
     return paramtypes;
@@ -25502,7 +25630,7 @@ function type_invocation(i, mn, p) {
              * solo hay que calcular el tipo resultante y los tipos
              * de los indices.
              */
-            invocation_datatype = new interfaces_1.Typed.AtomicType(i.datatype);
+            invocation_datatype = new interfaces_1.Typed.AtomicType('invocation', i.datatype);
         }
         else {
             /**
@@ -25514,14 +25642,14 @@ function type_invocation(i, mn, p) {
             for (var j = remaining_dimensions.length - 1; j >= 0; j--) {
                 if (j == remaining_dimensions.length - 1) {
                     if (i.datatype == 'caracter') {
-                        last_type = new interfaces_1.Typed.StringType(remaining_dimensions[j]);
+                        last_type = new interfaces_1.Typed.StringType(remaining_dimensions[j], 'invocation');
                     }
                     else {
-                        last_type = new interfaces_1.Typed.ArrayType(new interfaces_1.Typed.AtomicType(i.datatype), remaining_dimensions[j]);
+                        last_type = new interfaces_1.Typed.ArrayType('invocation', new interfaces_1.Typed.AtomicType('invocation', i.datatype), remaining_dimensions[j]);
                     }
                 }
                 else {
-                    last_type = new interfaces_1.Typed.ArrayType(last_type, remaining_dimensions[j]);
+                    last_type = new interfaces_1.Typed.ArrayType('invocation', last_type, remaining_dimensions[j]);
                 }
             }
             invocation_datatype = last_type;
@@ -25577,7 +25705,7 @@ function type_invocation(i, mn, p) {
             is_array: is_array,
             typings: {
                 indexes: [],
-                type: new interfaces_1.Typed.AtomicType(datatype)
+                type: new interfaces_1.Typed.AtomicType('invocation', datatype)
             }
         };
         return { error: false, result: result };
@@ -25706,15 +25834,15 @@ function plus_times(s, op) {
             case 'entero':
                 switch (b) {
                     case 'entero':
-                        s.push(new interfaces_1.Typed.AtomicType('entero'));
+                        s.push(new interfaces_1.Typed.AtomicType('literal', 'entero'));
                         break;
                     case 'real':
-                        s.push(new interfaces_1.Typed.AtomicType('real'));
+                        s.push(new interfaces_1.Typed.AtomicType('literal', 'real'));
                         break;
                 }
                 break;
             case 'real':
-                s.push(new interfaces_1.Typed.AtomicType('real'));
+                s.push(new interfaces_1.Typed.AtomicType('literal', 'real'));
                 break;
         }
         return { error: false, result: s };
@@ -25740,7 +25868,7 @@ function comparison(s, op) {
             return { error: true, result: result };
         }
         else {
-            s.push(new interfaces_1.Typed.AtomicType('logico'));
+            s.push(new interfaces_1.Typed.AtomicType('literal', 'logico'));
             return { error: false, result: s };
         }
     }
@@ -26155,7 +26283,7 @@ function style(s) {
             var styled_content = '';
             switch (styles[i].name) {
                 case 'code':
-                    styled_content = "<span class=\"code\">" + styles[i].content + "</span>";
+                    styled_content = "<code class=\"code\">" + styles[i].content + "</code>";
                     break;
             }
             result += pieces[i] + styled_content;
@@ -26221,7 +26349,7 @@ function split_at_styles(s) {
 var templates = {
     default: { title: 'Tu programa contiene un error: $code{@where::@reason}' },
     '@assignment-incompatible-types': {
-        title: 'Se intento asignar un valor de tipo $code{@received} a una variable de tipo $code{@expected}.',
+        title: 'Se intentó asignar un valor de tipo $code{@received} a una variable de tipo $code{@expected}.',
         description: 'Las variables de tipo $code{@expected} no pueden contener datos de tipo $code{@received}.',
         suggestion: 'Deberias cambiar el tipo de la variable o cambiar el valor que quieres asignarle.'
     },
@@ -26297,6 +26425,21 @@ var templates = {
         title: 'Se utilizó un índice del tipo equivocado',
         description: 'Se invocó un arreglo con un índice de tipo $code{@received}.',
         suggestion: 'Todos los índices de un arreglo deben ser de tipo $code{entero}.'
+    },
+    '@read-bad-arg': {
+        title: 'Argumento invalido en una llamada a $code{leer}',
+        description: 'Este error ocurrió porque el argumento número @index de una llamada a $code{leer} no representa a una variable si no a un valor literal.',
+        suggestion: 'Todos los argumentos de las llamadas a $code{leer} deben representar a una variable, a una cadena, o a una celda de un vector.'
+    },
+    '@call-bad-ref-arg': {
+        title: 'En una llamada a $code{@module}: se recibió un valor literal en lugar de una variable',
+        description: 'Este error ocurrió porque el argumento número @index de una llamada a $code{@module} no representa a una variable si no a un valor literal. El parametro $code{@param_name} del módulo esperaba recibir una variable de tipo $code{@param_expected}.',
+        suggestion: 'El argumento enviado a este parámetro tomado por referencia debe representar a un variable del tipo $code{@param_expected}.'
+    },
+    'bad-write-arg': {
+        title: 'En una llamada a $code{@name}: se recibió un valor que no se puede mostrar.',
+        description: 'Este error ocurrió porque el argumento número @index de una llamada a $code{@name} no representa un valor que se pueda mostrar en la pantalla. Los tipos de datos que pueden mostrarse son: $code{entero} $code{logico} $code{caracter} $code{real} $code{caracter[n]} (donde $code{n} es un numero entero).',
+        suggestion: 'Cuando llamas a $code{@name} asegura te pasarle argumentos de alguno de los tipos soportados.'
     }
 };
 
