@@ -137,11 +137,12 @@ var ReservedKind;
     ReservedKind[ReservedKind["FinMientras"] = 50] = "FinMientras";
     ReservedKind[ReservedKind["Procedimiento"] = 51] = "Procedimiento";
     ReservedKind[ReservedKind["FinProcedimiento"] = 52] = "FinProcedimiento";
+    ReservedKind[ReservedKind["Neg"] = 53] = "Neg";
 })(ReservedKind = exports.ReservedKind || (exports.ReservedKind = {}));
 var OtherKind;
 (function (OtherKind) {
-    OtherKind[OtherKind["Word"] = 53] = "Word";
-    OtherKind[OtherKind["Unknown"] = 54] = "Unknown";
+    OtherKind[OtherKind["Word"] = 54] = "Word";
+    OtherKind[OtherKind["Unknown"] = 55] = "Unknown";
 })(OtherKind = exports.OtherKind || (exports.OtherKind = {}));
 /**
  * Stage 3: transforms a program into another that's equivalent
@@ -192,6 +193,8 @@ var S3;
         StatementKinds[StatementKinds["AssignString"] = 30] = "AssignString";
         StatementKinds[StatementKinds["Alias"] = 31] = "Alias";
         StatementKinds[StatementKinds["CopyVec"] = 32] = "CopyVec";
+        StatementKinds[StatementKinds["Neg"] = 33] = "Neg";
+        StatementKinds[StatementKinds["MakeFrame"] = 34] = "MakeFrame";
     })(StatementKinds = S3.StatementKinds || (S3.StatementKinds = {}));
     var BaseStatement = (function () {
         function BaseStatement(owner) {
@@ -218,6 +221,17 @@ var S3;
         return BaseStatement;
     }());
     S3.BaseStatement = BaseStatement;
+    var MakeFrame = (function (_super) {
+        tslib_1.__extends(MakeFrame, _super);
+        function MakeFrame(owner, name) {
+            var _this = _super.call(this, owner) || this;
+            _this.kind = StatementKinds.MakeFrame;
+            _this.name = name;
+            return _this;
+        }
+        return MakeFrame;
+    }(BaseStatement));
+    S3.MakeFrame = MakeFrame;
     var CopyVec = (function (_super) {
         tslib_1.__extends(CopyVec, _super);
         /**
@@ -11353,7 +11367,7 @@ exports.TypeName = TypeName;
  */
 function IndexExpression(source) {
     var indexes = [];
-    var index_report = Expression(source);
+    var index_report = Expression(source, function (tk) { return tk == interfaces_1.SymbolKind.RightBracket || tk == interfaces_1.SymbolKind.Comma; });
     if (index_report.error === true) {
         return index_report;
     }
@@ -11414,22 +11428,27 @@ function Variable(source) {
     }
 }
 exports.Variable = Variable;
+/**
+ * Para dos operaciones a y b, si precedencia(a) > precedencia(b) => la operacion a ocurre primero
+ */
 var precedence = {
-    'power': 6,
-    'div': 5,
-    'mod': 5,
-    'times': 5,
-    'divide': 5,
-    'minus': 4,
-    'plus': 4,
-    'minor-than': 3,
-    'minor-equal': 3,
-    'major-than': 3,
-    'major-equal': 3,
-    'equal': 2,
-    'diff-than': 2,
-    'and': 1,
-    'or': 0
+    'not': 7,
+    'neg': 6,
+    'minor-than': 5,
+    'minor-equal': 5,
+    'major-than': 5,
+    'major-equal': 5,
+    'power': 4,
+    'div': 4,
+    'mod': 4,
+    'times': 4,
+    'slash': 4,
+    'minus': 3,
+    'plus': 3,
+    'and': 2,
+    'or': 1,
+    'equal': 0,
+    'diff-than': 0
 };
 function is_operator(k) {
     switch (k) {
@@ -11448,42 +11467,42 @@ function is_operator(k) {
         case interfaces_1.ReservedKind.Mod:
         case interfaces_1.ReservedKind.And:
         case interfaces_1.ReservedKind.Or:
+        case interfaces_1.ReservedKind.Not:
+        case interfaces_1.ReservedKind.Neg:
             return true;
         default:
             return false;
     }
 }
 /**
- * Captura una expresion
+ * Expression: captura una expresion
+ * end_reached: funcion que indica si se llegó al final de este tipo de expresion
  */
-function Expression(source) {
+function Expression(source, end_reached) {
     // Ubicacion del inicio de la expresion, en caso de que haya algun error
     var column = source.current().column;
     var line = source.current().line;
     /**
      * Dice si un token indica el fin de la expresion a capturar
      */
-    var end_reached = function (tkind) {
-        return tkind == interfaces_1.SymbolKind.EOL
-            || tkind == interfaces_1.SymbolKind.EOF
-            || tkind == interfaces_1.SymbolKind.Comma
-            || tkind == interfaces_1.SymbolKind.RightPar
-            || tkind == interfaces_1.SymbolKind.RightBracket;
-    };
     var output = [];
     var operators = [];
-    while (!end_reached(source.current().kind)) {
+    while (source.current().kind != interfaces_1.SymbolKind.EOF && !end_reached(source.current().kind)) {
         var ctoken = source.current();
         if (ctoken.kind == interfaces_1.SymbolKind.LeftPar) {
-            operators.unshift({ type: 'parenthesis', name: 'left-par' });
+            operators.push({ type: 'parenthesis', name: 'left-par' });
             source.next();
         }
         else if (ctoken.kind == interfaces_1.SymbolKind.RightPar) {
-            while (operators.length > 0 && operators[0].name != 'left-par') {
-                output.push(operators.shift());
+            while (operators.length > 0 && operators[operators.length - 1].name != 'left-par') {
+                output.push(operators.pop());
             }
             if (operators[operators.length - 1].name == 'left-par') {
-                operators.shift();
+                operators.pop();
+                /**
+                 * Consumir el right-par
+                 */
+                source.next();
             }
             else {
                 var unexpected = interfaces_1.SymbolKind.LeftPar;
@@ -11494,12 +11513,12 @@ function Expression(source) {
         }
         else if (is_operator(ctoken.kind)) {
             var p1 = precedence[ctoken.name];
-            var p2 = function () { return precedence[operators[0].name]; };
+            var p2 = function () { return precedence[operators[operators.length - 1].name]; };
             while (operators.length > 0 && p1 <= p2()) {
-                var op = operators.shift();
+                var op = operators.pop();
                 output.push({ type: 'operator', name: op.name });
             }
-            operators.unshift({ type: 'operator', name: ctoken.name });
+            operators.push({ type: 'operator', name: ctoken.name });
             source.next();
         }
         else {
@@ -11510,8 +11529,12 @@ function Expression(source) {
             output.push(value_match.result);
         }
     }
+    /**
+     * No hace falta consumir el token que marca el final porque
+     * de eso se encarga la funcion que llamó a ésta (Expression)
+     */
     while (operators.length > 0)
-        output.push(operators.shift());
+        output.push(operators.pop());
     return { error: false, result: output };
 }
 exports.Expression = Expression;
@@ -11571,7 +11594,7 @@ function isLiteralTokenType(k) {
  */
 function ArgumentList(source) {
     var args = [];
-    var exp = Expression(source);
+    var exp = Expression(source, function (tk) { return tk == interfaces_1.SymbolKind.Comma || tk == interfaces_1.SymbolKind.RightPar; });
     if (exp.error) {
         return exp;
     }
@@ -11736,7 +11759,7 @@ function Assignment(source) {
         else {
             source.next();
         }
-        var right_hand_match = Expression(source);
+        var right_hand_match = Expression(source, function (tk) { return tk == interfaces_1.SymbolKind.EOL; });
         if (right_hand_match.error) {
             return right_hand_match;
         }
@@ -11786,7 +11809,7 @@ function If(source) {
         queue.push(source.current());
         source.next();
     }
-    var expression_match = Expression(new TokenQueue_js_1.default(queue));
+    var expression_match = Expression(new TokenQueue_js_1.default(queue), function (tk) { return tk == interfaces_1.SymbolKind.RightPar; });
     if (expression_match.error) {
         return expression_match;
     }
@@ -11891,7 +11914,7 @@ function While(source) {
         queue.push(source.current());
         source.next();
     }
-    var expression_match = Expression(new TokenQueue_js_1.default(queue));
+    var expression_match = Expression(new TokenQueue_js_1.default(queue), function (tk) { return tk == interfaces_1.SymbolKind.RightPar; });
     if (expression_match.error) {
         return expression_match;
     }
@@ -11986,7 +12009,7 @@ function For(source) {
             var reason = 'missing-hasta';
             return { error: true, result: { unexpected: unexpected, expected: expected, pos: { line: line, column: column }, reason: reason, where: 'parser' } };
         }
-        var last_val_exp = Expression(source);
+        var last_val_exp = Expression(source, function (tk) { return tk == interfaces_1.SymbolKind.EOL; });
         if (last_val_exp.error) {
             return last_val_exp;
         }
@@ -12092,7 +12115,7 @@ function Until(source) {
         queue.push(source.current());
         source.next();
     }
-    var expression_match = Expression(new TokenQueue_js_1.default(queue));
+    var expression_match = Expression(new TokenQueue_js_1.default(queue), function (tk) { return tk == interfaces_1.SymbolKind.EOL; });
     if (expression_match.error) {
         return expression_match;
     }
@@ -12133,7 +12156,7 @@ function Return(source) {
     }
     else {
         source.next(); // consumir 'retornar'
-        var exp = Expression(source);
+        var exp = Expression(source, function (tk) { return tk == interfaces_1.SymbolKind.EOL; });
         if (exp.error) {
             return exp;
         }
@@ -12271,22 +12294,14 @@ function FunctionModule(source) {
     for (var _i = 0, _a = parameters.result; _i < _a.length; _i++) {
         var par = _a[_i];
         /**
-         * Crear declaraciones para todos los parametros que no se toman por referencia
+         * Extraer las propiedades del parametro que son necesarias
+         * para crear la variable
          */
-        if (!par.by_ref) {
-            /**
-             * Extraer las propiedades del parametro que son necesarias
-             * para crear la variable
-             */
-            var name_1 = par.name;
-            var is_array = par.is_array;
-            var dimensions = par.dimensions;
-            var type = par.type;
-            /**
-             * Meter los datos de la variable en el arreglo del enunciado de declaracion.
-             */
-            par_declaration.variables.push({ name: name_1, is_array: is_array, dimensions: dimensions, datatype: type });
-        }
+        var name_1 = par.name, is_array = par.is_array, by_ref = par.by_ref, dimensions = par.dimensions, type = par.type;
+        /**
+         * Meter los datos de la variable en el arreglo del enunciado de declaracion.
+         */
+        par_declaration.variables.push({ name: name_1, is_array: is_array, dimensions: dimensions, datatype: type, by_ref: by_ref });
     }
     if (source.current().kind != interfaces_1.SymbolKind.RightPar)
         return UnexpectedTokenReport(source.current(), [')'], 'missing-right-par');
@@ -12358,22 +12373,14 @@ function ProcedureModule(source) {
     for (var _i = 0, _a = parameters.result; _i < _a.length; _i++) {
         var par = _a[_i];
         /**
-         * Crear declaraciones para todos los parametros que no se toman por referencia
+         * Extraer las propiedades del parametro que son necesarias
+         * para crear la variable
          */
-        if (!par.by_ref) {
-            /**
-             * Extraer las propiedades del parametro que son necesarias
-             * para crear la variable
-             */
-            var name_2 = par.name;
-            var is_array = par.is_array;
-            var dimensions = par.dimensions;
-            var type = par.type;
-            /**
-             * Meter los datos de la variable en el arreglo del enunciado de declaracion.
-             */
-            par_declaration.variables.push({ name: name_2, is_array: is_array, dimensions: dimensions, datatype: type });
-        }
+        var name_2 = par.name, is_array = par.is_array, by_ref = par.by_ref, dimensions = par.dimensions, type = par.type;
+        /**
+         * Meter los datos de la variable en el arreglo del enunciado de declaracion.
+         */
+        par_declaration.variables.push({ name: name_2, is_array: is_array, dimensions: dimensions, datatype: type, by_ref: by_ref });
     }
     if (source.current().kind != interfaces_1.SymbolKind.RightPar)
         return UnexpectedTokenReport(source.current(), [')'], 'missing-right-par');
@@ -12447,7 +12454,8 @@ function DeclarationStatement(source) {
                 datatype: current_type,
                 name: variable.name,
                 is_array: variable.is_array,
-                dimensions: variable.dimensions
+                dimensions: variable.dimensions,
+                by_ref: false
             };
             result.variables.push(declaration);
         }
@@ -12718,9 +12726,10 @@ var SpecialSymbolToken = (function () {
                         this.name = 'major-eq';
                         this.text += source.nextChar();
                     }
-                    else
+                    else {
                         this.kind = interfaces_1.SymbolKind.Major;
-                    this.name = 'major';
+                        this.name = 'major';
+                    }
                 }
                 break;
             case '=':
@@ -12815,6 +12824,7 @@ function isReservedWord(word) {
                 case 'not':
                 case 'mod':
                 case 'ref':
+                case 'neg':
                     return true;
                 default:
                     return false;
@@ -12976,6 +12986,8 @@ function wtk(word) {
                     return interfaces_1.ReservedKind.Mod;
                 case 'ref':
                     return interfaces_1.ReservedKind.Ref;
+                case 'neg':
+                    return interfaces_1.ReservedKind.Neg;
             }
         case 4:
             switch (word) {
@@ -22810,14 +22822,21 @@ exports.default = Window;
 
 var interfaces_1 = __webpack_require__(0);
 var helpers_1 = __webpack_require__(1);
+/*
+  Un evaluador sirve para ejecutar las acciones/enunciados de un modulo.
+  Se crea con la info necesaria para dicha tarea. El retorno de su modulo se
+  devuelve a traves de la funcion run.
+*/
+/*
+  Los evaluadores son eliminados cuando terminan de ejecutar su modulo. Son de
+  un solo uso.
+*/
 var Evaluator = (function () {
     function Evaluator(program) {
         this.entry_point = program.entry_point;
         this.modules = program.modules;
-        this.globals = program.local_variables.main;
-        this.locals = program.local_variables;
-        this.locals_stack = [this.globals];
-        this.aliases = [];
+        this.frame_templates = program.local_variables;
+        this.frame_stack = [this.make_frame('main')];
         this.current_statement = this.entry_point;
         this.current_module = 'main';
         this.state = {
@@ -22827,26 +22846,23 @@ var Evaluator = (function () {
             statement_stack: [],
             last_report: { error: false, result: { action: 'none', done: this.entry_point === null ? true : false } },
             next_statement: null,
+            next_frame: null,
             paused: false
         };
     }
     /**
      * get_locals
-     * devuelve las variables locales de un modulo.
+     * devuelve las variables locales del modulo en ejecucion.
      */
-    Evaluator.prototype.get_locals = function (module_name) {
-        return this.locals[module_name];
-    };
-    Evaluator.prototype.get_current_locals = function () {
-        var current_locals = this.locals_stack[this.locals_stack.length - 1];
-        return current_locals;
+    Evaluator.prototype.get_locals = function () {
+        return this.frame_stack[this.frame_stack.length - 1];
     };
     /**
      * get_globals
      * devuelve las variables globales de este evaluador.
      */
     Evaluator.prototype.get_globals = function () {
-        return this.globals;
+        return this.frame_stack[0];
     };
     Evaluator.prototype.input = function (v) {
         /**
@@ -22890,7 +22906,7 @@ var Evaluator = (function () {
             while (this.state.next_statement == null && this.state.statement_stack.length > 0) {
                 this.state.next_statement = this.state.statement_stack.pop();
                 this.current_module = this.state.module_stack.pop();
-                this.locals_stack.pop();
+                this.frame_stack.pop();
             }
             /**
              * Si aun despues de desapilar todo se encuentra que no hay
@@ -22993,7 +23009,41 @@ var Evaluator = (function () {
                 return this.alias(s);
             case interfaces_1.S3.StatementKinds.CopyVec:
                 return this.copy_vec(s);
+            case interfaces_1.S3.StatementKinds.Neg:
+                return this.neg();
+            case interfaces_1.S3.StatementKinds.MakeFrame:
+                return this.make_frame_statement(s);
         }
+    };
+    Evaluator.prototype.make_frame_statement = function (s) {
+        this.state.next_frame = this.make_frame(s.name);
+        return { error: false, result: { done: false, action: 'none' } };
+    };
+    Evaluator.prototype.make_frame = function (mod_name) {
+        var templates = this.frame_templates[mod_name];
+        var frame = {};
+        for (var name in templates) {
+            var template = templates[name];
+            var type = template.type, datatype = template.datatype, by_ref = template.by_ref;
+            if (by_ref) {
+                frame[name] = { type: 'alias', name: '', indexes: [] };
+            }
+            else {
+                if (type == 'array') {
+                    var values = new Array(template.dimensions.reduce(function (a, b) { return a * b; }));
+                    frame[name] = { type: 'vector', dimensions: template.dimensions, values: values };
+                }
+                else {
+                    frame[name] = { type: 'variable', value: null };
+                }
+            }
+        }
+        return frame;
+    };
+    Evaluator.prototype.neg = function () {
+        var a = this.state.value_stack.pop();
+        this.state.value_stack.push(-a);
+        return { error: false, result: { done: false, action: 'none' } };
     };
     Evaluator.prototype.pad = function (a, padder, desired_length) {
         var padded_copy = new Array(desired_length);
@@ -23043,18 +23093,11 @@ var Evaluator = (function () {
         }
         return { error: false, result: { done: false, action: 'none' } };
     };
-    Evaluator.prototype.has_alias = function (name, module_name) {
-        for (var _i = 0, _a = this.aliases; _i < _a.length; _i++) {
-            var alias = _a[_i];
-            if (alias.local_name == name && alias.module == module_name) {
-                return { error: false, result: alias };
-            }
-        }
-        return { error: true, result: 'no-alias' };
-    };
     Evaluator.prototype.alias = function (s) {
         var indexes = this.pop_indexes(s.var_indexes);
-        this.aliases.push({ varname: s.varname, indexes: indexes, local_name: s.local_alias, dimensions: s.dimensions, module: s.module_name });
+        var alias = this.state.next_frame[s.local_alias];
+        alias.indexes = indexes;
+        alias.name = s.varname;
         return { error: false, result: { done: false, action: 'none' } };
     };
     Evaluator.prototype.assign_string = function (s) {
@@ -23119,58 +23162,51 @@ var Evaluator = (function () {
         return { error: false, result: { action: 'none', done: this.state.done } };
     };
     Evaluator.prototype.assign = function (s) {
-        var alias_found = this.has_alias(s.varname, s.owner);
-        /**
-         * Si no hay alias esta es una asignacion normal
-         */
-        if (alias_found.error) {
-            var variable = this.get_var(s.varname);
+        var var_found = this.get_var(s.varname);
+        // Si no hay alias esta es una asignacion normal
+        if (var_found.type != 'alias') {
+            var variable = var_found;
             variable.value = this.state.value_stack.pop();
             return { error: false, result: { action: 'none', done: this.state.done } };
         }
         else {
-            var alias = alias_found.result;
-            if (alias.dimensions.length > 0) {
-                var variable = this.get_var(alias.varname);
-                var index = this.calculate_index(alias.indexes.map(function (i) { return i - 1; }), alias.dimensions);
-                variable.values[index] = this.state.value_stack.pop();
+            var _a = this.resolve_alias(var_found), variable = _a.variable, pre_indexes = _a.pre_indexes;
+            if (pre_indexes.length > 0) {
+                var v = variable;
+                var index = this.calculate_index(pre_indexes.map(function (i) { return i - 1; }), v.dimensions);
+                v.values[index] = this.state.value_stack.pop();
                 return { error: false, result: { action: 'none', done: this.state.done } };
             }
             else {
-                var variable = this.get_var(alias.varname);
                 variable.value = this.state.value_stack.pop();
                 return { error: false, result: { action: 'none', done: this.state.done } };
             }
         }
     };
     Evaluator.prototype.get_value = function (s) {
-        var alias_found = this.has_alias(s.varname, s.owner);
-        /**
-         * Si no hay alias solo hay que apilar el valor de la variable
-         */
-        if (alias_found.error) {
-            var variable = this.get_var(s.varname);
-            this.state.value_stack.push(variable.value);
+        var var_found = this.get_var(s.varname);
+        // Si no hay alias solo hay que apilar el valor de la variable
+        if (var_found.type != 'alias') {
+            this.state.value_stack.push(var_found.value);
             return { error: false, result: { action: 'none', done: this.state.done } };
         }
         else {
-            var alias = alias_found.result;
-            if (alias.dimensions.length > 0) {
-                var variable = this.get_var(alias.varname);
-                var index = this.calculate_index(alias.indexes.map(function (i) { return i - 1; }), alias.dimensions);
-                this.state.value_stack.push(variable.values[index]);
+            var _a = this.resolve_alias(var_found), variable = _a.variable, pre_indexes = _a.pre_indexes;
+            if (pre_indexes.length > 0) {
+                var v = variable;
+                var index = this.calculate_index(pre_indexes.map(function (i) { return i - 1; }), v.dimensions);
+                this.state.value_stack.push(v.values[index]);
                 return { error: false, result: { action: 'none', done: this.state.done } };
             }
             else {
-                var variable = this.get_var(alias.varname);
                 this.state.value_stack.push(variable.value);
                 return { error: false, result: { action: 'none', done: this.state.done } };
             }
         }
     };
     Evaluator.prototype.assignv = function (s) {
-        var alias_found = this.has_alias(s.varname, s.owner);
-        if (alias_found.error) {
+        var var_found = this.get_var(s.varname);
+        if (var_found.type != 'alias') {
             var indexes = this.pop_indexes(s.total_indexes);
             if (this.is_whithin_bounds(indexes, s.dimensions)) {
                 /**
@@ -23199,17 +23235,17 @@ var Evaluator = (function () {
             }
         }
         else {
-            var alias = alias_found.result;
+            var _a = this.resolve_alias(var_found), variable = _a.variable, pre_indexes = _a.pre_indexes;
             /**
              * Los indices usados para asignar el valor al alias (al parametro tomado por referencia)
              */
             var partial_indexes = this.pop_indexes(s.total_indexes);
-            var indexes = alias.indexes.concat(partial_indexes);
-            var dimensions = alias.dimensions;
+            var indexes = pre_indexes.concat(partial_indexes);
+            var dimensions = variable.dimensions;
             if (this.is_whithin_bounds(indexes, dimensions)) {
                 var index = this.calculate_index(indexes.map(function (i) { return i - 1; }), dimensions);
-                var variable = this.get_var(alias.varname);
-                variable.values[index] = this.state.value_stack.pop();
+                var v = variable;
+                v.values[index] = this.state.value_stack.pop();
                 return { error: false, result: { action: 'none', done: false } };
             }
             else {
@@ -23227,8 +23263,8 @@ var Evaluator = (function () {
         }
     };
     Evaluator.prototype.getv_value = function (s) {
-        var alias_found = this.has_alias(s.varname, s.owner);
-        if (alias_found.error) {
+        var var_found = this.get_var(s.varname);
+        if (var_found.type != 'alias') {
             var indexes = this.pop_indexes(s.total_indexes);
             if (this.is_whithin_bounds(indexes, s.dimensions)) {
                 /**
@@ -23256,17 +23292,17 @@ var Evaluator = (function () {
             }
         }
         else {
-            var alias = alias_found.result;
+            var _a = this.resolve_alias(var_found), variable = _a.variable, pre_indexes = _a.pre_indexes;
             /**
              * Los indices usados para asignar el valor al alias (al parametro tomado por referencia)
              */
             var partial_indexes = this.pop_indexes(s.total_indexes);
-            var indexes = alias.indexes.concat(partial_indexes);
-            var dimensions = alias.dimensions;
+            var indexes = pre_indexes.concat(partial_indexes);
+            var dimensions = variable.dimensions;
             if (this.is_whithin_bounds(indexes, dimensions)) {
                 var index = this.calculate_index(indexes.map(function (i) { return i - 1; }), dimensions);
-                var variable = this.get_var(alias.varname);
-                this.state.value_stack.push(variable.values[index]);
+                var v = variable;
+                this.state.value_stack.push(v.values[index]);
                 return { error: false, result: { action: 'none', done: false } };
             }
             else {
@@ -23298,12 +23334,30 @@ var Evaluator = (function () {
         return result.reverse();
     };
     Evaluator.prototype.get_var = function (vn) {
-        var locals = this.get_current_locals();
-        if (vn in locals) {
-            return locals[vn];
-        }
-        else {
-            return this.globals[vn];
+        var locals = this.get_locals();
+        return vn in locals ? locals[vn] : this.get_globals()[vn];
+    };
+    Evaluator.prototype.resolve_alias = function (a) {
+        /**
+         * indice del ante-penultimo frame
+         */
+        var i = this.frame_stack.length - 2;
+        // se busca a partir del ante-penultimo porque se que en el ante-ultimo no esta
+        // si estuviera get_var nunca hubiera llamado a esta funcion
+        var var_found = false;
+        var v = a;
+        var pre_indexes = [];
+        while (i >= 0) {
+            pre_indexes = v.indexes.concat(pre_indexes);
+            v = this.frame_stack[i][v.name];
+            switch (v.type) {
+                case 'alias':
+                    i--;
+                    break;
+                case 'vector':
+                case 'variable':
+                    return { variable: v, pre_indexes: pre_indexes };
+            }
         }
     };
     Evaluator.prototype.write = function (s) {
@@ -23314,7 +23368,8 @@ var Evaluator = (function () {
         this.state.next_statement = this.modules[s.name].entry_point;
         this.state.statement_stack.push(this.current_statement.exit_point);
         this.state.module_stack.push(this.current_module);
-        this.locals_stack.push(this.copy_locals(s.name));
+        this.frame_stack.push(this.state.next_frame);
+        this.state.next_frame = null;
         this.current_module = s.name;
         return { error: false, result: { action: 'none', done: this.state.done } };
     };
@@ -23469,36 +23524,6 @@ var Evaluator = (function () {
             i++;
         }
         return result;
-    };
-    Evaluator.prototype.copy_locals = function (module_name) {
-        var variables = this.locals[module_name];
-        var copy = {};
-        for (var vn in variables) {
-            var variable = variables[vn];
-            if (variable.is_array) {
-                var datatype = variable.datatype, dimensions = variable.dimensions, is_array = variable.is_array, name = variable.name;
-                var vcopy = {
-                    datatype: datatype,
-                    dimensions: dimensions,
-                    is_array: is_array,
-                    name: name,
-                    values: new Array(variable.values.length)
-                };
-                copy[vn] = vcopy;
-            }
-            else if (variable.is_array == false) {
-                var datatype = variable.datatype, dimensions = variable.dimensions, is_array = variable.is_array, name = variable.name;
-                var vcopy = {
-                    datatype: datatype,
-                    dimensions: dimensions,
-                    is_array: is_array,
-                    name: name,
-                    value: null
-                };
-                copy[vn] = vcopy;
-            }
-        }
-        return copy;
     };
     return Evaluator;
 }());
@@ -24328,7 +24353,12 @@ function get_variable_info(name, variables, module_name) {
     var exists = name in variables[module_name] || name in variables['main'];
     var variable = name in variables[module_name] ? variables[module_name][name] : variables['main'][name];
     if (exists) {
-        return { error: false, result: { datatype: variable.datatype, dimensions: variable.dimensions, is_array: variable.is_array } };
+        switch (variable.type) {
+            case 'array':
+                return { error: false, result: { datatype: variable.datatype, dimensions: variable.dimensions, is_array: true } };
+            case 'scalar':
+                return { error: false, result: { datatype: variable.datatype, dimensions: [], is_array: false } };
+        }
     }
     else
         return { error: true, result: [{ reason: 'undefined-variable', name: name, where: 'call-decorator-transform' }] };
@@ -24445,24 +24475,12 @@ function declare_variables(declarations) {
             var variable = _b[_a];
             if (!(variable.name in declared_variables)) {
                 if (variable.is_array) {
-                    var new_array = {
-                        name: variable.name,
-                        datatype: variable.datatype,
-                        is_array: true,
-                        dimensions: variable.dimensions,
-                        values: new Array(variable.dimensions.reduce(function (a, b) { return a * b; }))
-                    };
-                    declared_variables[new_array.name] = new_array;
+                    var name = variable.name, datatype = variable.datatype, dimensions = variable.dimensions, by_ref = variable.by_ref;
+                    declared_variables[name] = { type: 'array', name: name, datatype: datatype, dimensions: dimensions, by_ref: by_ref };
                 }
                 else {
-                    var new_var = {
-                        name: variable.name,
-                        datatype: variable.datatype,
-                        is_array: false,
-                        dimensions: variable.dimensions,
-                        value: null
-                    };
-                    declared_variables[new_var.name] = new_var;
+                    var name = variable.name, datatype = variable.datatype, by_ref = variable.by_ref;
+                    declared_variables[name] = { type: 'scalar', name: name, datatype: datatype, by_ref: by_ref };
                 }
             }
             else {
@@ -24770,10 +24788,17 @@ function transform_call(call, module_name) {
     }
     var ucall = new interfaces_1.S3.UserModuleCall(module_name, call.name, call.args.length);
     if (first_arg_initd) {
+        var make_frame = new interfaces_1.S3.MakeFrame(module_name, call.name);
+        // enlazar creacion de frame a inicializacion de argumentos
+        make_frame.exit_point = first_arg;
+        // enlazar inicializacion de argumentos a llamada
         last_statement.exit_point = ucall;
-        return first_arg;
+        return make_frame;
     }
     else {
+        var make_frame = new interfaces_1.S3.MakeFrame(module_name, call.name);
+        // enlazar creacion de frame a llamada
+        make_frame.exit_point = ucall;
         return ucall;
     }
 }
@@ -25189,6 +25214,8 @@ function transform_exp_element(element, module_name) {
                     return new interfaces_1.S3.Operation(module_name, interfaces_1.S3.StatementKinds.And);
                 case 'or':
                     return new interfaces_1.S3.Operation(module_name, interfaces_1.S3.StatementKinds.Or);
+                case 'neg':
+                    return new interfaces_1.S3.Operation(module_name, interfaces_1.S3.StatementKinds.Neg);
             }
             break;
         case 'literal':
@@ -25873,6 +25900,14 @@ function operate(s, op) {
         case 'equal':
         case 'different':
             return comparison(s, op);
+        case 'slash':
+            return slash(s);
+        case 'and':
+        case 'or':
+        case 'not':
+            return logical(s, op);
+        case 'neg':
+            return neg(s);
     }
 }
 /**
@@ -25960,6 +25995,91 @@ function comparison(s, op) {
         return { error: true, result: result };
     }
 }
+function slash(s) {
+    if (s.length >= 2) {
+        var a = s.pop();
+        var b = s.pop();
+        var a_string = helpers_1.stringify(a);
+        var b_string = helpers_1.stringify(b);
+        var atomic_cond = a.kind == 'atomic' && b.kind == 'atomic';
+        if (!(atomic_cond && (a_string == 'entero' || a_string == 'real') && (b_string == 'entero' || b_string == 'real'))) {
+            /**
+             * Este error se detecta cuando se intenta comparar datos de tipos incompatibles
+             * o cuando alguno de los operandos es un arreglo.
+             */
+            var result = { reason: 'incompatible-operands', where: 'typer', bad_type_a: helpers_1.stringify(b), operator: '/', bad_type_b: helpers_1.stringify(a) };
+            return { error: true, result: result };
+        }
+        else {
+            s.push(new interfaces_1.Typed.AtomicType('literal', 'real'));
+            return { error: false, result: s };
+        }
+    }
+    else {
+        var result = { reason: 'missing-operands', where: 'typer', operator: '/', required: 2 };
+        return { error: true, result: result };
+    }
+}
+function logical(s, op) {
+    if ((op == 'and' || op == 'or') && s.length >= 2) {
+        var a = s.pop();
+        var b = s.pop();
+        var a_string = helpers_1.stringify(a);
+        var b_string = helpers_1.stringify(b);
+        var atomic_cond = a.kind == 'atomic' && b.kind == 'atomic';
+        if (!(atomic_cond && a_string == 'logico' && b_string == 'logico')) {
+            /**
+             * Este error se detecta cuando se intenta comparar datos de tipos incompatibles
+             * o cuando alguno de los operandos es un arreglo.
+             */
+            var result = { reason: 'incompatible-operands', where: 'typer', bad_type_a: helpers_1.stringify(b), operator: '/', bad_type_b: helpers_1.stringify(a) };
+            return { error: true, result: result };
+        }
+        else {
+            s.push(new interfaces_1.Typed.AtomicType('literal', 'logico'));
+            return { error: false, result: s };
+        }
+    }
+    else if (op == 'not' && s.length == 1) {
+        var a = s.pop();
+        if (!(a.kind == 'atomic' && helpers_1.stringify(a) == 'logico')) {
+            var result = { reason: 'incompatible-operand', where: 'typer', bad_type: helpers_1.stringify(a), operator: 'not' };
+            return { error: true, result: result };
+        }
+        else {
+            s.push(new interfaces_1.Typed.AtomicType('literal', 'logico'));
+            return { error: false, result: s };
+        }
+    }
+    else {
+        if (op == 'not') {
+            var result = { reason: 'missing-operands', where: 'typer', operator: 'not', required: 1 };
+            return { error: true, result: result };
+        }
+        else {
+            var result = { reason: 'missing-operands', where: 'typer', operator: op, required: 2 };
+            return { error: true, result: result };
+        }
+    }
+}
+function neg(s) {
+    if (s.length >= 1) {
+        var a = s.pop();
+        var a_string = helpers_1.stringify(a);
+        if (!(a.kind == 'atomic' && (a_string == 'entero' || a_string == 'real'))) {
+            var result = { reason: 'incompatible-operand', where: 'typer', bad_type: a_string, operator: 'neg' };
+            return { error: true, result: result };
+        }
+        else {
+            s.push(new interfaces_1.Typed.AtomicType('literal', 'entero'));
+            return { error: false, result: s };
+        }
+    }
+    else {
+        var result = { reason: 'missing-operands', where: 'typer', operator: 'neg', required: 1 };
+        return { error: true, result: result };
+    }
+}
 
 
 /***/ }),
@@ -26025,7 +26145,7 @@ function fr_writer(p) {
     for (var vn in p.local_variables['main']) {
         var v = p.local_variables['main'][vn];
         variables += "" + repetir(' ', espacios) + v.datatype + " " + vn;
-        if (v.is_array) {
+        if (v.type == 'array') {
             variables += "[" + v.dimensions.toString() + "]";
         }
         variables += '\n';
@@ -26049,7 +26169,7 @@ function fr_writer(p) {
         for (var vn in p.local_variables[mn]) {
             var v = p.local_variables[mn][vn];
             variables_1 += "" + repetir(' ', espacios) + v.datatype + " " + vn;
-            if (v.is_array) {
+            if (v.type == 'array') {
                 variables_1 += "[" + v.dimensions.toString() + "]";
             }
             variables_1 += '\n';
@@ -26151,6 +26271,8 @@ function procesar_enunciado(e, nivel) {
             return repetir(' ', nivel * espacios) + "ALIAS " + e.varname + " " + e.var_indexes + " " + e.dimensions + " " + e.local_alias;
         case interfaces_1.S3.StatementKinds.CopyVec:
             return repetir(' ', nivel * espacios) + "CPYVEC " + e.target.name + " " + e.target.dimensions + " " + e.target.indexes + " " + e.source.name + " " + e.source.dimensions + " " + e.source.indexes;
+        case interfaces_1.S3.StatementKinds.MakeFrame:
+            return repetir(' ', nivel * espacios) + "MAKEFRAME " + e.name;
     }
 }
 function procesar_si(e, nivel) {
