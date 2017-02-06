@@ -195,6 +195,7 @@ var S3;
         StatementKinds[StatementKinds["CopyVec"] = 32] = "CopyVec";
         StatementKinds[StatementKinds["Neg"] = 33] = "Neg";
         StatementKinds[StatementKinds["MakeFrame"] = 34] = "MakeFrame";
+        StatementKinds[StatementKinds["InitV"] = 35] = "InitV";
     })(StatementKinds = S3.StatementKinds || (S3.StatementKinds = {}));
     var BaseStatement = (function () {
         function BaseStatement(owner) {
@@ -232,6 +233,19 @@ var S3;
         return MakeFrame;
     }(BaseStatement));
     S3.MakeFrame = MakeFrame;
+    // Los contenidos de esta clase son parecidos a los de CopyVec al proposito
+    var InitV = (function (_super) {
+        tslib_1.__extends(InitV, _super);
+        function InitV(owner, source, target_name) {
+            var _this = _super.call(this, owner) || this;
+            _this.kind = StatementKinds.InitV;
+            _this.source = source;
+            _this.target_name = target_name;
+            return _this;
+        }
+        return InitV;
+    }(BaseStatement));
+    S3.InitV = InitV;
     var CopyVec = (function (_super) {
         tslib_1.__extends(CopyVec, _super);
         /**
@@ -22822,15 +22836,6 @@ exports.default = Window;
 
 var interfaces_1 = __webpack_require__(0);
 var helpers_1 = __webpack_require__(1);
-/*
-  Un evaluador sirve para ejecutar las acciones/enunciados de un modulo.
-  Se crea con la info necesaria para dicha tarea. El retorno de su modulo se
-  devuelve a traves de la funcion run.
-*/
-/*
-  Los evaluadores son eliminados cuando terminan de ejecutar su modulo. Son de
-  un solo uso.
-*/
 var Evaluator = (function () {
     function Evaluator(program) {
         this.entry_point = program.entry_point;
@@ -23008,12 +23013,46 @@ var Evaluator = (function () {
             case interfaces_1.S3.StatementKinds.Alias:
                 return this.alias(s);
             case interfaces_1.S3.StatementKinds.CopyVec:
-                return this.copy_vec(s);
+                return this.copy_vec_statement(s);
             case interfaces_1.S3.StatementKinds.Neg:
                 return this.neg();
             case interfaces_1.S3.StatementKinds.MakeFrame:
                 return this.make_frame_statement(s);
+            case interfaces_1.S3.StatementKinds.InitV:
+                return this.initv(s);
         }
+    };
+    Evaluator.prototype.initv = function (s) {
+        // obtener el vector donde se copiaran los valores
+        var tgt = this.state.next_frame[s.target_name];
+        var tgt_range = {
+            from: 0,
+            to: this.calculate_index(tgt.dimensions.map(function (i) { return i - 1; }), tgt.dimensions)
+        };
+        var src_found = this.get_var(s.source.name);
+        var src_provided_indexes = this.pop_indexes(s.source.indexes);
+        // src: vector del cual se copiaran los valores
+        var src = null;
+        if (src_found.type == 'alias') {
+            var _a = this.resolve_alias(src_found), variable = _a.variable, pre_indexes = _a.pre_indexes;
+            var partial_indexes = this.pad(src_provided_indexes, 1, s.source.dimensions.length);
+            var indexes = pre_indexes.concat(partial_indexes).map(function (i) { return i - 1; });
+            src = variable;
+            var src_range = {
+                from: this.calculate_index(indexes, src.dimensions),
+                to: this.calculate_index(src.dimensions.map(function (i) { return i - 1; }), src.dimensions)
+            };
+            this.copy_vec(tgt, src, tgt_range, src_range);
+        }
+        else {
+            src = src_found;
+            var src_range = {
+                from: this.calculate_index(this.pad(src_provided_indexes, 1, s.source.dimensions.length).map(function (i) { return i - 1; }), s.source.dimensions),
+                to: this.calculate_index(s.source.dimensions.map(function (i) { return i - 1; }), s.source.dimensions)
+            };
+            this.copy_vec(tgt, src, tgt_range, src_range);
+        }
+        return { error: false, result: { done: false, action: 'none' } };
     };
     Evaluator.prototype.make_frame_statement = function (s) {
         this.state.next_frame = this.make_frame(s.name);
@@ -23057,7 +23096,7 @@ var Evaluator = (function () {
         }
         return padded_copy;
     };
-    Evaluator.prototype.copy_vec = function (s) {
+    Evaluator.prototype.copy_vec_statement = function (s) {
         /**
          * Indices provistos para el vector del cual se copian los datos
          */
@@ -23066,29 +23105,53 @@ var Evaluator = (function () {
          * Indices provistos para el vector que recibe los datos
          */
         var tgt_provided_indexes = this.pop_indexes(s.target.indexes);
-        /**
-         * Indice inicial: indices provistos rellenados con 1 hasta que haya tantos como dimensiones
-         * Aclaracion: se resta 1 a todos para que sean indices para que arranquen en 0 en lugar de 1
-         */
-        var tgt_start_indexes = this.pad(tgt_provided_indexes, 1, s.target.dimensions.length).map(function (i) { return i - 1; });
-        /**
-         * Indice final: indices provistos rellenados con el tamaño de las dimensiones que no tienen indice
-         */
-        var tgt_end_indexes = tgt_provided_indexes.concat(helpers_1.drop(s.target.indexes, s.target.dimensions)).map(function (i) { return i - 1; });
-        /**
-         * Los valores que me interesan
-         */
-        var tgt_start = this.calculate_index(tgt_start_indexes, s.target.dimensions);
-        var tgt_end = this.calculate_index(tgt_end_indexes, s.target.dimensions);
-        var src_start_indexes = this.pad(src_provided_indexes, 1, s.source.dimensions.length).map(function (i) { return i - 1; });
-        // const src_end_indexes = [...src_provided_indexes, ...drop(s.source.indexes, s.source.dimensions)].map(i => i - 1)
-        // const src_end = this.calculate_index(src_end_indexes, s.source.dimensions)
-        var src_start = this.calculate_index(src_start_indexes, s.source.dimensions);
-        var tgt_var = this.get_var(s.target.name);
-        var src_var = this.get_var(s.source.name);
+        var tgt_indexes = {
+            from: this.pad(tgt_provided_indexes, 1, s.target.dimensions.length).map(function (i) { return i - 1; }),
+            to: tgt_provided_indexes.concat(helpers_1.drop(s.target.indexes, s.target.dimensions)).map(function (i) { return i - 1; })
+        };
+        var src_indexes = {
+            from: this.pad(src_provided_indexes, 1, s.source.dimensions.length).map(function (i) { return i - 1; }),
+            to: src_provided_indexes.concat(helpers_1.drop(s.source.indexes, s.source.dimensions)).map(function (i) { return i - 1; })
+        };
+        // variables que se usan para saber si se encontró la variable deseada o un alias
+        var tgt_found = this.get_var(s.target.name);
+        var src_found = this.get_var(s.source.name);
+        // variables que se usaran para la asignacion
+        var tgt_var;
+        var src_var;
+        // rangos que indican el indice donde inicia la copia y el indice donde termina
+        var tgt_range = { from: 0, to: 0 };
+        var src_range = { from: 0, to: 0 };
+        // preparar las variables y los rangos
+        if (tgt_found.type == 'alias') {
+            var _a = this.resolve_alias(tgt_found), variable = _a.variable, pre_indexes = _a.pre_indexes;
+            tgt_var = variable;
+            tgt_range.from = this.calculate_index(pre_indexes.concat(tgt_indexes.from), tgt_var.dimensions);
+            tgt_range.to = this.calculate_index(pre_indexes.concat(tgt_indexes.to), tgt_var.dimensions);
+        }
+        else {
+            tgt_var = tgt_found;
+            tgt_range.from = this.calculate_index(tgt_indexes.from, tgt_var.dimensions);
+            tgt_range.to = this.calculate_index(tgt_indexes.to, tgt_var.dimensions);
+        }
+        if (src_found.type == 'alias') {
+            var _b = this.resolve_alias(src_found), variable = _b.variable, pre_indexes = _b.pre_indexes;
+            src_var = variable;
+            src_range.from = this.calculate_index(pre_indexes.concat(src_indexes.from), src_var.dimensions);
+            src_range.to = this.calculate_index(pre_indexes.concat(src_indexes.to), src_var.dimensions);
+        }
+        else {
+            src_var = src_found;
+            src_range.from = this.calculate_index(src_indexes.from, src_var.dimensions);
+            src_range.to = this.calculate_index(src_indexes.to, src_var.dimensions);
+        }
+        this.copy_vec(tgt_var, src_var, tgt_range, src_range);
+        return { error: false, result: { done: false, action: 'none' } };
+    };
+    Evaluator.prototype.copy_vec = function (tgt, src, tgt_range, src_range) {
         var counter = 0;
-        while (tgt_start + counter <= tgt_end) {
-            tgt_var.values[tgt_start + counter] = src_var.values[src_start + counter];
+        while (tgt_range.from + counter <= tgt_range.to) {
+            tgt.values[tgt_range.from + counter] = src.values[src_range.from + counter];
             counter++;
         }
         return { error: false, result: { done: false, action: 'none' } };
@@ -24553,11 +24616,8 @@ function transform_module(old_module, current_module) {
     var first_statement_initialized = false;
     for (var i = old_module.parameters.length - 1; i >= 0; i--) {
         var param = old_module.parameters[i];
-        /**
-         * Saltear parametros tomados por referencia, no hace falta
-         * inicializarlos
-         */
-        if (!param.by_ref) {
+        // saltear parametros tomados por referencia y vectores que NO son cadenas
+        if ((param.type instanceof interfaces_1.Typed.StringType || param.type.kind != 'array') && !param.by_ref) {
             var fake_inv = {
                 dimensions: param.dimensions,
                 indexes: [],
@@ -24771,6 +24831,34 @@ function transform_call(call, module_name) {
             }
             else {
                 next_arg = make_alias;
+            }
+        }
+        else if (call.parameters[i].is_array) {
+            // Hay que inicializar un vector del modulo con valores del vector pasado como argumento
+            var source = call.args[i][0];
+            var param = call.parameters[i];
+            var entry = null;
+            var last = null;
+            var entry_initd = false;
+            for (var i_1 = 0; i_1 < source.indexes.length; i_1++) {
+                if (!entry_initd) {
+                    entry = transform_expression(source.indexes[i_1], module_name);
+                    last = interfaces_1.S3.get_last(entry);
+                    entry_initd = true;
+                }
+                else {
+                    var next = transform_expression(source.indexes[i_1], module_name);
+                    last.exit_point = next;
+                    last = interfaces_1.S3.get_last(next);
+                }
+            }
+            var initv = new interfaces_1.S3.InitV(module_name, { name: source.name, indexes: source.indexes.length, dimensions: source.dimensions }, param.name);
+            if (entry_initd) {
+                last.exit_point = initv;
+                next_arg = entry;
+            }
+            else {
+                next_arg = initv;
             }
         }
         else {
@@ -25016,7 +25104,7 @@ function transform_assignment(a, module_name) {
             }
             /**
              * Apilar indices del vector del cual se copian los datos
-             * Aclaracion el type assert para a.right es correcto porque ya se verifico
+             * Aclaracion: el type assert para a.right es correcto porque ya se verifico
              * (en TSChecker) que el primer y unico componente de esa expresion sea una
              * invocacion de un vector.
              */
@@ -25024,6 +25112,7 @@ function transform_assignment(a, module_name) {
                 if (!entry_initd) {
                     entry = transform_expression(a.right[0].indexes[i], module_name);
                     last = interfaces_1.S3.get_last(entry);
+                    entry_initd = true;
                 }
                 else {
                     var next = transform_expression(a.right[0].indexes[i], module_name);
@@ -26268,11 +26357,13 @@ function procesar_enunciado(e, nivel) {
         case interfaces_1.S3.StatementKinds.AssignString:
             return repetir(' ', nivel * espacios) + "ASIGNAR CADENA " + e.varname + " " + e.length + " " + e.indexes;
         case interfaces_1.S3.StatementKinds.Alias:
-            return repetir(' ', nivel * espacios) + "ALIAS " + e.varname + " " + e.var_indexes + " " + e.dimensions + " " + e.local_alias;
+            return repetir(' ', nivel * espacios) + "ALIAS " + e.varname + " " + e.var_indexes + " [" + e.dimensions + "] " + e.local_alias;
         case interfaces_1.S3.StatementKinds.CopyVec:
-            return repetir(' ', nivel * espacios) + "CPYVEC " + e.target.name + " " + e.target.dimensions + " " + e.target.indexes + " " + e.source.name + " " + e.source.dimensions + " " + e.source.indexes;
+            return repetir(' ', nivel * espacios) + "CPYVEC " + e.target.name + " [" + e.target.dimensions + "] " + e.target.indexes + " " + e.source.name + " [" + e.source.dimensions + "] " + e.source.indexes;
         case interfaces_1.S3.StatementKinds.MakeFrame:
             return repetir(' ', nivel * espacios) + "MAKEFRAME " + e.name;
+        case interfaces_1.S3.StatementKinds.InitV:
+            return repetir(' ', nivel * espacios) + "INITV " + e.source.name + " " + e.source.indexes + " [" + e.source.dimensions + "] " + e.target_name;
     }
 }
 function procesar_si(e, nivel) {
