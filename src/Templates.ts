@@ -7,7 +7,7 @@ export interface Template {
 }
 
 export default function get_template(data: Errors.Base): Template {
-    const template = data.reason in templates ? templates[data.reason] : templates.default
+    const template = data.reason in templates ? templates[data.reason] : (data.where in generic_templates ? generic_templates[data.where] : templates.default)
 
     const parsed_template: Template = { title: style(interpolate(data, template.title)) }
 
@@ -16,11 +16,45 @@ export default function get_template(data: Errors.Base): Template {
     }
 
     if ('suggestion' in template) {
-        parsed_template['suggestion'] = style(interpolate(data, template.suggestion))
+        parsed_template['suggestion'] = style(interpolate(data, create(data, template.suggestion)))
     }
 
     return parsed_template
 }
+
+function create(data: any, s: string): string {
+    let result = ''
+
+    /**
+     * Regexp que encuentra los nombres
+     * de los estilos que hay que aplicar
+     */
+    const r = /\$\w+/g
+
+    if (r.test(s)) {
+        /**
+         * Partes de la cadena que no cambian y estilos
+         */
+        const {pieces, styles} = split_at_styles(s)
+
+        let i = 0
+        for (; i < styles.length; i++) {
+            let styled_content = ''
+
+            switch (styles[i].name) {
+                case 'codelist':
+                    styled_content = codelist(data, styles[i].content)
+                    break
+            }
+
+            result += pieces[i] + styled_content
+        }
+        result += pieces[i]
+        return result
+    }
+    else {
+        return s
+    }}
 
 function interpolate(data: any, s: string): string {
     let result = ''
@@ -157,6 +191,30 @@ function split_at_styles (s: string): {pieces: string[], styles: Style[]} {
     pieces.push(current_piece)
 
     return {pieces, styles}
+}
+
+/**
+ * Crea una <ul> con el stilo '$code'
+ */
+function codelist(data: any, propName: string): string {
+    let list = '<ul>'
+
+    for (let i = 0; i < data[propName].length; i++) {
+        const item = data[propName][i]
+        list += `<li>\$code\{${item}\}</li>`
+    }
+
+    list += '</ul>'
+
+    return list
+}
+
+const generic_templates: { [t: string]: Template } = {
+    'parser': {
+        title: 'Se encontró un error de sintaxis',
+        description: 'Los errores de sintaxis ocurren cuando el compilador esperaba encontrar algo pero no lo hizo. Por ejemplo, no escribir $code{finsi} al final de una estructura $code{si} es un error de sintaxis.',
+        suggestion: 'En este caso, el error ocurrió porque el compilador no encontró ninguno de los siguientes elementos: $codelist{expected}'
+    }
 }
 
 const templates: { default: Template, [t: string]: Template } = {
