@@ -26524,18 +26524,47 @@ exports.default = Prompt;
 "use strict";
 
 function get_template(data) {
-    var template = data.reason in templates ? templates[data.reason] : templates.default;
+    var template = data.reason in templates ? templates[data.reason] : (data.where in generic_templates ? generic_templates[data.where] : templates.default);
     var parsed_template = { title: style(interpolate(data, template.title)) };
     if ('description' in template) {
         parsed_template['description'] = style(interpolate(data, template.description));
     }
     if ('suggestion' in template) {
-        parsed_template['suggestion'] = style(interpolate(data, template.suggestion));
+        parsed_template['suggestion'] = style(interpolate(data, create(data, template.suggestion)));
     }
     return parsed_template;
 }
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = get_template;
+function create(data, s) {
+    var result = '';
+    /**
+     * Regexp que encuentra los nombres
+     * de los estilos que hay que aplicar
+     */
+    var r = /\$\w+/g;
+    if (r.test(s)) {
+        /**
+         * Partes de la cadena que no cambian y estilos
+         */
+        var _a = split_at_styles(s), pieces = _a.pieces, styles = _a.styles;
+        var i = 0;
+        for (; i < styles.length; i++) {
+            var styled_content = '';
+            switch (styles[i].name) {
+                case 'codelist':
+                    styled_content = codelist(data, styles[i].content);
+                    break;
+            }
+            result += pieces[i] + styled_content;
+        }
+        result += pieces[i];
+        return result;
+    }
+    else {
+        return s;
+    }
+}
 function interpolate(data, s) {
     var result = '';
     /**
@@ -26644,6 +26673,25 @@ function split_at_styles(s) {
     pieces.push(current_piece);
     return { pieces: pieces, styles: styles };
 }
+/**
+ * Crea una <ul> con el stilo '$code'
+ */
+function codelist(data, propName) {
+    var list = '<ul>';
+    for (var i = 0; i < data[propName].length; i++) {
+        var item = data[propName][i];
+        list += "<li>$code{" + item + "}</li>";
+    }
+    list += '</ul>';
+    return list;
+}
+var generic_templates = {
+    'parser': {
+        title: 'Se encontró un error de sintaxis',
+        description: 'Los errores de sintaxis ocurren cuando el compilador esperaba encontrar algo pero no lo hizo. Por ejemplo, no escribir $code{finsi} al final de una estructura $code{si} es un error de sintaxis.',
+        suggestion: 'En este caso, el error ocurrió porque el compilador no encontró ninguno de los siguientes elementos: $codelist{expected}'
+    }
+};
 var templates = {
     default: { title: 'Tu programa contiene un error: $code{@where::@reason}' },
     '@assignment-incompatible-types': {
