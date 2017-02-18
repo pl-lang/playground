@@ -10,34 +10,17 @@
     <title>Interprete</title>
   </head>
   <body>
-    <div id="content" class="flex-row">
-      <div id="editor-div" class="flex-col">
-        <div class="bar bar-bottom-border flex-row center-align">
-          <span style="margin-left:10px" class="octicon octicon-pencil"></span>
-          <span class="title">EDITOR</span>
-          <button id="ejecutar" class='boton-ejecutar'>
-            <span class="button-label">Ejecutar programa</span>
-          </button>
-          <span style="margin-left:15px;" class="octicon octicon-repo"></span>
-          <a style="margin-left: 5px;" class="button-label" href="https://github.com/pl-lang/jsplint/wiki/Sintaxis/">
-            Ayuda sobre el lenguaje
-          </a>
-          <span style="margin-left:15px;" class="octicon octicon-mark-github"></span>
-          <a style="margin-left:5px" class="button-label" href="https://github.com/pl-lang/playground/">
-            Visita el proyecto en GitHub
-          </a>
-        </div>
-        <textarea id="editor"></textarea>
-        <div id="message_panel"></div>
-      </div>
-
-      <div class="divider"></div>
-
-      <div id="program-div" class="flex-col">
-        <div class="bar bar-bottom-border flex-row center-align"><span style="margin-left:10px" class="octicon octicon-terminal"></span><span class="title">SALIDA</span></div>
-        <div id="window"></div>
-      </div>
+    <div id="app" class="flex-row">
+      <!--Links a la ayuda y github-->
+      <!--<span style="margin-left:15px;" class="octicon octicon-repo"></span>
+      <a style="margin-left: 5px;" class="button-label" href="https://github.com/pl-lang/jsplint/wiki/Sintaxis/">
+        Ayuda sobre el lenguaje
+      </a>
+      <span style="margin-left:15px;" class="octicon octicon-mark-github"></span>
+      <a style="margin-left:5px" class="button-label" href="https://github.com/pl-lang/playground/">
+        Visita el proyecto en GitHub
+      </a>-->
     </div>
   </body>
-  <script src="./src/bundle.js"></script>
+  <script src="./src/bundle/bundle.js"></script>
 </html>

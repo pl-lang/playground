@@ -2,50 +2,19 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <link rel="stylesheet" href="./css/codemirror.css" charset="utf-8">
     <link rel="stylesheet" href="./css/octicons/octicons.css" charset="utf-8">
     <link rel="stylesheet" href="./css/common.css" charset="utf-8">
     <link rel="stylesheet" href="./css/editor_panel.css" charset="utf-8">
     <link rel="stylesheet" href="./css/compiled_panel.css" charset="utf-8">
     <link rel="stylesheet" href="./css/output_panel.css" charset="utf-8">
     <link rel="stylesheet" href="./css/dev.css" charset="utf-8">
+    <link rel="stylesheet" href="./css/codemirror.css" charset="utf-8">
     <title>Interprete</title>
   </head>
   <body>
-    <div id="content" class="flex-row">
-      <div id="editor-div" class="flex-col">
-        <div class="bar bar-bottom-border flex-row center-align"><span style="margin-left:10px" class="octicon octicon-pencil"></span><span class="title">EDITOR</span>
-          <button id="ejecutar" class='boton-ejecutar'>
-            <span class="button-label">Ejecutar programa</span><span>
-          </button>
 
-          <button id="compilar" class='boton-compilar'>
-            <span class="button-label">Compilar programa</span><span>
-          </button>
-        </div>
-        <textarea id="editor"></textarea>
-        <div id="message_panel"></div>
-      </div>
-
-      <div class="handle"></div>
-
-      <div id="ir-panel" class="flex-col">
-        <div class="bar bar-bottom-border flex-row center-align">
-          <span style="margin-left:10px" class="octicon octicon-gear">
-          <span class="title">PROGRAMA COMPILADO</span>
-        </div>
-        <div style="overflow: auto;">
-          <pre id="ir-pre"></pre>
-        </div>
-      </div>
-
-      <div class="handle"></div>
-
-      <div id="program-div" class="flex-col">
-        <div class="bar bar-bottom-border flex-row center-align"><span style="margin-left:10px" class="octicon octicon-terminal"></span><span class="title">SALIDA</span></div>
-        <div id="window"></div>
-      </div>
-    </div>
+    <div id="app" class="flex-row"></div>
+    
   </body>
-  <script src="./src/bundle.dev.js"></script>
+  <script src="./src/bundle/bundle.dev.js"></script>
 </html>

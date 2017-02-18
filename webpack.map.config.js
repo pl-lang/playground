@@ -2,7 +2,7 @@ module.exports = {
     entry: './src/app.ts',
     output: {
         filename: 'bundle.js',
-        path: './src'
+        path: './src/bundle'
     },
     module: {
         rules: [

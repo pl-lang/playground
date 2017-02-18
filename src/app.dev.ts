@@ -1,23 +1,27 @@
 import * as CodeMirror from 'codemirror'
 import * as $ from 'jquery'
 import {Parser, transform, fr_writer, Errors} from 'interprete-pl'
-import StatusBar from './StatusBar'
-import MessagePanel from './MessagePanel'
-import Window from './Window'
+import OutputPanel from './components/OutputPanel'
+import EditorPanel from './components/EditorPanel'
+import CodePanel from './components/CodePanel'
 
-// crear el panel de mensajes
-// crear el editor
-const editor = CodeMirror.fromTextArea(document.getElementById('editor') as HTMLTextAreaElement, {lineNumbers: true, firstLineNumber: 0})
+const app_container = document.getElementById('app')
 
-const status_bar = new StatusBar($('#message_panel'))
+const editor_panel = new EditorPanel($('#app'), { debug: true })
 
-const message_panel = new MessagePanel($('#message_panel'), editor)
+const handle_1 = document.createElement('div')
+handle_1.className = "handle"
+app_container.appendChild(handle_1)
 
-const panel_compilado = $('#ir-pre')
+const code_panel = new CodePanel($('#app'))
 
-const pWindow = new Window($('#window'))
+const handle_2 = document.createElement('div')
+handle_2.className = "handle"
+app_container.appendChild(handle_2)
 
-status_bar.error_count = 0
+const output_panel = new OutputPanel($('#app'))
+
+editor_panel.status_bar.error_count = 0
 
 const ejecutar = document.getElementById('ejecutar') as HTMLButtonElement
 
@@ -27,10 +31,10 @@ let error_count = 0
 
 const parser = new Parser()
 
-pWindow.on('evaluation-error', (error: Errors.Base) => {
+output_panel.output.on('evaluation-error', (error: Errors.Base) => {
     error_count++
-    status_bar.error_count = error_count
-    message_panel.add_message(error)
+    editor_panel.status_bar.error_count = error_count
+    editor_panel.message_panel.add_message(error)
 })
 
 /**
@@ -41,16 +45,16 @@ function ejecutar_codigo (): void {
     /**
      * Limpiar los restos de la ejecucion anterior...
      */
-    status_bar.error_count = 0
-    pWindow.clear()
-    if (message_panel.dirty) {
-        message_panel.reset()
+    editor_panel.status_bar.error_count = 0
+    output_panel.output.clear()
+    if (editor_panel.message_panel.dirty) {
+        editor_panel.message_panel.reset()
     }
-    else if (message_panel.collapsed == false) {
-        message_panel.collapse()
+    else if (editor_panel.message_panel.collapsed == false) {
+        editor_panel.message_panel.collapse()
     }
 
-    const codigo = editor.getValue()
+    const codigo = editor_panel.editor.getValue()
     ejecutar.disabled = true
     compilar.disabled = true
 
@@ -64,11 +68,11 @@ function ejecutar_codigo (): void {
                 /**
                  * mostrar el programa compilado
                  */
-                panel_compilado.text(fr_writer(transformed.result))
+                code_panel.contents = fr_writer(transformed.result)
                 /**
                  * ejecutar el programa!
                  */
-                pWindow.run(transformed.result)
+                output_panel.output.run(transformed.result)
             }
             else if (transformed.error) {
                 /**
@@ -77,10 +81,10 @@ function ejecutar_codigo (): void {
                  */
                 for (let error of transformed.result) {
                     error_count++
-                    message_panel.add_message(error)
+                    editor_panel.message_panel.add_message(error)
                 }
 
-                status_bar.error_count = error_count
+                editor_panel.status_bar.error_count = error_count
             }
         }
         else {
@@ -89,9 +93,9 @@ function ejecutar_codigo (): void {
              */
             for (let error of parsed.result) {
                 error_count++
-                message_panel.add_message(error)
+                editor_panel.message_panel.add_message(error)
             }
-            status_bar.error_count = error_count
+            editor_panel.status_bar.error_count = error_count
         }
     } catch (error) {
         /**
@@ -100,9 +104,9 @@ function ejecutar_codigo (): void {
         console.log(error)
         ejecutar.disabled = false
         compilar.disabled = false
-        status_bar.error_count = 0
+        editor_panel.status_bar.error_count = 0
         error_count = 0
-        message_panel.reset()
+        editor_panel.message_panel.reset()
     }
 
     compilar.disabled = false
@@ -114,17 +118,17 @@ function compilar_codigo (): void {
     /**
      * Limpiar los restos de la ejecucion anterior...
      */
-    panel_compilado.text('')
-    status_bar.error_count = 0
-    pWindow.clear()
-    if (message_panel.dirty) {
-        message_panel.reset()
+    code_panel.contents = ''
+    editor_panel.status_bar.error_count = 0
+    output_panel.output.clear()
+    if (editor_panel.message_panel.dirty) {
+        editor_panel.message_panel.reset()
     }
-    else if (message_panel.collapsed == false) {
-        message_panel.collapse()
+    else if (editor_panel.message_panel.collapsed == false) {
+        editor_panel.message_panel.collapse()
     }
 
-    const codigo = editor.getValue()
+    const codigo = editor_panel.editor.getValue()
     ejecutar.disabled = true
     compilar.disabled = true
 
@@ -138,7 +142,7 @@ function compilar_codigo (): void {
                 /**
                  * mostrar el programa compilado
                  */
-                panel_compilado.text(fr_writer(transformed.result))
+                code_panel.contents = fr_writer(transformed.result)
             }
             else if (transformed.error) {
                 /**
@@ -147,10 +151,10 @@ function compilar_codigo (): void {
                  */
                 for (let error of transformed.result) {
                     error_count++
-                    message_panel.add_message(error)
+                    editor_panel.message_panel.add_message(error)
                 }
 
-                status_bar.error_count = error_count
+                editor_panel.status_bar.error_count = error_count
             }
         }
         else {
@@ -159,9 +163,9 @@ function compilar_codigo (): void {
              */
             for (let error of parsed.result) {
                 error_count++
-                message_panel.add_message(error)
+                editor_panel.message_panel.add_message(error)
             }
-            status_bar.error_count = error_count
+            editor_panel.status_bar.error_count = error_count
         }
     } catch (error) {
         /**
@@ -170,9 +174,9 @@ function compilar_codigo (): void {
         console.log(error)
         ejecutar.disabled = false
         compilar.disabled = false
-        status_bar.error_count = 0
+        editor_panel.status_bar.error_count = 0
         error_count = 0
-        message_panel.reset()
+        editor_panel.message_panel.reset()
     }
 
     ejecutar.disabled = false
@@ -180,5 +184,5 @@ function compilar_codigo (): void {
     error_count = 0
 }
 
-ejecutar.onclick = ejecutar_codigo
-compilar.onclick = compilar_codigo
+editor_panel.run_button.click(ejecutar_codigo)
+editor_panel.compile_button.click(compilar_codigo)

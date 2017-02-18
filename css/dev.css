@@ -1,11 +1,7 @@
 #editor-div {
-
+    width: 50%
 }
 
-#ir-panel {
-
-}
-
-#program-div {
-    
+.output_container {
+    width: 25%;
 }

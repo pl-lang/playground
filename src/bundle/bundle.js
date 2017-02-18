@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 29);
+/******/ 	return __webpack_require__(__webpack_require__.s = 31);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -520,254 +520,6 @@ var Typed;
 
 /***/ }),
 /* 1 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var interfaces_1 = __webpack_require__(0);
-// flatten :: [any] -> [[any]] -> [any]
-function flatten(accumulator, arr) {
-    for (var _i = 0, arr_1 = arr; _i < arr_1.length; _i++) {
-        var a = arr_1[_i];
-        for (var _a = 0, a_1 = a; _a < a_1.length; _a++) {
-            var element = a_1[_a];
-            accumulator.push(element);
-        }
-    }
-    return accumulator;
-}
-exports.flatten = flatten;
-// toma dos objetos y devuelve uno nuevo que contiene las propiedades (y valores)
-// de los dos anteriores. Si hay propiedades repetidas entre a y b, se toman las
-// de b
-function mergeObjs(a, b) {
-    var r = {};
-    for (var prop in a) {
-        r[prop] = a[prop];
-    }
-    for (var prop in b) {
-        r[prop] = b[prop];
-    }
-    return r;
-}
-exports.mergeObjs = mergeObjs;
-function clone_obj(a) {
-    return mergeObjs({}, a);
-}
-exports.clone_obj = clone_obj;
-// take, zip y zipObj estan basadas en funciones de haskell
-// crea un nuevo objeto dadas una lista de valores y una lista de cadenas.
-// Tendra tantos pares prop/valor como haya elementos en la lista mas
-// corta
-function zipObj(values, names) {
-    if (values.length > names.length) {
-        values = take(names.length, values);
-    }
-    else if (values.length < names.length) {
-        names = take(values.length, names);
-    }
-    var pairs = zip(names, values);
-    /**
-     * result es un objeto cuyas claves son cadenas y cuyos valores son de tipo A
-     */
-    var result = {};
-    for (var _i = 0, pairs_1 = pairs; _i < pairs_1.length; _i++) {
-        var _a = pairs_1[_i], prop = _a[0], value = _a[1];
-        result[prop] = value;
-    }
-    return result;
-}
-exports.zipObj = zipObj;
-// toma dos listas y devuelve una lista de pares donde el primer elemento
-// pertenece a "a" y el segundo a "b". La lista tendra tantos elementos
-// como la mas corta entre a y b
-function zip(a, b) {
-    if (a.length > b.length) {
-        a = take(b.length, a);
-    }
-    else if (a.length < b.length) {
-        b = take(a.length, b);
-    }
-    var result = [];
-    for (var i = 0; i < a.length; i++) {
-        result.push([a[i], b[i]]);
-    }
-    return result;
-}
-exports.zip = zip;
-// toma los primeros n elementos de un arreglo
-function take(n, list) {
-    return list.slice(0, n);
-}
-exports.take = take;
-/**
- * drop
- * quita los primeros n elementos de un arreglo
- */
-function drop(n, list) {
-    return list.slice(n);
-}
-exports.drop = drop;
-/**
- * arr_counter
- * crea un arreglo numerico inicializado con una longitud especifica
- * para ser usado como contador
- */
-function arr_counter(length, init) {
-    var arr = new Array(length);
-    for (var i = 0; i < length; i++) {
-        arr[i] = init;
-    }
-    return arr;
-}
-exports.arr_counter = arr_counter;
-/**
- * arr_equal
- * compara dos arreglos para ver si son iguales
- */
-function arr_equal(a, b) {
-    if (a.length != b.length) {
-        return false;
-    }
-    else {
-        for (var i = 0; i < a.length; i++) {
-            if (a[i] != b[i]) {
-                return false;
-            }
-        }
-    }
-    return true;
-}
-exports.arr_equal = arr_equal;
-/**
- * arr_less
- * compara dos arreglos numericos de la misma longitud
- * para ver si el primero es menor que el segundo.
- */
-function arr_minor(a, b) {
-    for (var i = 0; i < a.length; i++) {
-        if (a[i] > b[i]) {
-            return false;
-        }
-    }
-    return true;
-}
-exports.arr_minor = arr_minor;
-/**
- * arr_major
- * compara dos arreglos numericos de la misma longitud
- * para ver si el primero es mayor que el segundo
- */
-function arr_major(a, b) {
-    for (var i = 0; i < a.length; i++) {
-        if (a[i] < b[i]) {
-            return false;
-        }
-    }
-    return true;
-}
-exports.arr_major = arr_major;
-/**
- * arr_counter_inc
- * toma una arreglo de numeros usado como contador y lo incrementa `increment` unidades
- */
-function arr_counter_inc(a, lengths, init) {
-    var done = false;
-    for (var i = a.length - 1; i >= 0 && !done; i--) {
-        a[i]++;
-        done = true;
-        /**
-         * Esto permite que el primer elemento del arreglo se incremente
-         * indefinidamente. Es el unico que no es reseteado.
-         */
-        if (i > 0) {
-            if (a[i] > lengths[i]) {
-                a[i] = init;
-                done = false;
-            }
-        }
-    }
-}
-exports.arr_counter_inc = arr_counter_inc;
-/**
- * arr_counter_inc
- * toma un arreglo numercio usado como contador y lo decrementa
- * `dec` unidades.
- */
-function arr_counter_dec(a, lengths) {
-    var done = false;
-    for (var i = a.length - 1; i >= 0 && !done; i--) {
-        a[i]--;
-        done = true;
-        if (i > 0) {
-            if (a[i] < 1) {
-                a[i] = lengths[i];
-                done = false;
-            }
-        }
-    }
-}
-exports.arr_counter_dec = arr_counter_dec;
-function types_are_equal(a, b) {
-    if (a.kind == b.kind) {
-        switch (a.kind) {
-            case 'array':
-                if (a.length == b.length) {
-                    return types_are_equal(a.cell_type, b.cell_type);
-                }
-                else {
-                    return false;
-                }
-            case 'atomic':
-                return a.typename == b.typename;
-        }
-    }
-    else {
-        return false;
-    }
-}
-exports.types_are_equal = types_are_equal;
-function stringify(type) {
-    if (type.kind == 'array') {
-        var dimensions = '';
-        var ct = type;
-        while (ct.kind == 'array') {
-            dimensions += ct.length;
-            if (ct.cell_type.kind == 'array') {
-                dimensions += ', ';
-            }
-            ct = ct.cell_type;
-        }
-        var atomic = ct.typename;
-        return atomic + "[" + dimensions + "]";
-    }
-    else {
-        return type.typename;
-    }
-}
-exports.stringify = stringify;
-function type_literal(l) {
-    var type = l.type, value = l.value;
-    var datatype;
-    switch (typeof l.value) {
-        case 'boolean':
-            datatype = new interfaces_1.Typed.AtomicType('literal', 'logico');
-            break;
-        case 'string':
-            datatype = l.value.length > 1 ? new interfaces_1.Typed.StringType(l.value.length, 'literal') : new interfaces_1.Typed.AtomicType('literal', 'caracter');
-            break;
-        case 'number': {
-            datatype = l.value - Math.trunc(l.value) > 0 ? new interfaces_1.Typed.AtomicType('literal', 'real') : new interfaces_1.Typed.AtomicType('literal', 'entero');
-            break;
-        }
-    }
-    return { type: type, value: value, typings: { type: datatype } };
-}
-exports.type_literal = type_literal;
-
-
-/***/ }),
-/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -10994,6 +10746,254 @@ return jQuery;
 
 
 /***/ }),
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var interfaces_1 = __webpack_require__(0);
+// flatten :: [any] -> [[any]] -> [any]
+function flatten(accumulator, arr) {
+    for (var _i = 0, arr_1 = arr; _i < arr_1.length; _i++) {
+        var a = arr_1[_i];
+        for (var _a = 0, a_1 = a; _a < a_1.length; _a++) {
+            var element = a_1[_a];
+            accumulator.push(element);
+        }
+    }
+    return accumulator;
+}
+exports.flatten = flatten;
+// toma dos objetos y devuelve uno nuevo que contiene las propiedades (y valores)
+// de los dos anteriores. Si hay propiedades repetidas entre a y b, se toman las
+// de b
+function mergeObjs(a, b) {
+    var r = {};
+    for (var prop in a) {
+        r[prop] = a[prop];
+    }
+    for (var prop in b) {
+        r[prop] = b[prop];
+    }
+    return r;
+}
+exports.mergeObjs = mergeObjs;
+function clone_obj(a) {
+    return mergeObjs({}, a);
+}
+exports.clone_obj = clone_obj;
+// take, zip y zipObj estan basadas en funciones de haskell
+// crea un nuevo objeto dadas una lista de valores y una lista de cadenas.
+// Tendra tantos pares prop/valor como haya elementos en la lista mas
+// corta
+function zipObj(values, names) {
+    if (values.length > names.length) {
+        values = take(names.length, values);
+    }
+    else if (values.length < names.length) {
+        names = take(values.length, names);
+    }
+    var pairs = zip(names, values);
+    /**
+     * result es un objeto cuyas claves son cadenas y cuyos valores son de tipo A
+     */
+    var result = {};
+    for (var _i = 0, pairs_1 = pairs; _i < pairs_1.length; _i++) {
+        var _a = pairs_1[_i], prop = _a[0], value = _a[1];
+        result[prop] = value;
+    }
+    return result;
+}
+exports.zipObj = zipObj;
+// toma dos listas y devuelve una lista de pares donde el primer elemento
+// pertenece a "a" y el segundo a "b". La lista tendra tantos elementos
+// como la mas corta entre a y b
+function zip(a, b) {
+    if (a.length > b.length) {
+        a = take(b.length, a);
+    }
+    else if (a.length < b.length) {
+        b = take(a.length, b);
+    }
+    var result = [];
+    for (var i = 0; i < a.length; i++) {
+        result.push([a[i], b[i]]);
+    }
+    return result;
+}
+exports.zip = zip;
+// toma los primeros n elementos de un arreglo
+function take(n, list) {
+    return list.slice(0, n);
+}
+exports.take = take;
+/**
+ * drop
+ * quita los primeros n elementos de un arreglo
+ */
+function drop(n, list) {
+    return list.slice(n);
+}
+exports.drop = drop;
+/**
+ * arr_counter
+ * crea un arreglo numerico inicializado con una longitud especifica
+ * para ser usado como contador
+ */
+function arr_counter(length, init) {
+    var arr = new Array(length);
+    for (var i = 0; i < length; i++) {
+        arr[i] = init;
+    }
+    return arr;
+}
+exports.arr_counter = arr_counter;
+/**
+ * arr_equal
+ * compara dos arreglos para ver si son iguales
+ */
+function arr_equal(a, b) {
+    if (a.length != b.length) {
+        return false;
+    }
+    else {
+        for (var i = 0; i < a.length; i++) {
+            if (a[i] != b[i]) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+exports.arr_equal = arr_equal;
+/**
+ * arr_less
+ * compara dos arreglos numericos de la misma longitud
+ * para ver si el primero es menor que el segundo.
+ */
+function arr_minor(a, b) {
+    for (var i = 0; i < a.length; i++) {
+        if (a[i] > b[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+exports.arr_minor = arr_minor;
+/**
+ * arr_major
+ * compara dos arreglos numericos de la misma longitud
+ * para ver si el primero es mayor que el segundo
+ */
+function arr_major(a, b) {
+    for (var i = 0; i < a.length; i++) {
+        if (a[i] < b[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+exports.arr_major = arr_major;
+/**
+ * arr_counter_inc
+ * toma una arreglo de numeros usado como contador y lo incrementa `increment` unidades
+ */
+function arr_counter_inc(a, lengths, init) {
+    var done = false;
+    for (var i = a.length - 1; i >= 0 && !done; i--) {
+        a[i]++;
+        done = true;
+        /**
+         * Esto permite que el primer elemento del arreglo se incremente
+         * indefinidamente. Es el unico que no es reseteado.
+         */
+        if (i > 0) {
+            if (a[i] > lengths[i]) {
+                a[i] = init;
+                done = false;
+            }
+        }
+    }
+}
+exports.arr_counter_inc = arr_counter_inc;
+/**
+ * arr_counter_inc
+ * toma un arreglo numercio usado como contador y lo decrementa
+ * `dec` unidades.
+ */
+function arr_counter_dec(a, lengths) {
+    var done = false;
+    for (var i = a.length - 1; i >= 0 && !done; i--) {
+        a[i]--;
+        done = true;
+        if (i > 0) {
+            if (a[i] < 1) {
+                a[i] = lengths[i];
+                done = false;
+            }
+        }
+    }
+}
+exports.arr_counter_dec = arr_counter_dec;
+function types_are_equal(a, b) {
+    if (a.kind == b.kind) {
+        switch (a.kind) {
+            case 'array':
+                if (a.length == b.length) {
+                    return types_are_equal(a.cell_type, b.cell_type);
+                }
+                else {
+                    return false;
+                }
+            case 'atomic':
+                return a.typename == b.typename;
+        }
+    }
+    else {
+        return false;
+    }
+}
+exports.types_are_equal = types_are_equal;
+function stringify(type) {
+    if (type.kind == 'array') {
+        var dimensions = '';
+        var ct = type;
+        while (ct.kind == 'array') {
+            dimensions += ct.length;
+            if (ct.cell_type.kind == 'array') {
+                dimensions += ', ';
+            }
+            ct = ct.cell_type;
+        }
+        var atomic = ct.typename;
+        return atomic + "[" + dimensions + "]";
+    }
+    else {
+        return type.typename;
+    }
+}
+exports.stringify = stringify;
+function type_literal(l) {
+    var type = l.type, value = l.value;
+    var datatype;
+    switch (typeof l.value) {
+        case 'boolean':
+            datatype = new interfaces_1.Typed.AtomicType('literal', 'logico');
+            break;
+        case 'string':
+            datatype = l.value.length > 1 ? new interfaces_1.Typed.StringType(l.value.length, 'literal') : new interfaces_1.Typed.AtomicType('literal', 'caracter');
+            break;
+        case 'number': {
+            datatype = l.value - Math.trunc(l.value) > 0 ? new interfaces_1.Typed.AtomicType('literal', 'real') : new interfaces_1.Typed.AtomicType('literal', 'entero');
+            break;
+        }
+    }
+    return { type: type, value: value, typings: { type: datatype } };
+}
+exports.type_literal = type_literal;
+
+
+/***/ }),
 /* 3 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -11111,13 +11111,13 @@ function __generator(thisArg, body) {
 
 var Parser_1 = __webpack_require__(5);
 exports.Parser = Parser_1.default;
-var Interpreter_1 = __webpack_require__(17);
+var Interpreter_1 = __webpack_require__(16);
 exports.Interpreter = Interpreter_1.default;
-var transform_1 = __webpack_require__(24);
+var transform_1 = __webpack_require__(23);
 exports.transform = transform_1.default;
 var TSChecker_1 = __webpack_require__(9);
 exports.typecheck = TSChecker_1.default;
-var fr_writer_1 = __webpack_require__(25);
+var fr_writer_1 = __webpack_require__(24);
 exports.fr_writer = fr_writer_1.default;
 
 
@@ -11129,8 +11129,8 @@ exports.fr_writer = fr_writer_1.default;
 
 var tslib_1 = __webpack_require__(3);
 var Emitter_1 = __webpack_require__(10);
-var SourceWrapper_1 = __webpack_require__(19);
-var Lexer_1 = __webpack_require__(18);
+var SourceWrapper_1 = __webpack_require__(18);
+var Lexer_1 = __webpack_require__(17);
 var TokenQueue_1 = __webpack_require__(7);
 var Patterns_1 = __webpack_require__(6);
 var Patterns_2 = __webpack_require__(6);
@@ -13088,7 +13088,7 @@ function wtk(word) {
 "use strict";
 
 var interfaces_1 = __webpack_require__(0);
-var helpers_1 = __webpack_require__(1);
+var helpers_1 = __webpack_require__(2);
 function check(p) {
     var errors = [];
     for (var mn in p.modules) {
@@ -13526,6 +13526,97 @@ exports.isWhiteSpace = function (char) { return /\s/.test(char) && (char !== '\n
 
 /***/ }),
 /* 12 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__(1);
+var CodeMirror = __webpack_require__(14);
+var MessagePanel_1 = __webpack_require__(26);
+var StatusBar_1 = __webpack_require__(28);
+var EditorPanel = (function () {
+    function EditorPanel(container, options) {
+        if (options) {
+            this.options = options;
+        }
+        else {
+            this.options = { debug: false };
+        }
+        this.container = container;
+        this.panel = $('<div id="editor-div" class="flex-col">');
+        this.container.append(this.panel);
+        var title_bar = this.create_title_bar();
+        this.panel.append(title_bar);
+        // agregar textarea para codemirror
+        this.panel.append($('<textarea id="editor"></textarea>'));
+        this.editor = CodeMirror.fromTextArea(this.panel.children('#editor')[0], { lineNumbers: true, firstLineNumber: 0 });
+        var info_panel = $('<div id="info_panel"></div>');
+        this.status_bar = new StatusBar_1.default(info_panel);
+        this.message_panel = new MessagePanel_1.default(info_panel, this.editor);
+        this.panel.append(info_panel);
+    }
+    EditorPanel.prototype.create_title_bar = function () {
+        var bar = $('<div class="bar bar-bottom-border flex-row center-align"></div>');
+        var icon = $('<span style="margin-left:10px" class="octicon octicon-pencil"></span>');
+        var title = $('<span class="title">EDITOR</span>');
+        var run_button = $('<button id="ejecutar" class="boton-ejecutar"><span class="button-label">Ejecutar programa</span><span></button>');
+        var compile_button = $('<button id="compilar" class="boton-compilar"><span class="button-label">Compilar programa</span><span></button>');
+        bar.append(icon).append(title).append(run_button);
+        this.run_button = run_button;
+        if (this.options.debug) {
+            bar.append(compile_button);
+            this.compile_button = compile_button;
+        }
+        else {
+            this.compile_button = null;
+        }
+        return bar;
+    };
+    Object.defineProperty(EditorPanel.prototype, "editor_contents", {
+        get: function () {
+            return this.editor.getValue();
+        },
+        set: function (contents) {
+            this.editor.setValue(contents);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    return EditorPanel;
+}());
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = EditorPanel;
+
+
+/***/ }),
+/* 13 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__(1);
+var Window_1 = __webpack_require__(30);
+var default_1 = (function () {
+    function default_1(container) {
+        this.parent = container;
+        this.container = $('<div class="output_container"></div>');
+        var bar = $('<div class="bar bar-bottom-border flex-row center-align">');
+        var icon = $('<span style="margin-left:10px" class="octicon octicon-terminal"></span>');
+        var title = $('<span class="title">SALIDA</span>');
+        bar.append(icon).append(title);
+        var output_container = $('<div class="output"></div>');
+        this.output = new Window_1.default(output_container);
+        this.container.append(bar).append(output_container);
+        this.parent.append(this.container);
+    }
+    return default_1;
+}());
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = default_1;
+
+
+/***/ }),
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -22643,199 +22734,13 @@ return CodeMirror;
 })));
 
 /***/ }),
-/* 13 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var $ = __webpack_require__(2);
-var Templates_1 = __webpack_require__(28);
-var MessagePanel = (function () {
-    function MessagePanel(container, editor_instance) {
-        this.container = container;
-        this.editor_instance = editor_instance;
-        this.message_list = $('<div id="message_list" class="flex-col msg_list-collapsed"></div>');
-        this.container.append(this.message_list);
-        this.collapsed = true;
-        this.dirty = false;
-    }
-    MessagePanel.prototype.add_message = function (data) {
-        var _this = this;
-        this.dirty = true;
-        var message = $('<div class="error-msg-container"></div>');
-        message.on('click', function (ev) { ev.stopPropagation(); });
-        var title_bar = $("<div class=\"bar flex-row space-between center-align error-bar\"></div>");
-        var template = Templates_1.default(data);
-        var title = $("<div class=\"title small-title error-title\">" + template.title + "</div>");
-        title_bar.append(title);
-        message.append(title_bar);
-        if ('description' in template || 'suggestion' in template) {
-            /**
-             * Agregar botoncito para mostrar/ocultar la descripcion y/o sugerencia
-             */
-            var expand_button_1 = $('<span class="octicon octicon-chevron-up"></span>');
-            expand_button_1.attr('title', 'Mostrar/ocultar informacion sobre este error');
-            expand_button_1.on('click', function (event) {
-                extra_info_container_1.toggleClass('expanded');
-                expand_button_1.toggleClass('chevron-restored');
-                event.stopPropagation();
-            });
-            title_bar.append(expand_button_1);
-            var extra_info_container_1 = $('<div id="extra_info" class="collapsable"></div>');
-            extra_info_container_1.on('click', function (e) { e.stopPropagation(); });
-            if ('description' in template) {
-                extra_info_container_1.append($("<p>" + template.description + "</p>"));
-            }
-            if ('suggestion' in template) {
-                extra_info_container_1.append($("<p>" + template.suggestion + "</p>"));
-            }
-            message.append(extra_info_container_1);
-        }
-        if ('pos' in data) {
-            /**
-             * Hacer que aparezca la manito al pasar el mouse sobre la barra
-             * del titulo
-             */
-            title_bar.addClass('pointer');
-            message.on('click', function () {
-                _this.editor_instance.focus();
-                _this.editor_instance.getDoc().setCursor({ line: data.pos.line, ch: data.pos.column });
-            });
-        }
-        if (this.collapsed) {
-            this.message_list.toggleClass('msg_list-expanded');
-            this.collapsed = false;
-        }
-        this.message_list.append(message);
-    };
-    MessagePanel.prototype.reset = function () {
-        this.collapsed = true;
-        this.message_list.toggleClass('msg_list-expanded');
-        this.message_list.empty();
-        this.dirty = false;
-    };
-    MessagePanel.prototype.collapse = function () {
-        this.collapsed = true;
-        this.message_list.toggleClass('msg_list-expanded');
-    };
-    return MessagePanel;
-}());
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = MessagePanel;
-
-
-/***/ }),
-/* 14 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var StatusBar = (function () {
-    function StatusBar(container) {
-        this.container = container;
-        var htmlstring = "\n        <div id=\"status_bar\" class=\"bar bar-top-border bar-bottom-border flex-row center-align\">\n            <span id=\"status_msg\" class=\"title small-title\"></span>\n        </div>\n        ";
-        this.element = this.container.append(htmlstring);
-        this.status_msg = this.element.find('#status_msg');
-    }
-    Object.defineProperty(StatusBar.prototype, "title", {
-        get: function () {
-            return this.status_msg.text();
-        },
-        set: function (s) {
-            this.status_msg.text(s);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(StatusBar.prototype, "error_count", {
-        get: function () {
-            return this._error_count;
-        },
-        set: function (error_count) {
-            this._error_count = error_count;
-            this.status_msg.empty();
-            if (error_count === 0) {
-                this.status_msg.text('Listo');
-            }
-            else {
-                if (error_count >= 1) {
-                    var icon = '<span class="octicon octicon-alert"></span>';
-                    if (error_count === 1) {
-                        this.status_msg.html(icon + " Se ha encontrado un error en tu programa.");
-                    }
-                    else {
-                        this.status_msg.html(icon + " Se han encontrado " + error_count + " errores en tu programa.");
-                    }
-                }
-            }
-        },
-        enumerable: true,
-        configurable: true
-    });
-    return StatusBar;
-}());
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = StatusBar;
-
-
-/***/ }),
 /* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var tslib_1 = __webpack_require__(3);
-var interprete_pl_1 = __webpack_require__(4);
-var Emitter_1 = __webpack_require__(26);
-var Prompt_1 = __webpack_require__(27);
-var $ = __webpack_require__(2);
-var Window = (function (_super) {
-    tslib_1.__extends(Window, _super);
-    function Window(container) {
-        var _this = _super.call(this, ['evaluation-error']) || this;
-        _this.container = container;
-        _this.container.append($('<div class="line"></div>'));
-        return _this;
-    }
-    Window.prototype.write = function (v) {
-        this.container.append($("<div class=\"line\"><span>" + v + "</span></div>"));
-    };
-    Window.prototype.read = function () {
-        var p = new Prompt_1.default(this.container, this.interpreter);
-    };
-    Window.prototype.run = function (p) {
-        var _this = this;
-        this.interpreter = new interprete_pl_1.Interpreter(p);
-        this.interpreter.on('write', function (v) { return _this.write(v); });
-        this.interpreter.on('read', function () { _this.read(); });
-        this.interpreter.on('evaluation-error', function (error_info) {
-            _this.container.append($('<br>'));
-            _this.container.append($('<div class="line"><span>Programa finalizado debido a un error</span></div>'));
-            _this.emit('evaluation-error', error_info);
-        });
-        this.interpreter.on('program-finished', function () {
-            _this.container.append($('<br>'));
-            _this.container.append($('<div class="line"><span>Programa finalizado</span></div>'));
-        });
-        this.interpreter.run();
-    };
-    Window.prototype.clear = function () {
-        this.container.empty();
-    };
-    return Window;
-}(Emitter_1.default));
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = Window;
-
-
-/***/ }),
-/* 16 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
 var interfaces_1 = __webpack_require__(0);
-var helpers_1 = __webpack_require__(1);
+var helpers_1 = __webpack_require__(2);
 var Evaluator = (function () {
     function Evaluator(program) {
         this.entry_point = program.entry_point;
@@ -23594,7 +23499,7 @@ exports.Evaluator = Evaluator;
 
 
 /***/ }),
-/* 17 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23609,10 +23514,10 @@ var tslib_1 = __webpack_require__(3);
  *  - write
  *  - read
  */
-var Evaluator_1 = __webpack_require__(16);
+var Evaluator_1 = __webpack_require__(15);
 var Emitter_js_1 = __webpack_require__(10);
 var interfaces_1 = __webpack_require__(0);
-var helpers_1 = __webpack_require__(1);
+var helpers_1 = __webpack_require__(2);
 var Interpreter = (function (_super) {
     tslib_1.__extends(Interpreter, _super);
     function Interpreter(p) {
@@ -23785,7 +23690,7 @@ exports.default = Interpreter;
 
 
 /***/ }),
-/* 18 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23894,7 +23799,7 @@ exports.default = Lexer;
 
 
 /***/ }),
-/* 19 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23958,7 +23863,7 @@ exports.default = SourceWrapper;
 
 
 /***/ }),
-/* 20 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -24432,7 +24337,7 @@ function is_builtin(name) {
 
 
 /***/ }),
-/* 21 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -24569,13 +24474,13 @@ function declare_variables(declarations) {
 
 
 /***/ }),
-/* 22 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 var interfaces_1 = __webpack_require__(0);
-var helpers_1 = __webpack_require__(1);
+var helpers_1 = __webpack_require__(2);
 function transform(p) {
     var result = {
         entry_point: null,
@@ -25318,13 +25223,13 @@ function transform_exp_element(element, module_name) {
 
 
 /***/ }),
-/* 23 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 var interfaces_1 = __webpack_require__(0);
-var helpers_1 = __webpack_require__(1);
+var helpers_1 = __webpack_require__(2);
 function transform(ast) {
     var errors = [];
     var typed_program = {
@@ -26172,16 +26077,16 @@ function neg(s) {
 
 
 /***/ }),
-/* 24 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var Declarator_1 = __webpack_require__(21);
-var CallDecorator_1 = __webpack_require__(20);
-var Interpretable_1 = __webpack_require__(22);
+var Declarator_1 = __webpack_require__(20);
+var CallDecorator_1 = __webpack_require__(19);
+var Interpretable_1 = __webpack_require__(21);
 var TSChecker_1 = __webpack_require__(9);
-var TSTyper_1 = __webpack_require__(23);
+var TSTyper_1 = __webpack_require__(22);
 function transform(p) {
     var s1 = Declarator_1.default(p);
     if (s1.error) {
@@ -26215,7 +26120,7 @@ exports.default = transform;
 
 
 /***/ }),
-/* 25 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26412,7 +26317,7 @@ function repetir(c, n) {
 
 
 /***/ }),
-/* 26 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26485,12 +26390,94 @@ exports.default = Emitter;
 
 
 /***/ }),
+/* 26 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__(1);
+var Templates_1 = __webpack_require__(29);
+var MessagePanel = (function () {
+    function MessagePanel(container, editor_instance) {
+        this.container = container;
+        this.editor_instance = editor_instance;
+        this.message_list = $('<div id="message_list" class="flex-col msg_list-collapsed"></div>');
+        this.container.append(this.message_list);
+        this.collapsed = true;
+        this.dirty = false;
+    }
+    MessagePanel.prototype.add_message = function (data) {
+        var _this = this;
+        this.dirty = true;
+        var message = $('<div class="error-msg-container"></div>');
+        message.on('click', function (ev) { ev.stopPropagation(); });
+        var title_bar = $("<div class=\"bar flex-row space-between center-align error-bar\"></div>");
+        var template = Templates_1.default(data);
+        var title = $("<div class=\"title small-title error-title\">" + template.title + "</div>");
+        title_bar.append(title);
+        message.append(title_bar);
+        if ('description' in template || 'suggestion' in template) {
+            /**
+             * Agregar botoncito para mostrar/ocultar la descripcion y/o sugerencia
+             */
+            var expand_button_1 = $('<span class="octicon octicon-chevron-up"></span>');
+            expand_button_1.attr('title', 'Mostrar/ocultar informacion sobre este error');
+            expand_button_1.on('click', function (event) {
+                extra_info_container_1.toggleClass('expanded');
+                expand_button_1.toggleClass('chevron-restored');
+                event.stopPropagation();
+            });
+            title_bar.append(expand_button_1);
+            var extra_info_container_1 = $('<div id="extra_info" class="collapsable"></div>');
+            extra_info_container_1.on('click', function (e) { e.stopPropagation(); });
+            if ('description' in template) {
+                extra_info_container_1.append($("<p>" + template.description + "</p>"));
+            }
+            if ('suggestion' in template) {
+                extra_info_container_1.append($("<p>" + template.suggestion + "</p>"));
+            }
+            message.append(extra_info_container_1);
+        }
+        if ('pos' in data) {
+            /**
+             * Hacer que aparezca la manito al pasar el mouse sobre la barra
+             * del titulo
+             */
+            title_bar.addClass('pointer');
+            message.on('click', function () {
+                _this.editor_instance.focus();
+                _this.editor_instance.getDoc().setCursor({ line: data.pos.line, ch: data.pos.column });
+            });
+        }
+        if (this.collapsed) {
+            this.message_list.toggleClass('msg_list-expanded');
+            this.collapsed = false;
+        }
+        this.message_list.append(message);
+    };
+    MessagePanel.prototype.reset = function () {
+        this.collapsed = true;
+        this.message_list.toggleClass('msg_list-expanded');
+        this.message_list.empty();
+        this.dirty = false;
+    };
+    MessagePanel.prototype.collapse = function () {
+        this.collapsed = true;
+        this.message_list.toggleClass('msg_list-expanded');
+    };
+    return MessagePanel;
+}());
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = MessagePanel;
+
+
+/***/ }),
 /* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var $ = __webpack_require__(2);
+var $ = __webpack_require__(1);
 var Prompt = (function () {
     function Prompt(container, i) {
         var _this = this;
@@ -26519,6 +26506,60 @@ exports.default = Prompt;
 
 /***/ }),
 /* 28 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var StatusBar = (function () {
+    function StatusBar(container) {
+        this.container = container;
+        var htmlstring = "\n        <div id=\"status_bar\" class=\"bar bar-top-border bar-bottom-border flex-row center-align\">\n            <span id=\"status_msg\" class=\"title small-title\"></span>\n        </div>\n        ";
+        this.element = this.container.append(htmlstring);
+        this.status_msg = this.element.find('#status_msg');
+    }
+    Object.defineProperty(StatusBar.prototype, "title", {
+        get: function () {
+            return this.status_msg.text();
+        },
+        set: function (s) {
+            this.status_msg.text(s);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(StatusBar.prototype, "error_count", {
+        get: function () {
+            return this._error_count;
+        },
+        set: function (error_count) {
+            this._error_count = error_count;
+            this.status_msg.empty();
+            if (error_count === 0) {
+                this.status_msg.text('Listo');
+            }
+            else {
+                if (error_count >= 1) {
+                    var icon = '<span class="octicon octicon-alert"></span>';
+                    if (error_count === 1) {
+                        this.status_msg.html(icon + " Se ha encontrado un error en tu programa.");
+                    }
+                    else {
+                        this.status_msg.html(icon + " Se han encontrado " + error_count + " errores en tu programa.");
+                    }
+                }
+            }
+        },
+        enumerable: true,
+        configurable: true
+    });
+    return StatusBar;
+}());
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = StatusBar;
+
+
+/***/ }),
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26791,31 +26832,80 @@ var templates = {
 
 
 /***/ }),
-/* 29 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var CodeMirror = __webpack_require__(12);
-var $ = __webpack_require__(2);
+var tslib_1 = __webpack_require__(3);
 var interprete_pl_1 = __webpack_require__(4);
-var StatusBar_1 = __webpack_require__(14);
-var MessagePanel_1 = __webpack_require__(13);
-var Window_1 = __webpack_require__(15);
-// crear el panel de mensajes
-// crear el editor
-var editor = CodeMirror.fromTextArea(document.getElementById('editor'), { lineNumbers: true, firstLineNumber: 0 });
-var status_bar = new StatusBar_1.default($('#message_panel'));
-var message_panel = new MessagePanel_1.default($('#message_panel'), editor);
-var pWindow = new Window_1.default($('#window'));
-status_bar.error_count = 0;
+var Emitter_1 = __webpack_require__(25);
+var Prompt_1 = __webpack_require__(27);
+var $ = __webpack_require__(1);
+var Window = (function (_super) {
+    tslib_1.__extends(Window, _super);
+    function Window(container) {
+        var _this = _super.call(this, ['evaluation-error']) || this;
+        _this.container = container;
+        _this.container.append($('<div class="line"></div>'));
+        return _this;
+    }
+    Window.prototype.write = function (v) {
+        this.container.append($("<div class=\"line\"><span>" + v + "</span></div>"));
+    };
+    Window.prototype.read = function () {
+        var p = new Prompt_1.default(this.container, this.interpreter);
+    };
+    Window.prototype.run = function (p) {
+        var _this = this;
+        this.interpreter = new interprete_pl_1.Interpreter(p);
+        this.interpreter.on('write', function (v) { return _this.write(v); });
+        this.interpreter.on('read', function () { _this.read(); });
+        this.interpreter.on('evaluation-error', function (error_info) {
+            _this.container.append($('<br>'));
+            _this.container.append($('<div class="line"><span>Programa finalizado debido a un error</span></div>'));
+            _this.emit('evaluation-error', error_info);
+        });
+        this.interpreter.on('program-finished', function () {
+            _this.container.append($('<br>'));
+            _this.container.append($('<div class="line"><span>Programa finalizado</span></div>'));
+        });
+        this.interpreter.run();
+    };
+    Window.prototype.clear = function () {
+        this.container.empty();
+    };
+    return Window;
+}(Emitter_1.default));
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = Window;
+
+
+/***/ }),
+/* 31 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__(1);
+var interprete_pl_1 = __webpack_require__(4);
+var OutputPanel_1 = __webpack_require__(13);
+var EditorPanel_1 = __webpack_require__(12);
+var app_container = document.getElementById('app');
+var editor_panel = new EditorPanel_1.default($('#app'), { debug: false });
+var handle_1 = document.createElement('div');
+handle_1.className = "handle";
+app_container.appendChild(handle_1);
+var output_panel = new OutputPanel_1.default($('#app'));
+editor_panel.status_bar.error_count = 0;
 var ejecutar = document.getElementById('ejecutar');
+var compilar = document.getElementById('compilar');
 var error_count = 0;
 var parser = new interprete_pl_1.Parser();
-pWindow.on('evaluation-error', function (error) {
+output_panel.output.on('evaluation-error', function (error) {
     error_count++;
-    status_bar.error_count = error_count;
-    message_panel.add_message(error);
+    editor_panel.status_bar.error_count = error_count;
+    editor_panel.message_panel.add_message(error);
 });
 /**
  * Falta asignar callbacks a los eventos de parser
@@ -26824,16 +26914,17 @@ function ejecutar_codigo() {
     /**
      * Limpiar los restos de la ejecucion anterior...
      */
-    status_bar.error_count = 0;
-    pWindow.clear();
-    if (message_panel.dirty) {
-        message_panel.reset();
+    editor_panel.status_bar.error_count = 0;
+    output_panel.output.clear();
+    if (editor_panel.message_panel.dirty) {
+        editor_panel.message_panel.reset();
     }
-    else if (message_panel.collapsed == false) {
-        message_panel.collapse();
+    else if (editor_panel.message_panel.collapsed == false) {
+        editor_panel.message_panel.collapse();
     }
-    var codigo = editor.getValue();
+    var codigo = editor_panel.editor.getValue();
     ejecutar.disabled = true;
+    compilar.disabled = true;
     try {
         var parsed = parser.parse(codigo);
         if (parsed.error == false) {
@@ -26842,19 +26933,19 @@ function ejecutar_codigo() {
                 /**
                  * ejecutar el programa!
                  */
-                pWindow.run(transformed.result);
+                output_panel.output.run(transformed.result);
             }
             else if (transformed.error) {
                 /**
-                 * se encontraron errores de transformacion
-                 * o de tipado
+                 * Se encontraron errores durante la transformacion
+                 * o el chequeo de tipos
                  */
                 for (var _i = 0, _a = transformed.result; _i < _a.length; _i++) {
                     var error = _a[_i];
                     error_count++;
-                    message_panel.add_message(error);
+                    editor_panel.message_panel.add_message(error);
                 }
-                status_bar.error_count = error_count;
+                editor_panel.status_bar.error_count = error_count;
             }
         }
         else {
@@ -26864,9 +26955,9 @@ function ejecutar_codigo() {
             for (var _b = 0, _c = parsed.result; _b < _c.length; _b++) {
                 var error = _c[_b];
                 error_count++;
-                message_panel.add_message(error);
+                editor_panel.message_panel.add_message(error);
             }
-            status_bar.error_count = error_count;
+            editor_panel.status_bar.error_count = error_count;
         }
     }
     catch (error) {
@@ -26875,14 +26966,16 @@ function ejecutar_codigo() {
          */
         console.log(error);
         ejecutar.disabled = false;
-        status_bar.error_count = 0;
+        compilar.disabled = false;
+        editor_panel.status_bar.error_count = 0;
         error_count = 0;
-        message_panel.reset();
+        editor_panel.message_panel.reset();
     }
+    compilar.disabled = false;
     ejecutar.disabled = false;
     error_count = 0;
 }
-ejecutar.onclick = ejecutar_codigo;
+editor_panel.run_button.click(ejecutar_codigo);
 
 
 /***/ })

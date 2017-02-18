@@ -1,53 +1,56 @@
 import * as CodeMirror from 'codemirror'
 import * as $ from 'jquery'
-import {Parser, transform, typecheck, Errors} from 'interprete-pl'
-import StatusBar from './StatusBar'
-import MessagePanel from './MessagePanel'
-import Window from './Window'
+import { Parser, transform, fr_writer, Errors } from 'interprete-pl'
+import OutputPanel from './components/OutputPanel'
+import EditorPanel from './components/EditorPanel'
+import CodePanel from './components/CodePanel'
 
-// crear el panel de mensajes
-// crear el editor
-const editor = CodeMirror.fromTextArea(document.getElementById('editor') as HTMLTextAreaElement, {lineNumbers: true, firstLineNumber: 0})
+const app_container = document.getElementById('app')
 
-const status_bar = new StatusBar($('#message_panel'))
+const editor_panel = new EditorPanel($('#app'), { debug: false })
 
-const message_panel = new MessagePanel($('#message_panel'), editor)
+const handle_1 = document.createElement('div')
+handle_1.className = "handle"
+app_container.appendChild(handle_1)
 
-const pWindow = new Window($('#window'))
+const output_panel = new OutputPanel($('#app'))
 
-status_bar.error_count = 0
+editor_panel.status_bar.error_count = 0
 
 const ejecutar = document.getElementById('ejecutar') as HTMLButtonElement
+
+const compilar = document.getElementById('compilar') as HTMLButtonElement
 
 let error_count = 0
 
 const parser = new Parser()
 
-pWindow.on('evaluation-error', (error: Errors.Base) => {
+output_panel.output.on('evaluation-error', (error: Errors.Base) => {
     error_count++
-    status_bar.error_count = error_count
-    message_panel.add_message(error)
+    editor_panel.status_bar.error_count = error_count
+    editor_panel.message_panel.add_message(error)
 })
 
 /**
  * Falta asignar callbacks a los eventos de parser
  */
 
-function ejecutar_codigo (): void {
+function ejecutar_codigo(): void {
     /**
      * Limpiar los restos de la ejecucion anterior...
      */
-    status_bar.error_count = 0
-    pWindow.clear()
-    if (message_panel.dirty) {
-        message_panel.reset()
+    editor_panel.status_bar.error_count = 0
+    output_panel.output.clear()
+    if (editor_panel.message_panel.dirty) {
+        editor_panel.message_panel.reset()
     }
-    else if (message_panel.collapsed == false) {
-        message_panel.collapse()
+    else if (editor_panel.message_panel.collapsed == false) {
+        editor_panel.message_panel.collapse()
     }
 
-    const codigo = editor.getValue()
+    const codigo = editor_panel.editor.getValue()
     ejecutar.disabled = true
+    compilar.disabled = true
 
     try {
         const parsed = parser.parse(codigo)
@@ -59,19 +62,19 @@ function ejecutar_codigo (): void {
                 /**
                  * ejecutar el programa!
                  */
-                pWindow.run(transformed.result)
+                output_panel.output.run(transformed.result)
             }
             else if (transformed.error) {
                 /**
-                 * se encontraron errores de transformacion
-                 * o de tipado
+                 * Se encontraron errores durante la transformacion
+                 * o el chequeo de tipos
                  */
                 for (let error of transformed.result) {
                     error_count++
-                    message_panel.add_message(error)
+                    editor_panel.message_panel.add_message(error)
                 }
 
-                status_bar.error_count = error_count
+                editor_panel.status_bar.error_count = error_count
             }
         }
         else {
@@ -80,9 +83,9 @@ function ejecutar_codigo (): void {
              */
             for (let error of parsed.result) {
                 error_count++
-                message_panel.add_message(error)
+                editor_panel.message_panel.add_message(error)
             }
-            status_bar.error_count = error_count
+            editor_panel.status_bar.error_count = error_count
         }
     } catch (error) {
         /**
@@ -90,13 +93,15 @@ function ejecutar_codigo (): void {
          */
         console.log(error)
         ejecutar.disabled = false
-        status_bar.error_count = 0
+        compilar.disabled = false
+        editor_panel.status_bar.error_count = 0
         error_count = 0
-        message_panel.reset()
+        editor_panel.message_panel.reset()
     }
 
+    compilar.disabled = false
     ejecutar.disabled = false
     error_count = 0
 }
 
-ejecutar.onclick = ejecutar_codigo
+editor_panel.run_button.click(ejecutar_codigo)
