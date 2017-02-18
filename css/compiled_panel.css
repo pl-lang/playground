@@ -1,0 +1,16 @@
+#ir-panel {
+  height: 100%;		
+  width: 25%;
+}		
+		
+#ir-pre {		
+  margin-top: 4px;		
+  margin-left: 4px;		
+}		
+		
+#ir-textarea {		
+  height: 100%;		
+  width: 100%;		
+  resize: none;		
+  margin-left: 0px;		
+}

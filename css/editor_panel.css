@@ -1,0 +1,115 @@
+#editor-div {
+  height: 100%;
+  width: 50%;
+}
+
+.CodeMirror {
+  width: 100%;
+  height: 100% !important;
+  box-sizing: border-box;
+  border: 0px;
+  font-size: 14px;
+  font-family: "Source Code Pro Regular", "Consolas", monospace;
+}
+
+/*------BOTONES-------*/
+
+.boton-ejecutar {
+  background-color: hsl(120, 61%, 53%);
+  color: white;
+  border: 1px solid hsl(120, 61%, 45%);
+  font-weight: bold;
+}
+
+.boton-ejecutar:hover {
+  background-color: hsl(120, 61%, 45%);
+}
+
+.boton-ejecutar:active {
+  background-color: hsl(120, 61%, 40%);
+}
+
+.boton-ejecutar:disabled {
+  background-color: red;
+}
+
+.boton-compilar {		
+ background-color: hsl(119.9, 10.7%, 80.2%);		
+ color: black;		
+ border: 1px solid hsl(119.9, 4.8%, 60%);		
+}		
+		
+.boton-compilar:hover {		
+ background-color: hsl(119.9, 10.7%, 70%);		
+}		
+		
+.boton-compilar:active {		
+ background-color: hsl(119.9, 10.7%, 50%);		
+}
+
+/* ---- MessagePanel ----*/
+
+#message_list {
+  overflow-y: scroll;
+  transition: height 150ms;
+}
+
+.msg_list-collapsed {
+  height: 0px;
+}
+
+.msg_list-expanded {
+  height: 200px;
+  max-height: 200px;
+}
+
+.error-msg-container {
+  margin-top: 3px;
+  border-bottom: 1px solid hsla(1, 94%, 30%, 1);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  background-color: hsl(0, 100%, 98%);
+}
+
+.error-bar {
+  background-color: hsl(0, 100%, 58%);
+  border-top: 1px solid hsla(1, 94%, 30%, 1);
+  border-bottom: 2px solid hsl(1, 95%, 38%);
+}
+
+.error-title {
+  color: white;
+  font-family: 'Segoe UI';
+  font-size: 16px;
+  font-weight: 400;
+}
+
+.octicon-chevron-up {
+  color: white;
+  margin-right: 4px;
+  transform: rotate(180deg);
+  transition: transform 300ms;
+  padding-left: 6px;
+  padding-right: 6px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  cursor: initial;
+}
+
+.chevron-restored {
+  transform: rotate(0deg);
+}
+
+#extra_info p {
+  margin-left: 4px;
+}
+
+.code {
+  border-radius: 3px;
+  border: 1px solid hsl(0, 0%, 81%);
+  background-color: rgb(247, 247, 247);
+  color: black;
+  padding: 1px 4px;
+  margin: 0px 2px;
+}
