@@ -279,3 +279,39 @@ textarea {
   border: 0px;
   margin-left: 4px;
 }
+
+#ir-panel {
+  height: 100%;		
+  width: 40%;		
+  border-right: 1px solid hsl(192, 15%, 70%);		
+  border-left: 1px solid hsl(192, 15%, 70%);		
+}		
+		
+#ir-pre {		
+  margin-top: 4px;		
+  margin-left: 4px;		
+}		
+		
+#ir-textarea {		
+  height: 100%;		
+  width: 100%;		
+  resize: none;		
+  margin-left: 0px;		
+}
+
+
+/* Boton 'compilar' */
+.boton-compilar {		
+ background-color: hsl(119.9, 10.7%, 80.2%);		
+ color: black;		
+ border: 1px solid hsl(119.9, 4.8%, 60%);		
+}		
+		
+.boton-compilar:hover {		
+ background-color: hsl(119.9, 10.7%, 70%);		
+}		
+		
+.boton-compilar:active {		
+ background-color: hsl(119.9, 10.7%, 50%);		
+}
+/* ---------------- */
