@@ -25,7 +25,6 @@
     "@types/codemirror": "0.0.37",
     "@types/jquery": "^2.0.39",
     "codemirror": "^5.23.0",
-    "draggabilly": "^2.1.1",
     "interprete-pl": "file:///C:\\Users\\Rodrigo\\Codigo\\interprete-pl",
     "jquery": "^3.1.1",
     "octicons": "^5.0.1",
@@ -33,6 +32,8 @@
     "ts-loader": "^2.0.0",
     "tslib": "^1.5.0",
     "typescript": "^2.1.5",
+    "unidragger": "^2.1.0",
     "webpack": "^2.2.0"
-  }
+  },
+  "devDependencies": {}
 }

@@ -490,13 +490,6 @@ domain-browser@^1.1.1:
   version "1.1.7"
   resolved "https://registry.yarnpkg.com/domain-browser/-/domain-browser-1.1.7.tgz#867aa4b093faa05f1de08c06f4d7b21fdf8698bc"
 
-draggabilly@^2.1.1:
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/draggabilly/-/draggabilly-2.1.1.tgz#3a31a1fa73e4cc71c75a4bfea9acfb2dade01722"
-  dependencies:
-    get-size "~2.0.2"
-    unidragger "~2.1.0"
-
 ecc-jsbn@~0.1.1:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/ecc-jsbn/-/ecc-jsbn-0.1.1.tgz#0fc73a9ed5f0d53c38193398523ef7e543777505"
@@ -678,10 +671,6 @@ generate-object-property@^1.1.0:
 get-caller-file@^1.0.1:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/get-caller-file/-/get-caller-file-1.0.2.tgz#f702e63127e7e231c160a80c1554acb70d5047e5"
-
-get-size@~2.0.2:
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/get-size/-/get-size-2.0.2.tgz#555ea98ab8732e0c021e9e23e2219adcbe398e98"
 
 getpass@^0.1.1:
   version "0.1.6"
@@ -1680,7 +1669,7 @@ uid-number@~0.0.6:
   version "0.0.6"
   resolved "https://registry.yarnpkg.com/uid-number/-/uid-number-0.0.6.tgz#0ea10e8035e8eb5b8e4449f06da1c730663baa81"
 
-unidragger@~2.1.0:
+unidragger@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/unidragger/-/unidragger-2.1.0.tgz#e4c23f5fab8188c637e776d0b3810c7d989e5561"
   dependencies:

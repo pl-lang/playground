@@ -50,7 +50,6 @@ function ejecutar_codigo(): void {
 
     const codigo = editor_panel.editor.getValue()
     ejecutar.disabled = true
-    compilar.disabled = true
 
     try {
         const parsed = parser.parse(codigo)
@@ -93,13 +92,11 @@ function ejecutar_codigo(): void {
          */
         console.log(error)
         ejecutar.disabled = false
-        compilar.disabled = false
         editor_panel.status_bar.error_count = 0
         error_count = 0
         editor_panel.message_panel.reset()
     }
-
-    compilar.disabled = false
+    
     ejecutar.disabled = false
     error_count = 0
 }

@@ -26924,7 +26924,6 @@ function ejecutar_codigo() {
     }
     var codigo = editor_panel.editor.getValue();
     ejecutar.disabled = true;
-    compilar.disabled = true;
     try {
         var parsed = parser.parse(codigo);
         if (parsed.error == false) {
@@ -26966,12 +26965,10 @@ function ejecutar_codigo() {
          */
         console.log(error);
         ejecutar.disabled = false;
-        compilar.disabled = false;
         editor_panel.status_bar.error_count = 0;
         error_count = 0;
         editor_panel.message_panel.reset();
     }
-    compilar.disabled = false;
     ejecutar.disabled = false;
     error_count = 0;
 }
