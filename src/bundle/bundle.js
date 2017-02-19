@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 31);
+/******/ 	return __webpack_require__(__webpack_require__.s = 32);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -11111,13 +11111,13 @@ function __generator(thisArg, body) {
 
 var Parser_1 = __webpack_require__(5);
 exports.Parser = Parser_1.default;
-var Interpreter_1 = __webpack_require__(16);
+var Interpreter_1 = __webpack_require__(17);
 exports.Interpreter = Interpreter_1.default;
-var transform_1 = __webpack_require__(23);
+var transform_1 = __webpack_require__(24);
 exports.transform = transform_1.default;
 var TSChecker_1 = __webpack_require__(9);
 exports.typecheck = TSChecker_1.default;
-var fr_writer_1 = __webpack_require__(24);
+var fr_writer_1 = __webpack_require__(25);
 exports.fr_writer = fr_writer_1.default;
 
 
@@ -11129,8 +11129,8 @@ exports.fr_writer = fr_writer_1.default;
 
 var tslib_1 = __webpack_require__(3);
 var Emitter_1 = __webpack_require__(10);
-var SourceWrapper_1 = __webpack_require__(18);
-var Lexer_1 = __webpack_require__(17);
+var SourceWrapper_1 = __webpack_require__(19);
+var Lexer_1 = __webpack_require__(18);
 var TokenQueue_1 = __webpack_require__(7);
 var Patterns_1 = __webpack_require__(6);
 var Patterns_2 = __webpack_require__(6);
@@ -13530,10 +13530,110 @@ exports.isWhiteSpace = function (char) { return /\s/.test(char) && (char !== '\n
 
 "use strict";
 
+var DragManager = (function () {
+    function DragManager(panels, width, handles, container) {
+        if (panels.length == width.length) {
+            this.panels = panels;
+            this.width = width;
+        }
+        else {
+            throw new Error('panels.length =/= widths.length');
+        }
+        this.handles = handles;
+        this.is_grabbed = false;
+        this.grabbed_handle = 0;
+        this.panel_container = container;
+        this.bind_handles();
+    }
+    DragManager.prototype.bind_handles = function () {
+        var _this = this;
+        var _loop_1 = function (i) {
+            this_1.handles[i].mousedown(function (ev) {
+                _this.is_grabbed = true;
+                _this.grabbed_handle = i;
+            });
+            this_1.handles[i].mouseup(function (ev) {
+                _this.is_grabbed = false;
+            });
+            this_1.handles[i].mousemove(function (ev) {
+                if (_this.is_grabbed && i == _this.grabbed_handle) {
+                    var pos = _this.handles[i].position();
+                    if (Math.abs(ev.pageX - pos.left) > 30) {
+                        _this.drag(i, { x: pos.left, y: pos.top }, { x: ev.pageX, y: ev.pageY });
+                    }
+                }
+            });
+        };
+        var this_1 = this;
+        for (var i = 0; i < this.handles.length; i++) {
+            _loop_1(i);
+        }
+    };
+    DragManager.prototype.drag = function (handle_index, starting_pos, final_pos) {
+        var width = this.panel_container.width();
+        var height = this.panel_container.height();
+        var handle = this.handles[handle_index];
+        if (final_pos.x < 0) {
+            final_pos.x = 0;
+        }
+        else if (final_pos.x > width) {
+            final_pos.x = width;
+        }
+        if (final_pos.y < 0) {
+            final_pos.y = 0;
+        }
+        else if (final_pos.y > height) {
+            final_pos.y = height;
+        }
+        var delta_percentage = Number((((final_pos.x - starting_pos.x) / width) * 100).toPrecision(3));
+        var left_panel_index = handle_index;
+        if (this.width[left_panel_index] == 0) {
+            if (delta_percentage < 0) {
+                while (this.width[left_panel_index] == 0) {
+                    left_panel_index--;
+                }
+            }
+        }
+        var right_panel_index = handle_index + 1;
+        if (this.width[right_panel_index] == 0) {
+            if (delta_percentage > 0) {
+                while (this.width[right_panel_index] == 0) {
+                    right_panel_index++;
+                }
+            }
+        }
+        var left_width = Math.abs(Number((this.width[left_panel_index] + delta_percentage).toPrecision(3)));
+        // let right_width = Math.abs(Number((this.width[right_panel_index] - delta_percentage).toPrecision(3)))
+        left_width = -(0 - left_width) < 0.1 ? 0 : left_width;
+        var right_width = (this.width[left_panel_index] - left_width) + this.width[right_panel_index];
+        right_width = -(0 - right_width) < 0.1 ? 0 : right_width;
+        this.width[left_panel_index] = left_width;
+        this.width[right_panel_index] = right_width;
+        var total_width = this.width.reduce(function (total, current) { return total + current; });
+        if (total_width > 100) {
+            var delta_1 = (total_width - 100) / this.width.length;
+            this.width = this.width.map(function (w) { return w - delta_1; });
+        }
+        for (var i = 0; i < this.panels.length; i++) {
+            this.panels[i].attr('style', "width: " + this.width[i] + "%;");
+        }
+    };
+    return DragManager;
+}());
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = DragManager;
+
+
+/***/ }),
+/* 13 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
 var $ = __webpack_require__(1);
-var CodeMirror = __webpack_require__(14);
-var MessagePanel_1 = __webpack_require__(26);
-var StatusBar_1 = __webpack_require__(28);
+var CodeMirror = __webpack_require__(15);
+var MessagePanel_1 = __webpack_require__(27);
+var StatusBar_1 = __webpack_require__(29);
 var EditorPanel = (function () {
     function EditorPanel(container, options) {
         if (options) {
@@ -13589,13 +13689,13 @@ exports.default = EditorPanel;
 
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 var $ = __webpack_require__(1);
-var Window_1 = __webpack_require__(30);
+var Window_1 = __webpack_require__(31);
 var default_1 = (function () {
     function default_1(container) {
         this.parent = container;
@@ -13616,7 +13716,7 @@ exports.default = default_1;
 
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -22734,7 +22834,7 @@ return CodeMirror;
 })));
 
 /***/ }),
-/* 15 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23499,7 +23599,7 @@ exports.Evaluator = Evaluator;
 
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23514,7 +23614,7 @@ var tslib_1 = __webpack_require__(3);
  *  - write
  *  - read
  */
-var Evaluator_1 = __webpack_require__(15);
+var Evaluator_1 = __webpack_require__(16);
 var Emitter_js_1 = __webpack_require__(10);
 var interfaces_1 = __webpack_require__(0);
 var helpers_1 = __webpack_require__(2);
@@ -23690,7 +23790,7 @@ exports.default = Interpreter;
 
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23799,7 +23899,7 @@ exports.default = Lexer;
 
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23863,7 +23963,7 @@ exports.default = SourceWrapper;
 
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -24337,7 +24437,7 @@ function is_builtin(name) {
 
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -24474,7 +24574,7 @@ function declare_variables(declarations) {
 
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -25223,7 +25323,7 @@ function transform_exp_element(element, module_name) {
 
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26077,16 +26177,16 @@ function neg(s) {
 
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var Declarator_1 = __webpack_require__(20);
-var CallDecorator_1 = __webpack_require__(19);
-var Interpretable_1 = __webpack_require__(21);
+var Declarator_1 = __webpack_require__(21);
+var CallDecorator_1 = __webpack_require__(20);
+var Interpretable_1 = __webpack_require__(22);
 var TSChecker_1 = __webpack_require__(9);
-var TSTyper_1 = __webpack_require__(22);
+var TSTyper_1 = __webpack_require__(23);
 function transform(p) {
     var s1 = Declarator_1.default(p);
     if (s1.error) {
@@ -26120,7 +26220,7 @@ exports.default = transform;
 
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26317,7 +26417,7 @@ function repetir(c, n) {
 
 
 /***/ }),
-/* 25 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26390,13 +26490,13 @@ exports.default = Emitter;
 
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 var $ = __webpack_require__(1);
-var Templates_1 = __webpack_require__(29);
+var Templates_1 = __webpack_require__(30);
 var MessagePanel = (function () {
     function MessagePanel(container, editor_instance) {
         this.container = container;
@@ -26472,7 +26572,7 @@ exports.default = MessagePanel;
 
 
 /***/ }),
-/* 27 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26505,7 +26605,7 @@ exports.default = Prompt;
 
 
 /***/ }),
-/* 28 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26559,7 +26659,7 @@ exports.default = StatusBar;
 
 
 /***/ }),
-/* 29 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26832,15 +26932,15 @@ var templates = {
 
 
 /***/ }),
-/* 30 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 var tslib_1 = __webpack_require__(3);
 var interprete_pl_1 = __webpack_require__(4);
-var Emitter_1 = __webpack_require__(25);
-var Prompt_1 = __webpack_require__(27);
+var Emitter_1 = __webpack_require__(26);
+var Prompt_1 = __webpack_require__(28);
 var $ = __webpack_require__(1);
 var Window = (function (_super) {
     tslib_1.__extends(Window, _super);
@@ -26882,25 +26982,43 @@ exports.default = Window;
 
 
 /***/ }),
-/* 31 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 var $ = __webpack_require__(1);
 var interprete_pl_1 = __webpack_require__(4);
-var OutputPanel_1 = __webpack_require__(13);
-var EditorPanel_1 = __webpack_require__(12);
+var OutputPanel_1 = __webpack_require__(14);
+var EditorPanel_1 = __webpack_require__(13);
+var DragManager_1 = __webpack_require__(12);
+function create_handle(i) {
+    var elem = document.createElement('div');
+    elem.className = 'handle';
+    elem.id = "handle" + i;
+    return elem;
+}
 var app_container = document.getElementById('app');
 var editor_panel = new EditorPanel_1.default($('#app'), { debug: false });
-var handle_1 = document.createElement('div');
-handle_1.className = "handle";
+var handle_1 = create_handle(0);
 app_container.appendChild(handle_1);
 var output_panel = new OutputPanel_1.default($('#app'));
 editor_panel.status_bar.error_count = 0;
 var ejecutar = document.getElementById('ejecutar');
 var compilar = document.getElementById('compilar');
 var error_count = 0;
+var dragger = new DragManager_1.default([editor_panel.panel, output_panel.container], [60, 40], [$('#handle0')], $('#app'));
+$(document).mouseup(function () {
+    if (dragger.is_grabbed) {
+        dragger.is_grabbed = false;
+    }
+});
+$(document).mousemove(function (m) {
+    if (dragger.is_grabbed) {
+        var pos = dragger.handles[dragger.grabbed_handle].position();
+        dragger.drag(dragger.grabbed_handle, { x: pos.left, y: pos.top }, { x: m.pageX, y: m.pageY });
+    }
+});
 var parser = new interprete_pl_1.Parser();
 output_panel.output.on('evaluation-error', function (error) {
     error_count++;

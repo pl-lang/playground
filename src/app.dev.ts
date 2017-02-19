@@ -4,19 +4,25 @@ import {Parser, transform, fr_writer, Errors} from 'interprete-pl'
 import OutputPanel from './components/OutputPanel'
 import EditorPanel from './components/EditorPanel'
 import CodePanel from './components/CodePanel'
+import DragManager from './DragManager'
+
+function create_handle(i: number) {
+    const elem = document.createElement('div')
+    elem.className = 'handle'
+    elem.id = `handle${i}`
+    return elem
+}
 
 const app_container = document.getElementById('app')
 
 const editor_panel = new EditorPanel($('#app'), { debug: true })
 
-const handle_1 = document.createElement('div')
-handle_1.className = "handle"
+const handle_1 = create_handle(0)
 app_container.appendChild(handle_1)
 
 const code_panel = new CodePanel($('#app'))
 
-const handle_2 = document.createElement('div')
-handle_2.className = "handle"
+const handle_2 = create_handle(1)
 app_container.appendChild(handle_2)
 
 const output_panel = new OutputPanel($('#app'))
@@ -30,6 +36,22 @@ const compilar = document.getElementById('compilar') as HTMLButtonElement
 let error_count = 0
 
 const parser = new Parser()
+
+const dragger = new DragManager([editor_panel.panel, code_panel.container, output_panel.container], [50, 25, 25], [$('#handle0'), $('#handle1')], $('#app'))
+
+$(document).mouseup(() => {
+    if (dragger.is_grabbed) {
+        dragger.is_grabbed = false
+    }
+})
+
+$(document).mousemove(m => {
+    if (dragger.is_grabbed) {
+        const pos = dragger.handles[dragger.grabbed_handle].position()
+
+        dragger.drag(dragger.grabbed_handle, { x: pos.left, y: pos.top }, { x: m.pageX, y: m.pageY })
+    }
+})
 
 output_panel.output.on('evaluation-error', (error: Errors.Base) => {
     error_count++
