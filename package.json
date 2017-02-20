@@ -5,11 +5,9 @@
   "main": "index.html",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prebuild": "npm install --save ../interprete-pl",
     "build": "webpack --display-error-details",
     "buildmap": "webpack --config webpack.map.config.js --display-error-details",
     "prebuildmap": "npm install --save ../interprete-pl",
-    "predev": "npm install --save ../interprete-pl",
     "dev": "webpack --config webpack.dev.config.js --display-error-details",
     "prepush": "git checkout master && git merge dev && npm run build && git add . && git commit -m \"bundle nuevo\"",
     "push": "git push",
