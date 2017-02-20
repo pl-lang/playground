@@ -5,6 +5,12 @@ import StatusBar from './StatusBar'
 
 export interface EditorOptions {
     debug?: boolean
+    links?: boolean
+}
+
+const defaults: EditorOptions = {
+    debug: false,
+    links: true,
 }
 
 export default class EditorPanel {
@@ -19,10 +25,10 @@ export default class EditorPanel {
 
     constructor (container: JQuery, options: EditorOptions) {
         if (options) {
-            this.options = options
+            this.options = { ...defaults, ...options }
         }
         else {
-            this.options = { debug: false }
+            this.options = defaults
         }
 
         this.container = container
@@ -54,13 +60,23 @@ export default class EditorPanel {
         const icon = $('<span style="margin-left:10px" class="octicon octicon-pencil"></span>')
         const title = $('<span class="title">EDITOR</span>')
         const run_button = $('<button id="ejecutar" class="boton-ejecutar"><span class="button-label">Ejecutar programa</span><span></button>')
-        const compile_button = $('<button id="compilar" class="boton-compilar"><span class="button-label">Compilar programa</span><span></button>')
 
         bar.append(icon).append(title).append(run_button)
+
+        if (this.options.links) {
+            const help_icon = $('<span style="margin-left:15px;" class="octicon octicon-repo"></span>')
+            const help_link = $('<a style="margin-left: 5px;" class="button-label" href="https://github.com/pl-lang/jsplint/wiki/Sintaxis/">Ayuda sobre el lenguaje</a>')
+            const repo_icon = $('<span style="margin-left:15px;" class="octicon octicon-mark-github"></span>')
+            const repo_link = $('<a style="margin-left:5px" class="button-label" href="https://github.com/pl-lang/playground/">Visita el proyecto en GitHub</a>')
+
+            bar.append(help_icon).append(help_link).append(repo_icon).append(repo_link)
+        }
 
         this.run_button = run_button
 
         if (this.options.debug) {
+            const compile_button = $('<button id="compilar" class="boton-compilar"><span class="button-label">Compilar programa</span><span></button>')
+
             bar.append(compile_button)
             this.compile_button = compile_button
         }
