@@ -15,7 +15,7 @@ function create_handle(i: number) {
 
 const app_container = document.getElementById('app')
 
-const editor_panel = new EditorPanel($('#app'), { debug: true })
+const editor_panel = new EditorPanel($('#app'), { debug: true, links: false })
 
 const handle_1 = create_handle(0)
 app_container.appendChild(handle_1)
