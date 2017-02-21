@@ -1,6 +1,6 @@
 import * as $ from 'jquery'
 
-interface Container {
+export interface Container {
     width: number
     height: number
     panel_length: number[]
@@ -14,7 +14,7 @@ export class DragLogic {
         this.containers = []
     }
 
-    add_panel(container_index: number, index: number, new_panel_width: number) {
+    protected add_panel(container_index: number, index: number, new_panel_width: number) {
         if (container_index >= 0 && container_index < this.containers.length) {
             const new_width: number[] = []
             const panel_width = this.containers[container_index].panel_length
@@ -33,11 +33,11 @@ export class DragLogic {
         }
     }
 
-    add_container(width: number, height: number, mode: 'vertical' | 'horizontal') {
+    protected add_container(width: number, height: number, mode: 'vertical' | 'horizontal') {
         this.containers.push({ width, height, mode, panel_length: [] })
     }
 
-    remove_container(container_index: number): Container {
+    protected remove_container(container_index: number): Container {
         if (container_index < 0 || container_index >= this.containers.length) {
             throw new Error(`Invalid container_index (${container_index})`)
         }
@@ -51,7 +51,7 @@ export class DragLogic {
         }
     }
 
-    get_container(container_index: number): Container {
+    protected get_container(container_index: number): Container {
         if (container_index < 0 || container_index >= this.containers.length) {
             throw new Error(`Invalid container_index (${container_index})`)
         }
@@ -60,7 +60,17 @@ export class DragLogic {
         }
     }
 
-    drag(container_index: number, handle_index: number, from: { x: number, y: number}, to: { x: number, y: number }): number[] {
+    protected set_container_dimensions(container_index: number, width: number, height: number) {
+        if (container_index >= 0 && container_index < this.containers.length) {
+            this.containers[container_index].height = height
+            this.containers[container_index].width = width
+        }
+        else {
+            throw new Error(`Invalid container_index (${container_index})`)
+        }
+    }
+
+    protected drag(container_index: number, handle_index: number, from: { x: number, y: number}, to: { x: number, y: number }): number[] {
         if (container_index >= 0 && container_index < this.containers.length) {
             if (handle_index >= 0 && handle_index < this.containers[container_index].panel_length.length - 1) {
                 const container = this.containers[container_index]
@@ -84,6 +94,8 @@ export class DragLogic {
 
                     let remaining_delta = total_delta
 
+                    let a_panel_shrinked = false
+
                     // distribuir el delta a lo largo de los paneles
                     while (remaining_delta > 0 && shrinking_panel_index < container.panel_length.length) {
                         const old_length = container.panel_length[shrinking_panel_index]
@@ -94,6 +106,7 @@ export class DragLogic {
                             container.panel_length[shrinking_panel_index] = 0
                         }
                         else {
+                            a_panel_shrinked = true
                             container.panel_length[shrinking_panel_index] = difference
                         }
 
@@ -102,8 +115,11 @@ export class DragLogic {
                         shrinking_panel_index++
                     }
 
-                    // aplicar el delta al panel que creció
-                    container.panel_length[handle_index] = container.panel_length[handle_index] + total_delta
+                    // si algun panel se encogio...
+                    if (a_panel_shrinked) {
+                        // ...hacer que el panel a la izquierda de la manija crezca
+                        container.panel_length[handle_index] = container.panel_length[handle_index] + total_delta
+                    }
 
                     return container.panel_length
                 }
@@ -113,6 +129,8 @@ export class DragLogic {
                     const total_delta = container.mode == 'vertical' ? delta_percentage.y : delta_percentage.x
 
                     let remaining_delta = total_delta
+
+                    let a_panel_shrinked = false
 
                     // distribuir el delta a lo largo de los paneles
                     while (remaining_delta > 0 && shrinking_panel_index >= 0) {
@@ -124,6 +142,7 @@ export class DragLogic {
                             container.panel_length[shrinking_panel_index] = 0
                         }
                         else {
+                            a_panel_shrinked = true
                             container.panel_length[shrinking_panel_index] = difference
                         }
 
@@ -132,8 +151,11 @@ export class DragLogic {
                         shrinking_panel_index--
                     }
 
-                    // aplicar el delta al panel que creció
-                    container.panel_length[handle_index + 1] = container.panel_length[handle_index + 1] + total_delta
+                    // si algun panel se encogio...
+                    if (a_panel_shrinked) {
+                        // ...hacer que el panel a la derecha de la manija crezca
+                        container.panel_length[handle_index + 1] = container.panel_length[handle_index + 1] + total_delta
+                    }
 
                     return container.panel_length
                 }
@@ -189,118 +211,113 @@ export class DragLogic {
     }
 }
 
-export class DragManager {
-    private panels: JQuery[]
-    private width: number[]
-    handles: JQuery[]
-    private panel_container: JQuery
+interface UIPanelContainer {
+    element: JQuery
+    panels: JQuery[]
+    mode: 'vertical' | 'horizontal'
+    last_handle_index: number
+}
+
+interface UIHandle {
     /**
-     * indicates whether a handle is grabbed or not
+     * indice del contenedor donde esta manija se encuentra
+     */
+    container_index: number
+    /**
+     * indice de la manija dentro de su contenedor
+     */
+    handle_index: number
+    element: JQuery
+}
+
+export class DragManager extends DragLogic {
+    ui_panel_containers: UIPanelContainer[]
+    /**
+     * arreglo de elementos que sirven de manija
+     */
+    handles: UIHandle[]
+    /**
+     * indica si una manija esta agarrada
      */
     is_grabbed: boolean
-    grabbed_handle: number
+    /**
+     * manija agarrada en un momento dado
+     */
+    grabbed_handle: UIHandle
 
-    constructor(panels: JQuery[], width: number[], handles: JQuery[], container: JQuery) {
-        if (panels.length == width.length) {
-            this.panels = panels
-            this.width = width
+    constructor() {
+        super()
+        this.ui_panel_containers = []
+        this.handles = []
+        this.grabbed_handle = null
+        this.is_grabbed = false
+    }
+
+    add_handle(container_index: number, handle: JQuery) {
+        if (container_index >= 0 && container_index < this.ui_panel_containers.length) {
+            const container = this.ui_panel_containers[container_index] 
+            const ui_handle = { container_index: container_index, element: handle, handle_index: container.last_handle_index }
+            this.handles.push(ui_handle)
+            container.last_handle_index++
+            this.bind_handle(ui_handle)
         }
         else {
-            throw new Error('panels.length =/= widths.length')
-        }
-
-        this.handles = handles
-        this.is_grabbed = false
-        this.grabbed_handle = 0
-        this.panel_container = container
-
-        this.bind_handles()
-    }
-
-    bind_handles() {
-        for (let i = 0; i < this.handles.length; i++) {
-            this.handles[i].mousedown(ev => {
-                this.is_grabbed = true
-                this.grabbed_handle = i
-            })
-
-            this.handles[i].mouseup(ev => {
-                this.is_grabbed = false
-            })
-
-            this.handles[i].mousemove(ev => {
-                if (this.is_grabbed && i == this.grabbed_handle) {
-                    const pos = this.handles[i].position()
-                    if (Math.abs(ev.pageX - pos.left) > 30) {
-                        this.drag(i, { x: pos.left, y: pos.top }, { x: ev.pageX, y: ev.pageY })
-                    }
-                }
-            })
+            throw new Error(`Invalid container_index (${container_index})`)
         }
     }
 
-    drag(handle_index: number, starting_pos: { x: number, y: number }, final_pos: { x: number, y: number }) {
-        const width = this.panel_container.width()
-        const height = this.panel_container.height()
-        const handle = this.handles[handle_index]
+    private bind_handle(handle: UIHandle) {
+        handle.element.mousedown(ev => {
+            this.is_grabbed = true
+            this.grabbed_handle = handle
+        })
 
-        if (final_pos.x < 0) {
-            final_pos.x = 0
-        }
-        else if (final_pos.x > width) {
-            final_pos.x = width
-        }
+        handle.element.mouseup(ev => {
+            this.is_grabbed = false
+            this.grabbed_handle = null
+        })
+    }
 
-        if (final_pos.y < 0) {
-            final_pos.y = 0
-        }
-        else if (final_pos.y > height) {
-            final_pos.y = height
-        }
+    add_ui_container(element: JQuery, mode: 'vertical' | 'horizontal') {
+        super.add_container(element.width(), element.height(), mode)
+        this.ui_panel_containers.push({ element, mode, panels: [], last_handle_index: 0 })
+    }
 
-        const delta_percentage = Number((((final_pos.x - starting_pos.x) / width) * 100).toPrecision(3))
+    add_ui_panel(container_index: number, index: number, panel_width: number, panel_element: JQuery) {
+        super.add_panel(container_index, index, panel_width)
 
-        let left_panel_index = handle_index
-
-        if (this.width[left_panel_index] == 0) {
-            if (delta_percentage < 0) {
-                while (this.width[left_panel_index] == 0) {
-                    left_panel_index--
+        if (container_index >= 0 && container_index < this.ui_panel_containers.length) {
+            const new_panels: JQuery[] = []
+            const old_panels = this.ui_panel_containers[container_index].panels
+            for (let i = 0; i <= old_panels.length; i++) {
+                if (i == index) {
+                    new_panels[i] = panel_element
+                }
+                else {
+                    new_panels[i] = old_panels[i]
                 }
             }
+            this.ui_panel_containers[container_index].panels = new_panels
         }
+        else {
+            throw new Error(`Invalid container_index (${container_index})`)
+        }
+    }
 
-        let right_panel_index: number = handle_index + 1
+    drag_handle(handle: UIHandle, from: { x: number, y: number }, to: { x: number, y: number }) {
 
-        if (this.width[right_panel_index] == 0) {
-            if (delta_percentage > 0) {
-                while (this.width[right_panel_index] == 0) {
-                    right_panel_index++
-                }
+        const panel_length = super.drag(handle.container_index, handle.handle_index, from, to)
+
+        const container = this.ui_panel_containers[handle.container_index]
+
+        // aplicar las nuevas longitudes
+        for (let i = 0; i < container.panels.length; i++) {
+            if (container.mode == 'horizontal') {
+                container.panels[i].attr('style', `width: ${panel_length[i]}%;`)
             }
-        }
-
-        let left_width = Math.abs(Number((this.width[left_panel_index] + delta_percentage).toPrecision(3)))
-        // let right_width = Math.abs(Number((this.width[right_panel_index] - delta_percentage).toPrecision(3)))
-
-        left_width = -(0 - left_width) < 0.1 ? 0 : left_width
-
-        let right_width = (this.width[left_panel_index] - left_width) + this.width[right_panel_index]
-
-        right_width = -(0 - right_width) < 0.1 ? 0 : right_width
-
-        this.width[left_panel_index] = left_width
-        this.width[right_panel_index] = right_width
-
-        const total_width = this.width.reduce((total, current) => total + current)
-
-        if (total_width > 100) {
-            const delta = (total_width - 100) / this.width.length
-            this.width = this.width.map(w => w - delta)
-        }
-
-        for (let i = 0; i < this.panels.length; i++) {
-            this.panels[i].attr('style', `width: ${this.width[i]}%;`)
+            else {
+                container.panels[i].attr('style', `height: ${panel_length[i]}%;`)
+            }
         }
     }
 }
