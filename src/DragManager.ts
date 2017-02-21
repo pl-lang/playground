@@ -169,25 +169,6 @@ export class DragLogic {
         }
     }
 
-    private next_non_zero_panel(lengths: number[], from: number, look_forward: boolean): number {
-        if (look_forward) {
-            for (let i = from + 1; i < lengths.length; i++) {
-                if (lengths[i] > 0) {
-                    return i
-                }
-            }
-        }
-        else {
-            for (let i = from - 1; i >= 0; i--) {
-                if (lengths[i] > 0) {
-                    return i
-                }
-            }
-        }
-        
-        return -1
-    }
-
     private clamp(container_index: number, vector: { x: number, y: number }): { x: number, y: number } {
         const container = this.containers[container_index]
 
