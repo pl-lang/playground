@@ -78,64 +78,64 @@ export class DragLogic {
 
                 // determinar que panel se achica en funcion de la direccion del movimiento de la manija
                 if (positive_direction) {
-                    if (container.panel_length[handle_index + 1] == 0) {
-                        // si la longitud del panel que se va a encoger ya es sero, no hay que modificarla
-                        return container.panel_length
+                    let shrinking_panel_index = handle_index + 1
+
+                    const total_delta = container.mode == 'vertical' ? delta_percentage.y : delta_percentage.x
+
+                    let remaining_delta = total_delta
+
+                    // distribuir el delta a lo largo de los paneles
+                    while (remaining_delta > 0 && shrinking_panel_index < container.panel_length.length) {
+                        const old_length = container.panel_length[shrinking_panel_index]
+
+                        const difference = old_length - remaining_delta
+
+                        if (difference < 0) {
+                            container.panel_length[shrinking_panel_index] = 0
+                        }
+                        else {
+                            container.panel_length[shrinking_panel_index] = difference
+                        }
+
+                        remaining_delta = total_delta - old_length
+
+                        shrinking_panel_index++
                     }
-                    else {
-                        // calcular la nueva longitud de los paneles adyacentes a la "manija"
-                        const shrinking_panel_length = container.panel_length[handle_index + 1] - (container.mode == 'vertical' ? delta_percentage.y : delta_percentage.x)
 
-                        const growinng_panel_length = container.panel_length[handle_index] + (container.mode == 'vertical' ? delta_percentage.y : delta_percentage.x)
+                    // aplicar el delta al panel que creció
+                    container.panel_length[handle_index] = container.panel_length[handle_index] + total_delta
 
-                        // aplicar las nuevas longitudes
-                        const new_length = container.panel_length.map((l, i) => {
-                            if (i == handle_index + 1) {
-                                return shrinking_panel_length
-                            }
-                            else if (i == handle_index) {
-                                return growinng_panel_length
-                            }
-                            else {
-                                return l
-                            }
-                        })
-
-                        // actualizar la longitud de los paneles
-                        this.containers[container_index].panel_length = new_length
-
-                        return new_length
-                    }
+                    return container.panel_length
                 }
                 else {
-                    if (container.panel_length[handle_index] == 0) {
-                        // si la longitud del panel que se va a encoger ya es sero, no hay que modificarla
-                        return container.panel_length
+                    let shrinking_panel_index = handle_index
+
+                    const total_delta = container.mode == 'vertical' ? delta_percentage.y : delta_percentage.x
+
+                    let remaining_delta = total_delta
+
+                    // distribuir el delta a lo largo de los paneles
+                    while (remaining_delta > 0 && shrinking_panel_index >= 0) {
+                        const old_length = container.panel_length[shrinking_panel_index]
+
+                        const difference = old_length - remaining_delta
+
+                        if (difference < 0) {
+                            container.panel_length[shrinking_panel_index] = 0
+                        }
+                        else {
+                            container.panel_length[shrinking_panel_index] = difference
+                        }
+
+                        remaining_delta = total_delta - old_length
+
+                        shrinking_panel_index--
                     }
-                    else {
-                        // calcular la nueva longitud de los paneles adyacentes a la "manija"
-                        const shrinking_panel_length = container.panel_length[handle_index] - (container.mode == 'vertical' ? delta_percentage.y : delta_percentage.x)
 
-                        const growinng_panel_length = container.panel_length[handle_index + 1] + (container.mode == 'vertical' ? delta_percentage.y : delta_percentage.x)
+                    // aplicar el delta al panel que creció
+                    container.panel_length[handle_index + 1] = container.panel_length[handle_index + 1] + total_delta
 
-                        // aplicar las nuevas longitudes
-                        const new_length = container.panel_length.map((l, i) => {
-                            if (i == handle_index) {
-                                return shrinking_panel_length
-                            }
-                            else if (i == handle_index + 1) {
-                                return growinng_panel_length
-                            }
-                            else {
-                                return l
-                            }
-                        })
-
-                        // actualizar la longitud de los paneles
-                        this.containers[container_index].panel_length = new_length
-
-                        return new_length
-                    }
+                    return container.panel_length
                 }
             }
             else {
@@ -145,6 +145,25 @@ export class DragLogic {
         else {
             throw new Error(`Invalid container_index (${container_index})`)
         }
+    }
+
+    private next_non_zero_panel(lengths: number[], from: number, look_forward: boolean): number {
+        if (look_forward) {
+            for (let i = from + 1; i < lengths.length; i++) {
+                if (lengths[i] > 0) {
+                    return i
+                }
+            }
+        }
+        else {
+            for (let i = from - 1; i >= 0; i--) {
+                if (lengths[i] > 0) {
+                    return i
+                }
+            }
+        }
+        
+        return -1
     }
 
     private clamp(container_index: number, vector: { x: number, y: number }): { x: number, y: number } {
