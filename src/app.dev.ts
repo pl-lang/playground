@@ -37,19 +37,26 @@ let error_count = 0
 
 const parser = new Parser()
 
-const dragger = new DragManager([editor_panel.panel, code_panel.container, output_panel.container], [50, 25, 25], [$('#handle0'), $('#handle1')], $('#app'))
+const dragger = new DragManager()
+dragger.add_ui_container($('#app'), 'horizontal')
+dragger.add_ui_panel(0, 0, 50, editor_panel.panel)
+dragger.add_ui_panel(0, 1, 25, code_panel.container)
+dragger.add_ui_panel(0, 2, 25, output_panel.container)
+dragger.add_handle(0, $('#handle0'))
+dragger.add_handle(0, $('#handle1'))
 
 $(document).mouseup(() => {
     if (dragger.is_grabbed) {
         dragger.is_grabbed = false
+        dragger.grabbed_handle = null
     }
 })
 
 $(document).mousemove(m => {
     if (dragger.is_grabbed) {
-        const pos = dragger.handles[dragger.grabbed_handle].position()
+        const pos = dragger.grabbed_handle.element.position()
 
-        dragger.drag(dragger.grabbed_handle, { x: pos.left, y: pos.top }, { x: m.pageX, y: m.pageY })
+        dragger.drag_handle(dragger.grabbed_handle, { x: pos.left, y: pos.top }, { x: m.pageX, y: m.pageY })
     }
 })
 
