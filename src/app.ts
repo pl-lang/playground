@@ -4,7 +4,7 @@ import { Parser, transform, fr_writer, Errors } from 'interprete-pl'
 import OutputPanel from './components/OutputPanel'
 import EditorPanel from './components/EditorPanel'
 import CodePanel from './components/CodePanel'
-import DragManager from './DragManager'
+import { DragManager } from './DragManager'
 
 function create_handle(i: number) {
     const elem = document.createElement('div')
@@ -30,23 +30,28 @@ const compilar = document.getElementById('compilar') as HTMLButtonElement
 
 let error_count = 0
 
-const dragger = new DragManager([editor_panel.panel, output_panel.container], [60, 40], [$('#handle0')], $('#app'))
+const parser = new Parser()
+
+const dragger = new DragManager()
+dragger.add_ui_container($('#app'), 'horizontal')
+dragger.add_ui_panel(0, 0, 60, editor_panel.panel)
+dragger.add_ui_panel(0, 1, 40, output_panel.container)
+dragger.add_handle(0, $('#handle0'))
 
 $(document).mouseup(() => {
     if (dragger.is_grabbed) {
         dragger.is_grabbed = false
+        dragger.grabbed_handle = null
     }
 })
 
 $(document).mousemove(m => {
     if (dragger.is_grabbed) {
-        const pos = dragger.handles[dragger.grabbed_handle].position()
+        const pos = dragger.grabbed_handle.element.position()
 
-        dragger.drag(dragger.grabbed_handle, { x: pos.left, y: pos.top }, { x: m.pageX, y: m.pageY })
+        dragger.drag_handle(dragger.grabbed_handle, { x: pos.left, y: pos.top }, { x: m.pageX, y: m.pageY })
     }
 })
-
-const parser = new Parser()
 
 output_panel.output.on('evaluation-error', (error: Errors.Base) => {
     error_count++

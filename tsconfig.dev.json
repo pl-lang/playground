@@ -7,6 +7,8 @@
     "sourceMap": true,
     "importHelpers": true
   },
-  "include": ["src/**/*"],
+  "files": [
+    "./src/app.dev.ts"
+  ],
   "exclude": ["node_modules"]
 }

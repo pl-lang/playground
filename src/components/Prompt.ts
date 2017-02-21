@@ -12,7 +12,7 @@ export default class Prompt {
         this.textarea.keydown(e => {
             if (e.keyCode == 13) {
                 this.close()
-                this.interpreter.send(this.textarea.val() as Value)
+                this.interpreter.send(this.textarea.val())
                 this.interpreter.run()
             }
         })

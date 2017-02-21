@@ -228,6 +228,7 @@ var S3;
             var _this = _super.call(this, owner) || this;
             _this.kind = StatementKinds.MakeFrame;
             _this.name = name;
+            _this.is_user_stmnt = false;
             return _this;
         }
         return MakeFrame;
@@ -241,6 +242,7 @@ var S3;
             _this.kind = StatementKinds.InitV;
             _this.source = source;
             _this.target_name = target_name;
+            _this.is_user_stmnt = false;
             return _this;
         }
         return InitV;
@@ -252,11 +254,13 @@ var S3;
          * target datos del vector que recibe los datos;
          * source datos del vector del cual se copian los datos;
          */
-        function CopyVec(owner, target, source) {
+        function CopyVec(owner, target, source, pos) {
             var _this = _super.call(this, owner) || this;
             _this.kind = StatementKinds.CopyVec;
             _this.target = target;
             _this.source = source;
+            _this.is_user_stmnt = true;
+            _this.pos = pos;
             return _this;
         }
         return CopyVec;
@@ -272,6 +276,7 @@ var S3;
             _this.local_alias = alias;
             _this.dimensions = dimensions;
             _this.module_name = module_name;
+            _this.is_user_stmnt = false;
             return _this;
         }
         return Alias;
@@ -279,12 +284,14 @@ var S3;
     S3.Alias = Alias;
     var AssignString = (function (_super) {
         tslib_1.__extends(AssignString, _super);
-        function AssignString(owner, varname, length, indexes) {
+        function AssignString(owner, varname, length, indexes, user, pos) {
             var _this = _super.call(this, owner) || this;
             _this.kind = StatementKinds.AssignString;
             _this.varname = varname;
             _this.length = length;
             _this.indexes = indexes;
+            _this.is_user_stmnt = user;
+            _this.pos = pos;
             return _this;
         }
         return AssignString;
@@ -296,6 +303,7 @@ var S3;
             var _this = _super.call(this, owner) || this;
             _this.kind = StatementKinds.Concat;
             _this.length = length;
+            _this.is_user_stmnt = false;
             return _this;
         }
         return Concat;
@@ -303,9 +311,11 @@ var S3;
     S3.Concat = Concat;
     var Return = (function (_super) {
         tslib_1.__extends(Return, _super);
-        function Return(owner) {
+        function Return(owner, pos) {
             var _this = _super.call(this, owner) || this;
             _this.kind = StatementKinds.Return;
+            _this.is_user_stmnt = true;
+            _this.pos = pos;
             return _this;
         }
         return Return;
@@ -313,11 +323,13 @@ var S3;
     S3.Return = Return;
     var UserModuleCall = (function (_super) {
         tslib_1.__extends(UserModuleCall, _super);
-        function UserModuleCall(owner, name, total_args) {
+        function UserModuleCall(owner, name, total_args, pos) {
             var _this = _super.call(this, owner) || this;
             _this.name = name;
             _this.total_args = total_args;
             _this.kind = StatementKinds.UserModuleCall;
+            _this.is_user_stmnt = true;
+            _this.pos = pos;
             return _this;
         }
         return UserModuleCall;
@@ -325,12 +337,14 @@ var S3;
     S3.UserModuleCall = UserModuleCall;
     var ReadCall = (function (_super) {
         tslib_1.__extends(ReadCall, _super);
-        function ReadCall(owner, varname, type) {
+        function ReadCall(owner, varname, type, pos) {
             var _this = _super.call(this, owner) || this;
             _this.varname = varname;
             _this.kind = StatementKinds.ReadCall;
             _this.name = 'leer';
             _this.type = type;
+            _this.is_user_stmnt = true;
+            _this.pos = pos;
             return _this;
         }
         return ReadCall;
@@ -338,10 +352,12 @@ var S3;
     S3.ReadCall = ReadCall;
     var WriteCall = (function (_super) {
         tslib_1.__extends(WriteCall, _super);
-        function WriteCall(owner) {
+        function WriteCall(owner, pos) {
             var _this = _super.call(this, owner) || this;
             _this.kind = StatementKinds.WriteCall;
             _this.name = 'escribir';
+            _this.is_user_stmnt = true;
+            _this.pos = pos;
             return _this;
         }
         return WriteCall;
@@ -349,10 +365,12 @@ var S3;
     S3.WriteCall = WriteCall;
     var Assign = (function (_super) {
         tslib_1.__extends(Assign, _super);
-        function Assign(owner, varname) {
+        function Assign(owner, varname, user, pos) {
             var _this = _super.call(this, owner) || this;
             _this.varname = varname;
             _this.kind = StatementKinds.Assign;
+            _this.is_user_stmnt = user;
+            _this.pos = pos;
             return _this;
         }
         return Assign;
@@ -360,12 +378,14 @@ var S3;
     S3.Assign = Assign;
     var AssignV = (function (_super) {
         tslib_1.__extends(AssignV, _super);
-        function AssignV(owner, total_indexes, dimensions, varname) {
+        function AssignV(owner, total_indexes, dimensions, varname, user, pos) {
             var _this = _super.call(this, owner) || this;
             _this.total_indexes = total_indexes;
             _this.dimensions = dimensions;
             _this.varname = varname;
             _this.kind = StatementKinds.AssignV;
+            _this.is_user_stmnt = user;
+            _this.pos = pos;
             return _this;
         }
         return AssignV;
@@ -428,10 +448,12 @@ var S3;
     S3.Operation = Operation;
     var While = (function (_super) {
         tslib_1.__extends(While, _super);
-        function While(owner, entry_point) {
+        function While(owner, entry_point, pos) {
             var _this = _super.call(this, owner) || this;
             _this.entry_point = entry_point;
             _this.kind = StatementKinds.While;
+            _this.is_user_stmnt = true;
+            _this.pos = pos;
             return _this;
         }
         return While;
@@ -439,10 +461,12 @@ var S3;
     S3.While = While;
     var Until = (function (_super) {
         tslib_1.__extends(Until, _super);
-        function Until(owner, entry_point) {
+        function Until(owner, entry_point, pos) {
             var _this = _super.call(this, owner) || this;
             _this.entry_point = entry_point;
             _this.kind = StatementKinds.Until;
+            _this.is_user_stmnt = true;
+            _this.pos = pos;
             return _this;
         }
         return Until;
@@ -450,11 +474,13 @@ var S3;
     S3.Until = Until;
     var If = (function (_super) {
         tslib_1.__extends(If, _super);
-        function If(owner, true_branch_entry, false_branch_entry) {
+        function If(owner, true_branch_entry, false_branch_entry, pos) {
             var _this = _super.call(this, owner) || this;
             _this.true_branch_entry = true_branch_entry;
             _this.false_branch_entry = false_branch_entry;
             _this.kind = StatementKinds.If;
+            _this.is_user_stmnt = true;
+            _this.pos = pos;
             return _this;
         }
         Object.defineProperty(If.prototype, "exit_point", {
@@ -11105,21 +11131,113 @@ function __generator(thisArg, body) {
 
 /***/ }),
 /* 4 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony export (immutable) */ __webpack_exports__["__extends"] = __extends;
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "__assign", function() { return __assign; });
+/* harmony export (immutable) */ __webpack_exports__["__rest"] = __rest;
+/* harmony export (immutable) */ __webpack_exports__["__decorate"] = __decorate;
+/* harmony export (immutable) */ __webpack_exports__["__param"] = __param;
+/* harmony export (immutable) */ __webpack_exports__["__metadata"] = __metadata;
+/* harmony export (immutable) */ __webpack_exports__["__awaiter"] = __awaiter;
+/* harmony export (immutable) */ __webpack_exports__["__generator"] = __generator;
+/*! *****************************************************************************
+Copyright (c) Microsoft Corporation. All rights reserved.
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+this file except in compliance with the License. You may obtain a copy of the
+License at http://www.apache.org/licenses/LICENSE-2.0
 
-var Parser_1 = __webpack_require__(5);
-exports.Parser = Parser_1.default;
-var Interpreter_1 = __webpack_require__(17);
-exports.Interpreter = Interpreter_1.default;
-var transform_1 = __webpack_require__(24);
-exports.transform = transform_1.default;
-var TSChecker_1 = __webpack_require__(9);
-exports.typecheck = TSChecker_1.default;
-var fr_writer_1 = __webpack_require__(25);
-exports.fr_writer = fr_writer_1.default;
+THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
+WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
+MERCHANTABLITY OR NON-INFRINGEMENT.
 
+See the Apache Version 2.0 License for specific language governing permissions
+and limitations under the License.
+***************************************************************************** */
+/* global Reflect, Promise */
+
+var extendStatics = Object.setPrototypeOf ||
+    ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+    function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+
+function __extends(d, b) {
+    extendStatics(d, b);
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+}
+
+var __assign = Object.assign || function __assign(t) {
+    for (var s, i = 1, n = arguments.length; i < n; i++) {
+        s = arguments[i];
+        for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+    }
+    return t;
+};
+
+function __rest(s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) if (e.indexOf(p[i]) < 0)
+            t[p[i]] = s[p[i]];
+    return t;
+};
+
+function __decorate(decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+
+function __param(paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+
+function __metadata(metadataKey, metadataValue) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(metadataKey, metadataValue);
+};
+
+function __awaiter(thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator.throw(value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+
+function __generator(thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t;
+    return { next: verb(0), "throw": verb(1), "return": verb(2) };
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = y[op[0] & 2 ? "return" : op[0] ? "throw" : "next"]) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [0, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
 
 /***/ }),
 /* 5 */
@@ -11127,13 +11245,31 @@ exports.fr_writer = fr_writer_1.default;
 
 "use strict";
 
+var Parser_1 = __webpack_require__(6);
+exports.Parser = Parser_1.default;
+var Interpreter_1 = __webpack_require__(17);
+exports.Interpreter = Interpreter_1.default;
+var transform_1 = __webpack_require__(24);
+exports.transform = transform_1.default;
+var TSChecker_1 = __webpack_require__(10);
+exports.typecheck = TSChecker_1.default;
+var fr_writer_1 = __webpack_require__(25);
+exports.fr_writer = fr_writer_1.default;
+
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
 var tslib_1 = __webpack_require__(3);
-var Emitter_1 = __webpack_require__(10);
+var Emitter_1 = __webpack_require__(11);
 var SourceWrapper_1 = __webpack_require__(19);
 var Lexer_1 = __webpack_require__(18);
-var TokenQueue_1 = __webpack_require__(7);
-var Patterns_1 = __webpack_require__(6);
-var Patterns_2 = __webpack_require__(6);
+var TokenQueue_1 = __webpack_require__(8);
+var Patterns_1 = __webpack_require__(7);
+var Patterns_2 = __webpack_require__(7);
 var Parser = (function (_super) {
     tslib_1.__extends(Parser, _super);
     function Parser() {
@@ -11190,13 +11326,13 @@ exports.default = Parser;
 
 
 /***/ }),
-/* 6 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 var interfaces_1 = __webpack_require__(0);
-var TokenQueue_js_1 = __webpack_require__(7);
+var TokenQueue_js_1 = __webpack_require__(8);
 /**
  * Funcion que intenta capturar un token numerico
  * @param {TokenQueue} source Fuente en la que hay que buscar el numero
@@ -11707,6 +11843,7 @@ exports.Parameter = Parameter;
  * Captura una llamada a una funcion o procedimiento
  */
 function ModuleCall(source) {
+    var pos = { line: source.current().line, column: source.current().column };
     var name = Word(source);
     if (name.error) {
         return name;
@@ -11731,7 +11868,7 @@ function ModuleCall(source) {
             else if (args.error == false) {
                 if (source.current().kind == interfaces_1.SymbolKind.RightPar) {
                     source.next();
-                    return { error: false, result: { type: 'call', args: args.result, name: name.result } };
+                    return { error: false, result: { type: 'call', args: args.result, name: name.result, pos: pos } };
                 }
                 else {
                     var current = source.current();
@@ -11745,7 +11882,7 @@ function ModuleCall(source) {
         }
         else {
             source.next();
-            return { error: false, result: { type: 'call', args: [], name: name.result } };
+            return { error: false, result: { type: 'call', args: [], name: name.result, pos: pos } };
         }
     }
 }
@@ -11754,7 +11891,8 @@ exports.ModuleCall = ModuleCall;
  * Captura un enunciado de asignacion
  */
 function Assignment(source) {
-    var result = { type: 'assignment', left: null, right: null };
+    var pos = { line: source.current().line, column: source.current().column };
+    var result = { type: 'assignment', left: null, right: null, pos: pos };
     var left_hand_match = Variable(source);
     if (left_hand_match.error) {
         return left_hand_match;
@@ -11788,11 +11926,13 @@ exports.Assignment = Assignment;
  * Captura un enunciado si
  */
 function If(source) {
+    var pos = { line: source.current().line, column: source.current().column };
     var result = {
         type: 'if',
         condition: null,
         true_branch: [],
-        false_branch: []
+        false_branch: [],
+        pos: pos
     };
     if (source.current().kind === interfaces_1.ReservedKind.Si) {
         source.next();
@@ -11894,10 +12034,12 @@ function If(source) {
 }
 exports.If = If;
 function While(source) {
+    var pos = { line: source.current().line, column: source.current().column };
     var result = {
         type: 'while',
         condition: null,
-        body: []
+        body: [],
+        pos: pos
     };
     if (source.current().kind === interfaces_1.ReservedKind.Mientras) {
         source.next();
@@ -11982,11 +12124,13 @@ exports.While = While;
 //    [<enunciado>]
 // 'finpara'
 function For(source) {
+    var pos = { line: source.current().line, column: source.current().column };
     var result = {
         type: 'for',
         counter_init: null,
         last_value: null,
-        body: []
+        body: [],
+        pos: pos
     };
     if (source.current().kind === interfaces_1.ReservedKind.Para) {
         source.next();
@@ -12057,10 +12201,12 @@ function For(source) {
 }
 exports.For = For;
 function Until(source) {
+    var pos = { line: source.current().line, column: source.current().column };
     var result = {
         type: 'until',
         condition: null,
-        body: []
+        body: [],
+        pos: pos
     };
     if (source.current().kind === interfaces_1.ReservedKind.Repetir) {
         source.next();
@@ -12155,9 +12301,11 @@ function Until(source) {
 }
 exports.Until = Until;
 function Return(source) {
+    var pos = { line: source.current().line, column: source.current().column };
     var result = {
         type: 'return',
-        expression: null
+        expression: null,
+        pos: pos
     };
     if (source.current().kind != interfaces_1.ReservedKind.Retornar) {
         var current = source.current();
@@ -12304,7 +12452,8 @@ function FunctionModule(source) {
      * Ahora hay que crear un DeclarationStatement donde se declaren las variables
      * de los parametros.
      */
-    var par_declaration = { type: 'declaration', variables: [] };
+    var pos = { line: source.current().line, column: source.current().column };
+    var par_declaration = { type: 'declaration', variables: [], pos: pos };
     for (var _i = 0, _a = parameters.result; _i < _a.length; _i++) {
         var par = _a[_i];
         /**
@@ -12383,7 +12532,8 @@ function ProcedureModule(source) {
      * Ahora hay que crear un DeclarationStatement donde se declaren las variables
      * de los parametros.
      */
-    var par_declaration = { type: 'declaration', variables: [] };
+    var pos = { line: source.current().line, column: source.current().column };
+    var par_declaration = { type: 'declaration', variables: [], pos: pos };
     for (var _i = 0, _a = parameters.result; _i < _a.length; _i++) {
         var par = _a[_i];
         /**
@@ -12445,9 +12595,11 @@ function ProcedureModule(source) {
 }
 exports.ProcedureModule = ProcedureModule;
 function DeclarationStatement(source) {
+    var pos = { line: source.current().line, column: source.current().column };
     var result = {
         type: 'declaration',
-        variables: []
+        variables: [],
+        pos: pos
     };
     var type_match = TypeName(source);
     var current_type = null;
@@ -12531,12 +12683,12 @@ function UnexpectedTokenReport(current_token, expected, reason) {
 
 
 /***/ }),
-/* 7 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var TokenTypes_1 = __webpack_require__(8);
+var TokenTypes_1 = __webpack_require__(9);
 var TokenQueue = (function () {
     function TokenQueue(array) {
         this.tokens = array;
@@ -12589,12 +12741,12 @@ exports.default = TokenQueue;
 
 
 /***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var StringMethods_1 = __webpack_require__(11);
+var StringMethods_1 = __webpack_require__(12);
 var interfaces_1 = __webpack_require__(0);
 var EoFToken = (function () {
     function EoFToken(source) {
@@ -13082,7 +13234,7 @@ function wtk(word) {
 
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -13131,7 +13283,8 @@ function check_simple_loop(l) {
         var error = {
             reason: 'bad-condition',
             where: 'typechecker',
-            received: helpers_1.stringify(l.typings.condition)
+            received: helpers_1.stringify(l.typings.condition),
+            pos: l.pos
         };
         errors.push(error);
     }
@@ -13154,7 +13307,8 @@ function check_for(f) {
         var error = {
             reason: '@for-bad-counter',
             where: 'typechecker',
-            received: helpers_1.stringify(f.counter_init.typings.left)
+            received: helpers_1.stringify(f.counter_init.typings.left),
+            pos: f.pos
         };
         errors.push(error);
     }
@@ -13162,7 +13316,8 @@ function check_for(f) {
         var error = {
             reason: '@for-bad-init',
             where: 'typechecker',
-            received: helpers_1.stringify(f.typings.init_value)
+            received: helpers_1.stringify(f.typings.init_value),
+            pos: f.pos
         };
         errors.push(error);
     }
@@ -13170,7 +13325,8 @@ function check_for(f) {
         var error = {
             reason: '@for-bad-last',
             where: 'typechecker',
-            received: helpers_1.stringify(f.typings.last_value)
+            received: helpers_1.stringify(f.typings.last_value),
+            pos: f.pos
         };
         errors.push(error);
     }
@@ -13190,7 +13346,8 @@ function check_return(r) {
             reason: 'bad-return',
             where: 'typechecker',
             declared: helpers_1.stringify(r.typings.expected),
-            received: helpers_1.stringify(r.typings.actual)
+            received: helpers_1.stringify(r.typings.actual),
+            pos: r.pos
         };
         errors.push(error);
     }
@@ -13202,7 +13359,8 @@ function check_if(i) {
         var error = {
             reason: 'bad-condition',
             where: 'typechecker',
-            received: helpers_1.stringify(i.typings.condition)
+            received: helpers_1.stringify(i.typings.condition),
+            pos: i.pos
         };
         errors.push(error);
     }
@@ -13244,7 +13402,8 @@ function check_call(c) {
                 received: c.typings.args.length,
                 name: c.name,
                 reason: '@call-wrong-arg-amount',
-                where: 'typechecker'
+                where: 'typechecker',
+                pos: c.pos
             };
             errors.push(error);
         }
@@ -13271,7 +13430,8 @@ function check_call(c) {
                     where: 'typechecker',
                     expected: helpers_1.stringify(param_type),
                     received: helpers_1.stringify(arg.type),
-                    index: arg.index + 1
+                    index: arg.index + 1,
+                    pos: c.pos
                 };
                 errors.push(error);
             }
@@ -13307,6 +13467,7 @@ function check_call(c) {
                          * Indice (en la lista de parametros del modulo)
                          */
                         index: arg.index,
+                        pos: c.pos
                     };
                     errors.push(error);
                 }
@@ -13341,7 +13502,8 @@ function check_io(c) {
                 reason: 'bad-write-arg',
                 received: helpers_1.stringify(type),
                 where: 'typechecker',
-                name: c.name
+                name: c.name,
+                pos: c.pos
             };
             errors.push(e);
         }
@@ -13349,7 +13511,8 @@ function check_io(c) {
             var e = {
                 reason: '@read-bad-arg',
                 where: 'typechecker',
-                index: i
+                index: i,
+                pos: c.pos
             };
             errors.push(e);
         }
@@ -13380,7 +13543,8 @@ function check_assignment(a) {
                     name: a.left.name,
                     reason: '@assignment-long-string',
                     type: helpers_1.stringify(inv_report.result),
-                    where: 'typechecker'
+                    where: 'typechecker',
+                    pos: a.pos
                 };
                 errors.push(error);
             }
@@ -13398,7 +13562,8 @@ function check_assignment(a) {
                     reason: '@assignment-incompatible-types',
                     where: 'typechecker',
                     expected: helpers_1.stringify(inv_report.result),
-                    received: helpers_1.stringify(a.typings.right)
+                    received: helpers_1.stringify(a.typings.right),
+                    pos: a.pos
                 };
                 errors.push(error);
             }
@@ -13441,7 +13606,7 @@ function check_invocation(i) {
 
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -13514,7 +13679,7 @@ exports.default = Emitter;
 
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -13525,213 +13690,245 @@ exports.isWhiteSpace = function (char) { return /\s/.test(char) && (char !== '\n
 
 
 /***/ }),
-/* 12 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony export (immutable) */ __webpack_exports__["__extends"] = __extends;
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "__assign", function() { return __assign; });
-/* harmony export (immutable) */ __webpack_exports__["__rest"] = __rest;
-/* harmony export (immutable) */ __webpack_exports__["__decorate"] = __decorate;
-/* harmony export (immutable) */ __webpack_exports__["__param"] = __param;
-/* harmony export (immutable) */ __webpack_exports__["__metadata"] = __metadata;
-/* harmony export (immutable) */ __webpack_exports__["__awaiter"] = __awaiter;
-/* harmony export (immutable) */ __webpack_exports__["__generator"] = __generator;
-/*! *****************************************************************************
-Copyright (c) Microsoft Corporation. All rights reserved.
-Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-this file except in compliance with the License. You may obtain a copy of the
-License at http://www.apache.org/licenses/LICENSE-2.0
-
-THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
-WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
-MERCHANTABLITY OR NON-INFRINGEMENT.
-
-See the Apache Version 2.0 License for specific language governing permissions
-and limitations under the License.
-***************************************************************************** */
-/* global Reflect, Promise */
-
-var extendStatics = Object.setPrototypeOf ||
-    ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-    function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-
-function __extends(d, b) {
-    extendStatics(d, b);
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-}
-
-var __assign = Object.assign || function __assign(t) {
-    for (var s, i = 1, n = arguments.length; i < n; i++) {
-        s = arguments[i];
-        for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
-    }
-    return t;
-};
-
-function __rest(s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) if (e.indexOf(p[i]) < 0)
-            t[p[i]] = s[p[i]];
-    return t;
-};
-
-function __decorate(decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-
-function __param(paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-};
-
-function __metadata(metadataKey, metadataValue) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(metadataKey, metadataValue);
-};
-
-function __awaiter(thisArg, _arguments, P, generator) {
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator.throw(value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-
-function __generator(thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t;
-    return { next: verb(0), "throw": verb(1), "return": verb(2) };
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
-            if (f = 1, y && (t = y[op[0] & 2 ? "return" : op[0] ? "throw" : "next"]) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [0, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-    }
-};
-
-/***/ }),
 /* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var DragManager = (function () {
-    function DragManager(panels, width, handles, container) {
-        if (panels.length == width.length) {
-            this.panels = panels;
-            this.width = width;
+var tslib_1 = __webpack_require__(4);
+var DragLogic = (function () {
+    function DragLogic() {
+        this.containers = [];
+    }
+    DragLogic.prototype.add_panel = function (container_index, index, new_panel_width) {
+        if (container_index >= 0 && container_index < this.containers.length) {
+            var new_width = [];
+            var panel_width = this.containers[container_index].panel_length;
+            for (var i = 0; i <= panel_width.length; i++) {
+                if (i == index) {
+                    new_width[i] = new_panel_width;
+                }
+                else {
+                    new_width[i] = panel_width[i];
+                }
+            }
+            this.containers[container_index].panel_length = new_width;
         }
         else {
-            throw new Error('panels.length =/= widths.length');
-        }
-        this.handles = handles;
-        this.is_grabbed = false;
-        this.grabbed_handle = 0;
-        this.panel_container = container;
-        this.bind_handles();
-    }
-    DragManager.prototype.bind_handles = function () {
-        var _this = this;
-        var _loop_1 = function (i) {
-            this_1.handles[i].mousedown(function (ev) {
-                _this.is_grabbed = true;
-                _this.grabbed_handle = i;
-            });
-            this_1.handles[i].mouseup(function (ev) {
-                _this.is_grabbed = false;
-            });
-            this_1.handles[i].mousemove(function (ev) {
-                if (_this.is_grabbed && i == _this.grabbed_handle) {
-                    var pos = _this.handles[i].position();
-                    if (Math.abs(ev.pageX - pos.left) > 30) {
-                        _this.drag(i, { x: pos.left, y: pos.top }, { x: ev.pageX, y: ev.pageY });
-                    }
-                }
-            });
-        };
-        var this_1 = this;
-        for (var i = 0; i < this.handles.length; i++) {
-            _loop_1(i);
+            throw new Error("Invalid container_index (" + container_index + ")");
         }
     };
-    DragManager.prototype.drag = function (handle_index, starting_pos, final_pos) {
-        var width = this.panel_container.width();
-        var height = this.panel_container.height();
-        var handle = this.handles[handle_index];
-        if (final_pos.x < 0) {
-            final_pos.x = 0;
+    DragLogic.prototype.add_container = function (width, height, mode) {
+        this.containers.push({ width: width, height: height, mode: mode, panel_length: [] });
+    };
+    DragLogic.prototype.remove_container = function (container_index) {
+        if (container_index < 0 || container_index >= this.containers.length) {
+            throw new Error("Invalid container_index (" + container_index + ")");
         }
-        else if (final_pos.x > width) {
-            final_pos.x = width;
+        else {
+            var container = this.containers.filter(function (c, i) { return i == container_index; }).pop();
+            // remover el contenedor
+            this.containers = this.containers.filter(function (c, i) { return i != container_index; });
+            return container;
         }
-        if (final_pos.y < 0) {
-            final_pos.y = 0;
+    };
+    DragLogic.prototype.get_container = function (container_index) {
+        if (container_index < 0 || container_index >= this.containers.length) {
+            throw new Error("Invalid container_index (" + container_index + ")");
         }
-        else if (final_pos.y > height) {
-            final_pos.y = height;
+        else {
+            return this.containers[container_index];
         }
-        var delta_percentage = Number((((final_pos.x - starting_pos.x) / width) * 100).toPrecision(3));
-        var left_panel_index = handle_index;
-        if (this.width[left_panel_index] == 0) {
-            if (delta_percentage < 0) {
-                while (this.width[left_panel_index] == 0) {
-                    left_panel_index--;
+    };
+    DragLogic.prototype.set_container_dimensions = function (container_index, width, height) {
+        if (container_index >= 0 && container_index < this.containers.length) {
+            this.containers[container_index].height = height;
+            this.containers[container_index].width = width;
+        }
+        else {
+            throw new Error("Invalid container_index (" + container_index + ")");
+        }
+    };
+    DragLogic.prototype.drag = function (container_index, handle_index, from, to) {
+        if (container_index >= 0 && container_index < this.containers.length) {
+            if (handle_index >= 0 && handle_index < this.containers[container_index].panel_length.length - 1) {
+                var container = this.containers[container_index];
+                var total_panel_length_1 = container.mode == 'vertical' ? container.height : container.width;
+                // con esto me aseguro de que la posicion final este dentro del panel
+                to = this.clamp(container_index, to);
+                var delta = this.substract(to, from);
+                var positive_direction = container.mode == 'vertical' ? delta.y > 0 : delta.x > 0;
+                var delta_percentage = this.map(delta, function (i) { return Math.abs((i / total_panel_length_1) * 100); });
+                // determinar que panel se achica en funcion de la direccion del movimiento de la manija
+                if (positive_direction) {
+                    var shrinking_panel_index = handle_index + 1;
+                    var total_delta = container.mode == 'vertical' ? delta_percentage.y : delta_percentage.x;
+                    var remaining_delta = total_delta;
+                    var a_panel_shrinked = false;
+                    // distribuir el delta a lo largo de los paneles
+                    while (remaining_delta > 0 && shrinking_panel_index < container.panel_length.length) {
+                        var old_length = container.panel_length[shrinking_panel_index];
+                        var difference = old_length - remaining_delta;
+                        if (difference < 0) {
+                            container.panel_length[shrinking_panel_index] = 0;
+                        }
+                        else {
+                            a_panel_shrinked = true;
+                            container.panel_length[shrinking_panel_index] = difference;
+                        }
+                        remaining_delta = total_delta - old_length;
+                        shrinking_panel_index++;
+                    }
+                    // si algun panel se encogio...
+                    if (a_panel_shrinked) {
+                        // ...hacer que el panel a la izquierda de la manija crezca
+                        container.panel_length[handle_index] = container.panel_length[handle_index] + total_delta;
+                    }
+                    return container.panel_length;
+                }
+                else {
+                    var shrinking_panel_index = handle_index;
+                    var total_delta = container.mode == 'vertical' ? delta_percentage.y : delta_percentage.x;
+                    var remaining_delta = total_delta;
+                    var a_panel_shrinked = false;
+                    // distribuir el delta a lo largo de los paneles
+                    while (remaining_delta > 0 && shrinking_panel_index >= 0) {
+                        var old_length = container.panel_length[shrinking_panel_index];
+                        var difference = old_length - remaining_delta;
+                        if (difference < 0) {
+                            container.panel_length[shrinking_panel_index] = 0;
+                        }
+                        else {
+                            a_panel_shrinked = true;
+                            container.panel_length[shrinking_panel_index] = difference;
+                        }
+                        remaining_delta = total_delta - old_length;
+                        shrinking_panel_index--;
+                    }
+                    // si algun panel se encogio...
+                    if (a_panel_shrinked) {
+                        // ...hacer que el panel a la derecha de la manija crezca
+                        container.panel_length[handle_index + 1] = container.panel_length[handle_index + 1] + total_delta;
+                    }
+                    return container.panel_length;
+                }
+            }
+            else {
+                throw new Error("Invalid handle_index (" + handle_index + ") for container with index " + container_index);
+            }
+        }
+        else {
+            throw new Error("Invalid container_index (" + container_index + ")");
+        }
+    };
+    DragLogic.prototype.next_non_zero_panel = function (lengths, from, look_forward) {
+        if (look_forward) {
+            for (var i = from + 1; i < lengths.length; i++) {
+                if (lengths[i] > 0) {
+                    return i;
                 }
             }
         }
-        var right_panel_index = handle_index + 1;
-        if (this.width[right_panel_index] == 0) {
-            if (delta_percentage > 0) {
-                while (this.width[right_panel_index] == 0) {
-                    right_panel_index++;
+        else {
+            for (var i = from - 1; i >= 0; i--) {
+                if (lengths[i] > 0) {
+                    return i;
                 }
             }
         }
-        var left_width = Math.abs(Number((this.width[left_panel_index] + delta_percentage).toPrecision(3)));
-        // let right_width = Math.abs(Number((this.width[right_panel_index] - delta_percentage).toPrecision(3)))
-        left_width = -(0 - left_width) < 0.1 ? 0 : left_width;
-        var right_width = (this.width[left_panel_index] - left_width) + this.width[right_panel_index];
-        right_width = -(0 - right_width) < 0.1 ? 0 : right_width;
-        this.width[left_panel_index] = left_width;
-        this.width[right_panel_index] = right_width;
-        var total_width = this.width.reduce(function (total, current) { return total + current; });
-        if (total_width > 100) {
-            var delta_1 = (total_width - 100) / this.width.length;
-            this.width = this.width.map(function (w) { return w - delta_1; });
+        return -1;
+    };
+    DragLogic.prototype.clamp = function (container_index, vector) {
+        var container = this.containers[container_index];
+        var x = vector.x, y = vector.y;
+        x = x < 0 ? 0 : x;
+        x = x > container.width ? container.width : x;
+        y = y < 0 ? 0 : y;
+        y = y > container.width ? container.height : y;
+        return { x: x, y: y };
+    };
+    DragLogic.prototype.substract = function (a, b) {
+        return { x: a.x - b.x, y: a.y - b.y };
+    };
+    DragLogic.prototype.map = function (a, f) {
+        var x = a.x, y = a.y;
+        return { x: f(x), y: f(y) };
+    };
+    return DragLogic;
+}());
+exports.DragLogic = DragLogic;
+var DragManager = (function (_super) {
+    tslib_1.__extends(DragManager, _super);
+    function DragManager() {
+        var _this = _super.call(this) || this;
+        _this.ui_panel_containers = [];
+        _this.handles = [];
+        _this.grabbed_handle = null;
+        _this.is_grabbed = false;
+        return _this;
+    }
+    DragManager.prototype.add_handle = function (container_index, handle) {
+        if (container_index >= 0 && container_index < this.ui_panel_containers.length) {
+            var container = this.ui_panel_containers[container_index];
+            var ui_handle = { container_index: container_index, element: handle, handle_index: container.last_handle_index };
+            this.handles.push(ui_handle);
+            container.last_handle_index++;
+            this.bind_handle(ui_handle);
         }
-        for (var i = 0; i < this.panels.length; i++) {
-            this.panels[i].attr('style', "width: " + this.width[i] + "%;");
+        else {
+            throw new Error("Invalid container_index (" + container_index + ")");
+        }
+    };
+    DragManager.prototype.bind_handle = function (handle) {
+        var _this = this;
+        handle.element.mousedown(function (ev) {
+            _this.is_grabbed = true;
+            _this.grabbed_handle = handle;
+        });
+        handle.element.mouseup(function (ev) {
+            _this.is_grabbed = false;
+            _this.grabbed_handle = null;
+        });
+    };
+    DragManager.prototype.add_ui_container = function (element, mode) {
+        _super.prototype.add_container.call(this, element.width(), element.height(), mode);
+        this.ui_panel_containers.push({ element: element, mode: mode, panels: [], last_handle_index: 0 });
+    };
+    DragManager.prototype.add_ui_panel = function (container_index, index, panel_width, panel_element) {
+        _super.prototype.add_panel.call(this, container_index, index, panel_width);
+        if (container_index >= 0 && container_index < this.ui_panel_containers.length) {
+            var new_panels = [];
+            var old_panels = this.ui_panel_containers[container_index].panels;
+            for (var i = 0; i <= old_panels.length; i++) {
+                if (i == index) {
+                    new_panels[i] = panel_element;
+                }
+                else {
+                    new_panels[i] = old_panels[i];
+                }
+            }
+            this.ui_panel_containers[container_index].panels = new_panels;
+        }
+        else {
+            throw new Error("Invalid container_index (" + container_index + ")");
+        }
+    };
+    DragManager.prototype.drag_handle = function (handle, from, to) {
+        var panel_length = _super.prototype.drag.call(this, handle.container_index, handle.handle_index, from, to);
+        var container = this.ui_panel_containers[handle.container_index];
+        // aplicar las nuevas longitudes
+        for (var i = 0; i < container.panels.length; i++) {
+            if (container.mode == 'horizontal') {
+                container.panels[i].attr('style', "width: " + panel_length[i] + "%;");
+            }
+            else {
+                container.panels[i].attr('style', "height: " + panel_length[i] + "%;");
+            }
         }
     };
     return DragManager;
-}());
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = DragManager;
+}(DragLogic));
+exports.DragManager = DragManager;
 
 
 /***/ }),
@@ -13740,7 +13937,7 @@ exports.default = DragManager;
 
 "use strict";
 
-var tslib_1 = __webpack_require__(12);
+var tslib_1 = __webpack_require__(4);
 var $ = __webpack_require__(1);
 var CodeMirror = __webpack_require__(26);
 var MessagePanel_1 = __webpack_require__(28);
@@ -13858,10 +14055,11 @@ var Evaluator = (function () {
             value_stack: [],
             module_stack: [],
             statement_stack: [],
-            last_report: { error: false, result: { action: 'none', done: this.entry_point === null ? true : false } },
+            last_report: { error: false, result: { kind: 'action', action: 'none', done: this.entry_point === null ? true : false } },
             next_statement: null,
             next_frame: null,
-            paused: false
+            paused: false,
+            statement_visited: false
         };
     }
     /**
@@ -13897,48 +14095,58 @@ var Evaluator = (function () {
          * El evaluador esta en pausa cuando esta esperando que sea realice alguna lectura.
          */
         if (this.state.paused) {
-            return { error: false, result: { action: 'paused', done: this.state.done } };
+            return { error: false, result: { kind: 'action', action: 'paused', done: this.state.done } };
         }
         if (this.state.done) {
             return this.state.last_report;
         }
-        var report = this.evaluate(this.current_statement);
-        this.state.last_report = report;
         /**
-         * Determinar si la ejecución terminó:
-         * Pudo haber terminado porque se llegó al fin del
-         * programa o porque hubo un error al evaluar el
-         * enunciado anterior.
+         * Antes de evaluar un enunciado retornar informacion sobre este
          */
-        if (report.error) {
-            this.state.done = true;
-            return this.state.last_report;
+        if (this.state.statement_visited == false) {
+            this.state.statement_visited = true;
+            return { error: false, result: { kind: 'info', is_user_statement: this.current_statement.is_user_stmnt, pos: this.current_statement.pos } };
         }
-        else if (report.error == false) {
+        else {
+            var report = this.evaluate(this.current_statement);
+            this.state.statement_visited = false;
+            this.state.last_report = report;
             /**
-             * Determinar si se llegó al fin del programa.
-             * this.state.next_statement ya fue establecido
-             * durante la llamada a this.evaluate
+             * Determinar si la ejecución terminó:
+             * Pudo haber terminado porque se llegó al fin del
+             * programa o porque hubo un error al evaluar el
+             * enunciado anterior.
              */
-            /**
-             * Si se llegó al final del modulo actual, desapilar modulos hasta
-             * que se encuentre uno que todavia no haya finalizado.
-             */
-            while (this.state.next_statement == null && this.state.statement_stack.length > 0) {
-                this.state.next_statement = this.state.statement_stack.pop();
-                this.current_module = this.state.module_stack.pop();
-                this.frame_stack.pop();
-            }
-            /**
-             * Si aun despues de desapilar todo se encuentra que no hay
-             * un enunciado para ejecutar, se llegó al fin del programa.
-             */
-            if (this.state.next_statement == null) {
+            if (report.error) {
                 this.state.done = true;
-                report.result.done = this.state.done;
+                return this.state.last_report;
             }
-            this.current_statement = this.state.next_statement;
-            return report;
+            else if (report.error == false) {
+                /**
+                 * Determinar si se llegó al fin del programa.
+                 * this.state.next_statement ya fue establecido
+                 * durante la llamada a this.evaluate
+                 */
+                /**
+                 * Si se llegó al final del modulo actual, desapilar modulos hasta
+                 * que se encuentre uno que todavia no haya finalizado.
+                 */
+                while (this.state.next_statement == null && this.state.statement_stack.length > 0) {
+                    this.state.next_statement = this.state.statement_stack.pop();
+                    this.current_module = this.state.module_stack.pop();
+                    this.frame_stack.pop();
+                }
+                /**
+                 * Si aun despues de desapilar todo se encuentra que no hay
+                 * un enunciado para ejecutar, se llegó al fin del programa.
+                 */
+                if (this.state.next_statement == null) {
+                    this.state.done = true;
+                    report.result.done = this.state.done;
+                }
+                this.current_statement = this.state.next_statement;
+                return report;
+            }
         }
     };
     /**
@@ -14021,7 +14229,7 @@ var Evaluator = (function () {
                  * Esto termina con la ejecucion de la funcion en curso
                  */
                 this.state.next_statement = null;
-                return { error: false, result: { action: 'none', done: this.state.done } };
+                return { error: false, result: { kind: 'action', action: 'none', done: this.state.done } };
             case interfaces_1.S3.StatementKinds.Concat:
                 return this.concat(s);
             case interfaces_1.S3.StatementKinds.AssignString:
@@ -14068,11 +14276,11 @@ var Evaluator = (function () {
             };
             this.copy_vec(tgt, src, tgt_range, src_range);
         }
-        return { error: false, result: { done: false, action: 'none' } };
+        return { error: false, result: { done: false, kind: 'action', action: 'none' } };
     };
     Evaluator.prototype.make_frame_statement = function (s) {
         this.state.next_frame = this.make_frame(s.name);
-        return { error: false, result: { done: false, action: 'none' } };
+        return { error: false, result: { done: false, kind: 'action', action: 'none' } };
     };
     Evaluator.prototype.make_frame = function (mod_name) {
         var templates = this.frame_templates[mod_name];
@@ -14098,7 +14306,7 @@ var Evaluator = (function () {
     Evaluator.prototype.neg = function () {
         var a = this.state.value_stack.pop();
         this.state.value_stack.push(-a);
-        return { error: false, result: { done: false, action: 'none' } };
+        return { error: false, result: { done: false, kind: 'action', action: 'none' } };
     };
     Evaluator.prototype.pad = function (a, padder, desired_length) {
         var padded_copy = new Array(desired_length);
@@ -14162,7 +14370,7 @@ var Evaluator = (function () {
             src_range.to = this.calculate_index(src_indexes.to, src_var.dimensions);
         }
         this.copy_vec(tgt_var, src_var, tgt_range, src_range);
-        return { error: false, result: { done: false, action: 'none' } };
+        return { error: false, result: { done: false, kind: 'action', action: 'none' } };
     };
     Evaluator.prototype.copy_vec = function (tgt, src, tgt_range, src_range) {
         var counter = 0;
@@ -14170,29 +14378,18 @@ var Evaluator = (function () {
             tgt.values[tgt_range.from + counter] = src.values[src_range.from + counter];
             counter++;
         }
-        return { error: false, result: { done: false, action: 'none' } };
+        return { error: false, result: { done: false, kind: 'action', action: 'none' } };
     };
     Evaluator.prototype.alias = function (s) {
         var indexes = this.pop_indexes(s.var_indexes);
         var alias = this.state.next_frame[s.local_alias];
         alias.indexes = indexes;
         alias.name = s.varname;
-        return { error: false, result: { done: false, action: 'none' } };
+        return { error: false, result: { done: false, kind: 'action', action: 'none' } };
     };
     Evaluator.prototype.assign_string = function (s) {
         var v = this.get_var(s.varname);
         var indexes = this.pop_indexes(s.indexes);
-        /**
-         * Si los indices recibidos estan dentro de lo permitido
-         * se continua con la asignacion. Como estos indices son
-         * parciales todavia puede ocurrir que la cadena sea mas
-         * larga que el vector, lo cual ocurre cuando i == s.length
-         * pero todavia no se desapiló el caracter '\0' que indica
-         * el final de la cadena. En ese caso se retorna el error
-         * Errors.LongString. Esto evita que se asignen cadenas
-         * que fueron leidas (ingresadas por el usuario) y son
-         * demasiado largas.
-         */
         if (this.is_whithin_bounds(indexes, v.dimensions)) {
             var string = this.state.value_stack.pop();
             var i = 0;
@@ -14201,7 +14398,7 @@ var Evaluator = (function () {
                 v.values[start_index + i] = string[i];
                 i++;
             }
-            return { error: false, result: { done: false, action: 'none' } };
+            return { error: false, result: { done: false, kind: 'action', action: 'none' } };
         }
         else {
             var bad_index = this.get_bad_index(indexes, v.dimensions);
@@ -14222,18 +14419,18 @@ var Evaluator = (function () {
             string.unshift(this.state.value_stack.pop());
         }
         this.state.value_stack.push(string.join(''));
-        return { error: false, result: { action: 'none', done: this.state.done } };
+        return { error: false, result: { kind: 'action', action: 'none', done: this.state.done } };
     };
     Evaluator.prototype.push = function (s) {
         this.state.value_stack.push(s.value);
-        return { error: false, result: { action: 'none', done: this.state.done } };
+        return { error: false, result: { kind: 'action', action: 'none', done: this.state.done } };
     };
     /**
      * Creo que esta funcion no sirve. No se usa nunca.
      */
     Evaluator.prototype.pop = function (s) {
         this.state.value_stack.pop();
-        return { error: false, result: { action: 'none', done: this.state.done } };
+        return { error: false, result: { kind: 'action', action: 'none', done: this.state.done } };
     };
     Evaluator.prototype.assign = function (s) {
         var var_found = this.get_var(s.varname);
@@ -14241,7 +14438,7 @@ var Evaluator = (function () {
         if (var_found.type != 'alias') {
             var variable = var_found;
             variable.value = this.state.value_stack.pop();
-            return { error: false, result: { action: 'none', done: this.state.done } };
+            return { error: false, result: { kind: 'action', action: 'none', done: this.state.done } };
         }
         else {
             var _a = this.resolve_alias(var_found), variable = _a.variable, pre_indexes = _a.pre_indexes;
@@ -14249,11 +14446,11 @@ var Evaluator = (function () {
                 var v = variable;
                 var index = this.calculate_index(pre_indexes.map(function (i) { return i - 1; }), v.dimensions);
                 v.values[index] = this.state.value_stack.pop();
-                return { error: false, result: { action: 'none', done: this.state.done } };
+                return { error: false, result: { kind: 'action', action: 'none', done: this.state.done } };
             }
             else {
                 variable.value = this.state.value_stack.pop();
-                return { error: false, result: { action: 'none', done: this.state.done } };
+                return { error: false, result: { kind: 'action', action: 'none', done: this.state.done } };
             }
         }
     };
@@ -14262,7 +14459,7 @@ var Evaluator = (function () {
         // Si no hay alias solo hay que apilar el valor de la variable
         if (var_found.type != 'alias') {
             this.state.value_stack.push(var_found.value);
-            return { error: false, result: { action: 'none', done: this.state.done } };
+            return { error: false, result: { kind: 'action', action: 'none', done: this.state.done } };
         }
         else {
             var _a = this.resolve_alias(var_found), variable = _a.variable, pre_indexes = _a.pre_indexes;
@@ -14270,11 +14467,11 @@ var Evaluator = (function () {
                 var v = variable;
                 var index = this.calculate_index(pre_indexes.map(function (i) { return i - 1; }), v.dimensions);
                 this.state.value_stack.push(v.values[index]);
-                return { error: false, result: { action: 'none', done: this.state.done } };
+                return { error: false, result: { kind: 'action', action: 'none', done: this.state.done } };
             }
             else {
                 this.state.value_stack.push(variable.value);
-                return { error: false, result: { action: 'none', done: this.state.done } };
+                return { error: false, result: { kind: 'action', action: 'none', done: this.state.done } };
             }
         }
     };
@@ -14293,7 +14490,7 @@ var Evaluator = (function () {
                 var value = this.state.value_stack.pop();
                 var variable = this.get_var(s.varname);
                 variable.values[index] = value;
-                return { error: false, result: { action: 'none', done: false } };
+                return { error: false, result: { kind: 'action', action: 'none', done: false } };
             }
             else {
                 var bad_index = this.get_bad_index(indexes, s.dimensions);
@@ -14320,7 +14517,7 @@ var Evaluator = (function () {
                 var index = this.calculate_index(indexes.map(function (i) { return i - 1; }), dimensions);
                 var v = variable;
                 v.values[index] = this.state.value_stack.pop();
-                return { error: false, result: { action: 'none', done: false } };
+                return { error: false, result: { kind: 'action', action: 'none', done: false } };
             }
             else {
                 var bad_index = this.get_bad_index(partial_indexes, s.dimensions);
@@ -14350,7 +14547,7 @@ var Evaluator = (function () {
                 var index = this.calculate_index(indexes.map(function (i) { return i - 1; }), s.dimensions);
                 var variable = this.get_var(s.varname);
                 this.state.value_stack.push(variable.values[index]);
-                return { error: false, result: { action: 'none', done: false } };
+                return { error: false, result: { kind: 'action', action: 'none', done: false } };
             }
             else {
                 var bad_index = this.get_bad_index(indexes, s.dimensions);
@@ -14377,7 +14574,7 @@ var Evaluator = (function () {
                 var index = this.calculate_index(indexes.map(function (i) { return i - 1; }), dimensions);
                 var v = variable;
                 this.state.value_stack.push(v.values[index]);
-                return { error: false, result: { action: 'none', done: false } };
+                return { error: false, result: { kind: 'action', action: 'none', done: false } };
             }
             else {
                 var bad_index = this.get_bad_index(partial_indexes, s.dimensions);
@@ -14436,7 +14633,7 @@ var Evaluator = (function () {
     };
     Evaluator.prototype.write = function (s) {
         var v = this.state.value_stack.pop();
-        return { error: false, result: { action: 'write', value: v, done: this.state.done } };
+        return { error: false, result: { kind: 'action', action: 'write', value: v, done: this.state.done } };
     };
     Evaluator.prototype.call = function (s) {
         this.state.next_statement = this.modules[s.name].entry_point;
@@ -14445,32 +14642,32 @@ var Evaluator = (function () {
         this.frame_stack.push(this.state.next_frame);
         this.state.next_frame = null;
         this.current_module = s.name;
-        return { error: false, result: { action: 'none', done: this.state.done } };
+        return { error: false, result: { kind: 'action', action: 'none', done: this.state.done } };
     };
     Evaluator.prototype.read = function (s) {
         this.state.paused = true;
-        return { error: false, result: { action: 'read', type: s.type, name: s.varname, done: this.state.done } };
+        return { error: false, result: { kind: 'action', action: 'read', type: s.type, name: s.varname, done: this.state.done } };
     };
     Evaluator.prototype.if_st = function (s) {
         var condition_result = this.state.value_stack.pop();
         this.state.next_statement = condition_result ? s.true_branch_entry : s.false_branch_entry;
-        return { error: false, result: { action: 'none', done: this.state.done } };
+        return { error: false, result: { kind: 'action', action: 'none', done: this.state.done } };
     };
     Evaluator.prototype.while_st = function (s) {
         var condition_result = this.state.value_stack.pop();
         this.state.next_statement = condition_result ? s.entry_point : s.exit_point;
-        return { error: false, result: { action: 'none', done: this.state.done } };
+        return { error: false, result: { kind: 'action', action: 'none', done: this.state.done } };
     };
     Evaluator.prototype.until_st = function (s) {
         var condition_result = this.state.value_stack.pop();
         this.state.next_statement = !condition_result ? s.entry_point : s.exit_point;
-        return { error: false, result: { action: 'none', done: this.state.done } };
+        return { error: false, result: { kind: 'action', action: 'none', done: this.state.done } };
     };
     Evaluator.prototype.times = function () {
         var b = this.state.value_stack.pop();
         var a = this.state.value_stack.pop();
         this.state.value_stack.push(a * b);
-        return { error: false, result: { action: 'none', done: this.state.done } };
+        return { error: false, result: { kind: 'action', action: 'none', done: this.state.done } };
     };
     Evaluator.prototype.uminus = function () {
         var a = this.state.value_stack.pop();
@@ -14480,90 +14677,90 @@ var Evaluator = (function () {
         var b = this.state.value_stack.pop();
         var a = this.state.value_stack.pop();
         this.state.value_stack.push(Math.pow(a, b));
-        return { error: false, result: { action: 'none', done: this.state.done } };
+        return { error: false, result: { kind: 'action', action: 'none', done: this.state.done } };
     };
     Evaluator.prototype.div = function () {
         var b = this.state.value_stack.pop();
         var a = this.state.value_stack.pop();
         this.state.value_stack.push((a - (a % b)) / b);
-        return { error: false, result: { action: 'none', done: this.state.done } };
+        return { error: false, result: { kind: 'action', action: 'none', done: this.state.done } };
     };
     Evaluator.prototype.mod = function () {
         var b = this.state.value_stack.pop();
         var a = this.state.value_stack.pop();
         this.state.value_stack.push(a % b);
-        return { error: false, result: { action: 'none', done: this.state.done } };
+        return { error: false, result: { kind: 'action', action: 'none', done: this.state.done } };
     };
     Evaluator.prototype.divide = function () {
         var b = this.state.value_stack.pop();
         var a = this.state.value_stack.pop();
         this.state.value_stack.push(a / b);
-        return { error: false, result: { action: 'none', done: this.state.done } };
+        return { error: false, result: { kind: 'action', action: 'none', done: this.state.done } };
     };
     Evaluator.prototype.minus = function () {
         var b = this.state.value_stack.pop();
         var a = this.state.value_stack.pop();
         this.state.value_stack.push(a - b);
-        return { error: false, result: { action: 'none', done: this.state.done } };
+        return { error: false, result: { kind: 'action', action: 'none', done: this.state.done } };
     };
     Evaluator.prototype.plus = function () {
         var b = this.state.value_stack.pop();
         var a = this.state.value_stack.pop();
         this.state.value_stack.push(a + b);
-        return { error: false, result: { action: 'none', done: this.state.done } };
+        return { error: false, result: { kind: 'action', action: 'none', done: this.state.done } };
     };
     Evaluator.prototype.less = function () {
         var b = this.state.value_stack.pop();
         var a = this.state.value_stack.pop();
         this.state.value_stack.push(a < b);
-        return { error: false, result: { action: 'none', done: this.state.done } };
+        return { error: false, result: { kind: 'action', action: 'none', done: this.state.done } };
     };
     Evaluator.prototype.less_or_equal = function () {
         var b = this.state.value_stack.pop();
         var a = this.state.value_stack.pop();
         this.state.value_stack.push(a <= b);
-        return { error: false, result: { action: 'none', done: this.state.done } };
+        return { error: false, result: { kind: 'action', action: 'none', done: this.state.done } };
     };
     Evaluator.prototype.greater = function () {
         var b = this.state.value_stack.pop();
         var a = this.state.value_stack.pop();
         this.state.value_stack.push(a > b);
-        return { error: false, result: { action: 'none', done: this.state.done } };
+        return { error: false, result: { kind: 'action', action: 'none', done: this.state.done } };
     };
     Evaluator.prototype.greater_or_equal = function () {
         var b = this.state.value_stack.pop();
         var a = this.state.value_stack.pop();
         this.state.value_stack.push(a >= b);
-        return { error: false, result: { action: 'none', done: this.state.done } };
+        return { error: false, result: { kind: 'action', action: 'none', done: this.state.done } };
     };
     Evaluator.prototype.equal = function () {
         var b = this.state.value_stack.pop();
         var a = this.state.value_stack.pop();
         this.state.value_stack.push(a == b);
-        return { error: false, result: { action: 'none', done: this.state.done } };
+        return { error: false, result: { kind: 'action', action: 'none', done: this.state.done } };
     };
     Evaluator.prototype.not = function () {
         var a = this.state.value_stack.pop();
         this.state.value_stack.push(!a);
-        return { error: false, result: { action: 'none', done: this.state.done } };
+        return { error: false, result: { kind: 'action', action: 'none', done: this.state.done } };
     };
     Evaluator.prototype.different = function () {
         var b = this.state.value_stack.pop();
         var a = this.state.value_stack.pop();
         this.state.value_stack.push(a != b);
-        return { error: false, result: { action: 'none', done: this.state.done } };
+        return { error: false, result: { kind: 'action', action: 'none', done: this.state.done } };
     };
     Evaluator.prototype.and = function () {
         var b = this.state.value_stack.pop();
         var a = this.state.value_stack.pop();
         this.state.value_stack.push(a && b);
-        return { error: false, result: { action: 'none', done: this.state.done } };
+        return { error: false, result: { kind: 'action', action: 'none', done: this.state.done } };
     };
     Evaluator.prototype.or = function () {
         var b = this.state.value_stack.pop();
         var a = this.state.value_stack.pop();
         this.state.value_stack.push(a || b);
-        return { error: false, result: { action: 'none', done: this.state.done } };
+        return { error: false, result: { kind: 'action', action: 'none', done: this.state.done } };
     };
     Evaluator.prototype.is_whithin_bounds = function (indexes, dimensions) {
         var i = 0;
@@ -14601,7 +14798,8 @@ var Evaluator = (function () {
     };
     return Evaluator;
 }());
-exports.Evaluator = Evaluator;
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = Evaluator;
 
 
 /***/ }),
@@ -14621,14 +14819,14 @@ var tslib_1 = __webpack_require__(3);
  *  - read
  */
 var Evaluator_1 = __webpack_require__(16);
-var Emitter_js_1 = __webpack_require__(10);
+var Emitter_js_1 = __webpack_require__(11);
 var interfaces_1 = __webpack_require__(0);
 var helpers_1 = __webpack_require__(2);
 var Interpreter = (function (_super) {
     tslib_1.__extends(Interpreter, _super);
     function Interpreter(p) {
         var _this = _super.call(this, ['program-started', 'program-resumed', 'program-paused', 'program-finished']) || this;
-        _this.evaluator = new Evaluator_1.Evaluator(p);
+        _this.evaluator = new Evaluator_1.default(p);
         _this.running = true;
         _this.paused = false;
         _this.data_read = false;
@@ -14650,28 +14848,30 @@ var Interpreter = (function (_super) {
         var done = false;
         while (this.running && done == false) {
             var evaluation_report = this.evaluator.step();
-            if (evaluation_report.error) {
+            if (evaluation_report.error == true) {
                 done = true;
                 this.emit('evaluation-error', evaluation_report.result);
             }
-            else if (evaluation_report.error == false) {
-                switch (evaluation_report.result.action) {
-                    case 'read':
-                        this.emit('read');
-                        this.read_stack.push({ name: evaluation_report.result.name, type: evaluation_report.result.type });
-                        break;
-                    case 'write':
-                        this.emit('write', evaluation_report.result.value);
-                    case 'none':
-                        break;
-                    case 'paused':
-                        this.paused = true;
+            else {
+                if (evaluation_report.result.kind == 'action') {
+                    switch (evaluation_report.result.action) {
+                        case 'read':
+                            this.emit('read');
+                            this.read_stack.push({ name: evaluation_report.result.name, type: evaluation_report.result.type });
+                            break;
+                        case 'write':
+                            this.emit('write', evaluation_report.result.value);
+                        case 'none':
+                            break;
+                        case 'paused':
+                            this.paused = true;
+                            this.running = false;
+                            break;
+                    }
+                    done = evaluation_report.result.done;
+                    if (done) {
                         this.running = false;
-                        break;
-                }
-                done = evaluation_report.result.done;
-                if (done) {
-                    this.running = false;
+                    }
                 }
             }
         }
@@ -14687,6 +14887,67 @@ var Interpreter = (function (_super) {
         else {
             this.emit('program-finished');
         }
+    };
+    Interpreter.prototype.step = function () {
+        // Esto es necesario porque el interprete se "pausa" cuando un modulo hace
+        // una llamada a leer
+        if (this.paused && this.data_read) {
+            this.emit('program-resumed');
+            this.paused = false;
+            this.running = true;
+            this.data_read = false;
+        }
+        else {
+            this.emit('program-started');
+        }
+        var done = false;
+        while (this.running && done == false) {
+            var evaluation_report = this.evaluator.step();
+            if (evaluation_report.error == true) {
+                done = true;
+                this.emit('evaluation-error', evaluation_report.result);
+            }
+            else {
+                if (evaluation_report.result.kind == 'info') {
+                    if (evaluation_report.result.is_user_statement) {
+                        return evaluation_report.result;
+                    }
+                }
+                else if (evaluation_report.result.kind == 'action') {
+                    switch (evaluation_report.result.action) {
+                        case 'read':
+                            this.emit('read');
+                            this.read_stack.push({ name: evaluation_report.result.name, type: evaluation_report.result.type });
+                            break;
+                        case 'write':
+                            this.emit('write', evaluation_report.result.value);
+                        case 'none':
+                            break;
+                        case 'paused':
+                            this.paused = true;
+                            this.running = false;
+                            break;
+                    }
+                    done = evaluation_report.result.done;
+                    if (done) {
+                        this.running = false;
+                    }
+                }
+            }
+        }
+        /**
+         * Esto determina que evento emitir si la ejecucion sale del
+         * bucle anterior. Hay dos motivos para salir de ese bucle:
+         *  - el evaluador esta pausado esperando que finalice una lectura
+         *  - hubo un error o el programa finalizó
+         */
+        if (this.paused) {
+            this.emit('program-paused');
+        }
+        else {
+            this.emit('program-finished');
+        }
+        return { kind: 'state', done: this.paused || !this.running };
     };
     Interpreter.prototype.send = function (value) {
         /**
@@ -14785,8 +15046,8 @@ exports.default = Interpreter;
 "use strict";
 
 var interfaces_1 = __webpack_require__(0);
-var TokenTypes_1 = __webpack_require__(8);
-var StringMethods_1 = __webpack_require__(11);
+var TokenTypes_1 = __webpack_require__(9);
+var StringMethods_1 = __webpack_require__(12);
 var isSpecialSymbolChar = TokenTypes_1.SpecialSymbolToken.isSpecialSymbolChar;
 /**
  * Clase para convertir una cadena en fichas.
@@ -15097,7 +15358,8 @@ function transform_assignment(assignment, ast, module_name) {
         var new_assignment = {
             type: 'assignment',
             left: variable.result,
-            right: payload.result
+            right: payload.result,
+            pos: assignment.pos
         };
         return { error: false, result: new_assignment };
     }
@@ -15136,7 +15398,8 @@ function transform_call(call, ast, module_name) {
                 type: 'call',
                 module_type: 'procedure',
                 parameters: [],
-                return_type: 'ninguno'
+                return_type: 'ninguno',
+                pos: call.pos
             };
             return { error: false, result: new_call };
         }
@@ -15147,7 +15410,8 @@ function transform_call(call, ast, module_name) {
                 name: call.name,
                 module_type: info.result.module_type,
                 parameters: info.result.parameters,
-                return_type: info.result.return_type
+                return_type: info.result.return_type,
+                pos: call.pos
             };
             return { error: false, result: new_call };
         }
@@ -15171,7 +15435,8 @@ function transform_loop(statement, ast, module_name) {
             var new_loop = {
                 type: statement.type,
                 condition: new_condition.result,
-                body: new_body.result
+                body: new_body.result,
+                pos: statement.pos
             };
             return { error: false, result: new_loop };
         }
@@ -15179,7 +15444,8 @@ function transform_loop(statement, ast, module_name) {
             var new_loop = {
                 type: statement.type,
                 condition: new_condition.result,
-                body: new_body.result
+                body: new_body.result,
+                pos: statement.pos
             };
             return { error: false, result: new_loop };
         }
@@ -15207,7 +15473,8 @@ function transform_if(statement, ast, module_name) {
             type: 'if',
             condition: new_condition.result,
             true_branch: new_true_branch.result,
-            false_branch: new_false_branch.result
+            false_branch: new_false_branch.result,
+            pos: statement.pos
         };
         return { error: false, result: new_if };
     }
@@ -15234,7 +15501,8 @@ function transform_for(statement, ast, module_name) {
             type: 'for',
             counter_init: new_init.result,
             last_value: new_goal.result,
-            body: new_body.result
+            body: new_body.result,
+            pos: statement.pos
         };
         return { error: false, result: new_for };
     }
@@ -15249,7 +15517,8 @@ function transform_return(ret_statement, ast, module_name) {
         var new_return = {
             type: 'return',
             expression: exp_returned.result,
-            expected: ret_typename
+            expected: ret_typename,
+            pos: ret_statement.pos
         };
         return { error: false, result: new_return };
     }
@@ -15547,7 +15816,8 @@ function declare_variables(declarations) {
                     name: original.name,
                     first_type: original.datatype,
                     second_type: variable.datatype,
-                    where: 'declarator-transform'
+                    where: 'declarator-transform',
+                    pos: declaration.pos
                 };
                 repeated_variables.push(error_info);
             }
@@ -15629,7 +15899,7 @@ function transform_module(old_module, current_module) {
             };
             var assignment = null;
             if (param.type instanceof interfaces_1.Typed.StringType) {
-                assignment = new interfaces_1.S3.AssignString(current_module, param.name, param.type.length, 0);
+                assignment = new interfaces_1.S3.AssignString(current_module, param.name, param.type.length, 0, false);
             }
             else {
                 assignment = create_assignment(fake_inv, current_module);
@@ -15677,7 +15947,7 @@ function transform_if(statement, module_name) {
     var last_statement = interfaces_1.S3.get_last(entry);
     var true_entry = transform_body(statement.true_branch, module_name);
     var false_entry = transform_body(statement.false_branch, module_name);
-    var sif = new interfaces_1.S3.If(module_name, true_entry, false_entry);
+    var sif = new interfaces_1.S3.If(module_name, true_entry, false_entry, statement.pos);
     /**
      * Hacer que la evaluacion de la condicion venga seguida del if
      */
@@ -15694,7 +15964,7 @@ function transform_while(statement, module_name) {
     var cond_last_st = interfaces_1.S3.get_last(condition_entry);
     var loop_body = transform_body(statement.body, module_name);
     var body_last_st = interfaces_1.S3.get_last(loop_body);
-    var swhile = new interfaces_1.S3.While(module_name, loop_body);
+    var swhile = new interfaces_1.S3.While(module_name, loop_body, statement.pos);
     cond_last_st.exit_point = swhile;
     body_last_st.exit_point = condition_entry;
     return condition_entry;
@@ -15709,7 +15979,7 @@ function transform_until(statement, module_name) {
      */
     body_last_st.exit_point = condition;
     var last_st_condition = interfaces_1.S3.get_last(condition);
-    var suntil = new interfaces_1.S3.Until(module_name, body);
+    var suntil = new interfaces_1.S3.Until(module_name, body, statement.pos);
     last_st_condition.exit_point = suntil;
     return body;
 }
@@ -15764,7 +16034,8 @@ function transform_for(statement, module_name) {
         typings: {
             left: left.typings.type,
             right: left.typings.type
-        }
+        },
+        pos: null
     };
     /**
      * Ahora ese enunciado de S2 debe convertirse en uno de Program
@@ -15780,7 +16051,7 @@ function transform_for(statement, module_name) {
      * -    incremento
      * -    condicion
      */
-    var swhile = new interfaces_1.S3.While(module_name, body);
+    var swhile = new interfaces_1.S3.While(module_name, body, statement.pos);
     init_last.exit_point = condition_entry;
     conditon_last.exit_point = swhile;
     body_last.exit_point = incremement_entry;
@@ -15868,7 +16139,7 @@ function transform_call(call, module_name) {
             last_statement = interfaces_1.S3.get_last(next_arg);
         }
     }
-    var ucall = new interfaces_1.S3.UserModuleCall(module_name, call.name, call.args.length);
+    var ucall = new interfaces_1.S3.UserModuleCall(module_name, call.name, call.args.length, call.pos);
     if (first_arg_initd) {
         var make_frame = new interfaces_1.S3.MakeFrame(module_name, call.name);
         // enlazar creacion de frame a inicializacion de argumentos
@@ -15897,7 +16168,7 @@ function transform_write(wc, module_name) {
         last_statement.exit_point = concat;
         last_statement = concat;
     }
-    var escribir_call = new interfaces_1.S3.WriteCall(module_name);
+    var escribir_call = new interfaces_1.S3.WriteCall(module_name, wc.pos);
     last_statement.exit_point = escribir_call;
     last_statement = escribir_call;
     for (var i = 1; i < wc.args.length; i++) {
@@ -15909,7 +16180,7 @@ function transform_write(wc, module_name) {
             last_statement.exit_point = concat;
             last_statement = concat;
         }
-        var wcall = new interfaces_1.S3.WriteCall(module_name);
+        var wcall = new interfaces_1.S3.WriteCall(module_name, wc.pos);
         last_statement.exit_point = wcall;
         last_statement = wcall;
     }
@@ -15932,7 +16203,7 @@ function transform_read(rc, module_name) {
          * son todos Invocation.
          */
         current_var = rc.args[i][0];
-        var lcall = new interfaces_1.S3.ReadCall(module_name, current_var.name, current_var.typings.type);
+        var lcall = new interfaces_1.S3.ReadCall(module_name, current_var.name, current_var.typings.type, rc.pos);
         if (i == 0) {
             first_call = lcall;
         }
@@ -15941,7 +16212,7 @@ function transform_read(rc, module_name) {
         }
         var target_assignment = null;
         if (current_var.typings.type instanceof interfaces_1.Typed.StringType) {
-            target_assignment = new interfaces_1.S3.AssignString(module_name, current_var.name, current_var.typings.type.length, current_var.indexes.length);
+            target_assignment = new interfaces_1.S3.AssignString(module_name, current_var.name, current_var.typings.type.length, current_var.indexes.length, false);
         }
         else {
             target_assignment = create_assignment(current_var, module_name);
@@ -15980,7 +16251,7 @@ function create_assignment(v, module_name) {
                     }
                     last_statement = interfaces_1.S3.get_last(index_exp);
                 }
-                var assignment = new interfaces_1.S3.AssignV(module_name, final_indexes.length, v.dimensions, v.name);
+                var assignment = new interfaces_1.S3.AssignV(module_name, final_indexes.length, v.dimensions, v.name, false);
                 last_statement.exit_point = assignment;
                 last_statement = assignment;
             }
@@ -15994,13 +16265,13 @@ function create_assignment(v, module_name) {
                 last_statement.exit_point = next_index;
                 last_statement = interfaces_1.S3.get_last(next_index);
             }
-            var assignment = new interfaces_1.S3.AssignV(module_name, v.indexes.length, v.dimensions, v.name);
+            var assignment = new interfaces_1.S3.AssignV(module_name, v.indexes.length, v.dimensions, v.name, false);
             last_statement.exit_point = assignment;
             return first_index;
         }
     }
     else {
-        var assignment = new interfaces_1.S3.Assign(module_name, v.name);
+        var assignment = new interfaces_1.S3.Assign(module_name, v.name, false);
         return assignment;
     }
 }
@@ -16016,7 +16287,7 @@ function transform_return(ret, module_name) {
      * de la funcion donde se encuentra.
      */
     var entry = transform_expression(ret.expression, module_name);
-    var ret_statement = new interfaces_1.S3.Return(module_name);
+    var ret_statement = new interfaces_1.S3.Return(module_name, ret.pos);
     interfaces_1.S3.get_last(entry).exit_point = ret_statement;
     return entry;
 }
@@ -16071,7 +16342,9 @@ function transform_assignment(a, module_name) {
              * Enunciados que apilan la cadena
              */
             var stack_string = transform_expression(a.right, module_name);
-            interfaces_1.S3.get_last(stack_string).exit_point = new interfaces_1.S3.AssignString(module_name, a.left.name, a.typings.left.length, a.left.indexes.length);
+            var assignment = new interfaces_1.S3.AssignString(module_name, a.left.name, a.typings.left.length, a.left.indexes.length, true, a.pos);
+            assignment.pos = a.pos;
+            interfaces_1.S3.get_last(stack_string).exit_point = assignment;
             return stack_string;
         }
         else {
@@ -16124,7 +16397,7 @@ function transform_assignment(a, module_name) {
                 dimensions: a.right[0].dimensions,
                 indexes: a.right[0].indexes.length
             };
-            var copy_statement = new interfaces_1.S3.CopyVec(module_name, target, source);
+            var copy_statement = new interfaces_1.S3.CopyVec(module_name, target, source, a.pos);
             if (!entry_initd) {
                 return copy_statement;
             }
@@ -16160,13 +16433,13 @@ function transform_assignment(a, module_name) {
                 index_last_st.exit_point = next_index;
                 index_last_st = interfaces_1.S3.get_last(next_index);
             }
-            var assignv = new interfaces_1.S3.AssignV(module_name, v.indexes.length, v.dimensions, v.name);
+            var assignv = new interfaces_1.S3.AssignV(module_name, v.indexes.length, v.dimensions, v.name, true, a.pos);
             index_last_st.exit_point = assignv;
             last_statement.exit_point = first_index;
             return entry_point;
         }
         else {
-            var assign = new interfaces_1.S3.Assign(module_name, a.left.name);
+            var assign = new interfaces_1.S3.Assign(module_name, a.left.name, true, a.pos);
             last_statement.exit_point = assign;
             return entry_point;
         }
@@ -16435,6 +16708,7 @@ function transform_if(a, mn, p) {
         else {
             var result = {
                 type: 'if',
+                pos: a.pos,
                 condition: c_report.result,
                 true_branch: typed_tb,
                 false_branch: typed_fb,
@@ -16478,6 +16752,7 @@ function transform_for(f, mn, p) {
         else {
             var result = {
                 type: 'for',
+                pos: f.pos,
                 counter_init: init.result,
                 body: body,
                 last_value: last.result,
@@ -16518,6 +16793,7 @@ function transform_while(w, mn, p) {
         else {
             var result = {
                 type: 'while',
+                pos: w.pos,
                 condition: c_report.result,
                 body: body_statements,
                 typings: {
@@ -16557,6 +16833,7 @@ function transform_until(u, mn, p) {
         else {
             var result = {
                 type: 'until',
+                pos: u.pos,
                 condition: c_report.result,
                 body: body_statements,
                 typings: {
@@ -16586,6 +16863,7 @@ function transform_return(r, mn, p) {
             var type = r.type, expected = r.expected;
             var result = {
                 type: type,
+                pos: r.pos,
                 expression: exp.result,
                 typings: {
                     actual: report.result,
@@ -16641,6 +16919,7 @@ function type_call(a, mn, p) {
             var type = a.type, name = a.name, parameters = a.parameters;
             var result = {
                 type: type,
+                pos: a.pos,
                 name: name,
                 args: transformed_args,
                 parameters: parameters,
@@ -16729,6 +17008,7 @@ function transform_assignment(a, mn, p) {
             var type = a.type, left = a.left, right = a.right;
             var result = {
                 type: type,
+                pos: a.pos,
                 left: left_type.result,
                 right: typed_right.result,
                 typings: { left: left_type.result.typings.type, right: right_type.result }
@@ -17158,7 +17438,7 @@ function neg(s) {
 var Declarator_1 = __webpack_require__(21);
 var CallDecorator_1 = __webpack_require__(20);
 var Interpretable_1 = __webpack_require__(22);
-var TSChecker_1 = __webpack_require__(9);
+var TSChecker_1 = __webpack_require__(10);
 var TSTyper_1 = __webpack_require__(23);
 function transform(p) {
     var s1 = Declarator_1.default(p);
@@ -17199,7 +17479,7 @@ exports.default = transform;
 "use strict";
 
 var interfaces_1 = __webpack_require__(0);
-var Parser_1 = __webpack_require__(5);
+var Parser_1 = __webpack_require__(6);
 function parse(s) {
     var p = new Parser_1.default();
     p.on('lexical-error', console.log);
@@ -27028,8 +27308,8 @@ var templates = {
 
 "use strict";
 
-var tslib_1 = __webpack_require__(12);
-var interprete_pl_1 = __webpack_require__(4);
+var tslib_1 = __webpack_require__(4);
+var interprete_pl_1 = __webpack_require__(5);
 var Emitter_1 = __webpack_require__(27);
 var Prompt_1 = __webpack_require__(29);
 var $ = __webpack_require__(1);
@@ -27079,7 +27359,7 @@ exports.default = Window;
 "use strict";
 
 var $ = __webpack_require__(1);
-var interprete_pl_1 = __webpack_require__(4);
+var interprete_pl_1 = __webpack_require__(5);
 var OutputPanel_1 = __webpack_require__(15);
 var EditorPanel_1 = __webpack_require__(14);
 var DragManager_1 = __webpack_require__(13);
@@ -27098,19 +27378,24 @@ editor_panel.status_bar.error_count = 0;
 var ejecutar = document.getElementById('ejecutar');
 var compilar = document.getElementById('compilar');
 var error_count = 0;
-var dragger = new DragManager_1.default([editor_panel.panel, output_panel.container], [60, 40], [$('#handle0')], $('#app'));
+var parser = new interprete_pl_1.Parser();
+var dragger = new DragManager_1.DragManager();
+dragger.add_ui_container($('#app'), 'horizontal');
+dragger.add_ui_panel(0, 0, 60, editor_panel.panel);
+dragger.add_ui_panel(0, 1, 40, output_panel.container);
+dragger.add_handle(0, $('#handle0'));
 $(document).mouseup(function () {
     if (dragger.is_grabbed) {
         dragger.is_grabbed = false;
+        dragger.grabbed_handle = null;
     }
 });
 $(document).mousemove(function (m) {
     if (dragger.is_grabbed) {
-        var pos = dragger.handles[dragger.grabbed_handle].position();
-        dragger.drag(dragger.grabbed_handle, { x: pos.left, y: pos.top }, { x: m.pageX, y: m.pageY });
+        var pos = dragger.grabbed_handle.element.position();
+        dragger.drag_handle(dragger.grabbed_handle, { x: pos.left, y: pos.top }, { x: m.pageX, y: m.pageY });
     }
 });
-var parser = new interprete_pl_1.Parser();
 output_panel.output.on('evaluation-error', function (error) {
     error_count++;
     editor_panel.status_bar.error_count = error_count;

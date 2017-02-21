@@ -4,7 +4,7 @@
   "description": "Interfaz para editar y ejecutar programas escritos en PL",
   "main": "index.html",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "tsc ./test/test.ts && mocha",
     "build": "webpack --display-error-details",
     "buildmap": "webpack --config webpack.map.config.js --display-error-details",
     "prebuildmap": "npm install --save ../interprete-pl",
@@ -22,10 +22,14 @@
   "dependencies": {
     "@types/codemirror": "0.0.37",
     "@types/jquery": "^2.0.39",
+    "@types/mocha": "^2.2.39",
+    "@types/should": "^8.1.30",
     "codemirror": "^5.23.0",
     "interprete-pl": "file:///C:\\Users\\Rodrigo\\Codigo\\interprete-pl",
     "jquery": "^3.1.1",
+    "mocha": "^3.2.0",
     "octicons": "^5.0.1",
+    "should": "^11.2.0",
     "source-map-loader": "^0.1.6",
     "ts-loader": "^2.0.0",
     "tslib": "^1.5.0",
