@@ -8,11 +8,11 @@ interface Container {
 }
 
 export class DragLogic {
-    is_grabbed: boolean
-    grabbed_handle: number
     private containers: Container[]
 
-    constructor() {}
+    constructor() {
+        this.containers = []
+    }
 
     add_panel(container_index: number, index: number, new_panel_width: number) {
         if (container_index >= 0 && container_index < this.containers.length) {
@@ -78,46 +78,64 @@ export class DragLogic {
 
                 // determinar que panel se achica en funcion de la direccion del movimiento de la manija
                 if (positive_direction) {
-                    // calcular la nueva longitud de los paneles adyacentes a la "manija"
-                    const shrinking_panel_length = container.panel_length[handle_index + 1] - (container.mode == 'vertical' ? delta_percentage.x : delta_percentage.y)
+                    if (container.panel_length[handle_index + 1] == 0) {
+                        // si la longitud del panel que se va a encoger ya es sero, no hay que modificarla
+                        return container.panel_length
+                    }
+                    else {
+                        // calcular la nueva longitud de los paneles adyacentes a la "manija"
+                        const shrinking_panel_length = container.panel_length[handle_index + 1] - (container.mode == 'vertical' ? delta_percentage.y : delta_percentage.x)
 
-                    const growinng_panel_length = container.panel_length[handle_index] + (container.mode == 'vertical' ? delta_percentage.x : delta_percentage.y)
-                
-                    // aplicar las nuevas longitudes
-                    const new_length = container.panel_length.map((l, i) => {
-                        if (i == handle_index + 1) {
-                            return shrinking_panel_length
-                        }
-                        else if (i == handle_index) {
-                            return growinng_panel_length
-                        }
-                        else {
-                            return l
-                        }
-                    })
+                        const growinng_panel_length = container.panel_length[handle_index] + (container.mode == 'vertical' ? delta_percentage.y : delta_percentage.x)
 
-                    return new_length
+                        // aplicar las nuevas longitudes
+                        const new_length = container.panel_length.map((l, i) => {
+                            if (i == handle_index + 1) {
+                                return shrinking_panel_length
+                            }
+                            else if (i == handle_index) {
+                                return growinng_panel_length
+                            }
+                            else {
+                                return l
+                            }
+                        })
+
+                        // actualizar la longitud de los paneles
+                        this.containers[container_index].panel_length = new_length
+
+                        return new_length
+                    }
                 }
                 else {
-                    // calcular la nueva longitud de los paneles adyacentes a la "manija"
-                    const shrinking_panel_length = container.panel_length[handle_index] - (container.mode == 'vertical' ? delta_percentage.x : delta_percentage.y)
+                    if (container.panel_length[handle_index] == 0) {
+                        // si la longitud del panel que se va a encoger ya es sero, no hay que modificarla
+                        return container.panel_length
+                    }
+                    else {
+                        // calcular la nueva longitud de los paneles adyacentes a la "manija"
+                        const shrinking_panel_length = container.panel_length[handle_index] - (container.mode == 'vertical' ? delta_percentage.y : delta_percentage.x)
 
-                    const growinng_panel_length = container.panel_length[handle_index + 1] + (container.mode == 'vertical' ? delta_percentage.x : delta_percentage.y)
+                        const growinng_panel_length = container.panel_length[handle_index + 1] + (container.mode == 'vertical' ? delta_percentage.y : delta_percentage.x)
 
-                    // aplicar las nuevas longitudes
-                    const new_length = container.panel_length.map((l, i) => {
-                        if (i == handle_index) {
-                            return shrinking_panel_length
-                        }
-                        else if (i == handle_index + 1) {
-                            return growinng_panel_length
-                        }
-                        else {
-                            return l
-                        }
-                    })
+                        // aplicar las nuevas longitudes
+                        const new_length = container.panel_length.map((l, i) => {
+                            if (i == handle_index) {
+                                return shrinking_panel_length
+                            }
+                            else if (i == handle_index + 1) {
+                                return growinng_panel_length
+                            }
+                            else {
+                                return l
+                            }
+                        })
 
-                    return new_length
+                        // actualizar la longitud de los paneles
+                        this.containers[container_index].panel_length = new_length
+
+                        return new_length
+                    }
                 }
             }
             else {
