@@ -4,7 +4,7 @@ import {Parser, transform, fr_writer, Errors} from 'interprete-pl'
 import OutputPanel from './components/OutputPanel'
 import EditorPanel from './components/EditorPanel'
 import CodePanel from './components/CodePanel'
-import DragManager from './DragManager'
+import { DragManager } from './DragManager'
 
 function create_handle(i: number) {
     const elem = document.createElement('div')
