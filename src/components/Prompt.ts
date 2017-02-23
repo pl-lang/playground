@@ -1,19 +1,20 @@
 import * as $ from 'jquery'
-import {Interpreter, Value} from 'interprete-pl'
+import { Action, ActionKind } from '../Actions'
+import { Dispatcher } from '../app.dev'
 
 export default class Prompt {
     private textarea: JQuery
-    private interpreter: Interpreter
+    private distpatcher: Dispatcher
 
-    constructor (readonly container: JQuery, i: Interpreter) {
+    constructor (readonly container: JQuery, d: Dispatcher) {
         this.textarea = $('<textarea id="prompt"></textarea>')
-        this.interpreter = i
+        this.distpatcher = d
 
         this.textarea.keydown(e => {
             if (e.keyCode == 13) {
+                const input = this.textarea.val()
                 this.close()
-                this.interpreter.send(this.textarea.val())
-                this.interpreter.run()
+                this.distpatcher.dispatch({ kind: ActionKind.SendInput, input })
             }
         })
 
@@ -22,7 +23,8 @@ export default class Prompt {
     }
 
     close () {
-        const new_line = $(`<div class="line"><span>&gt; ${this.textarea.val()}</span></div>`)
+        const new_line = $(`<div class="line"><span>&gt;${this.textarea.val()}</span></div>`)
         this.textarea.replaceWith(new_line)
+        this.textarea = null
     }
 }

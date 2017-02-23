@@ -1,217 +1,315 @@
 import * as CodeMirror from 'codemirror'
 import * as $ from 'jquery'
-import {Parser, transform, fr_writer, Errors} from 'interprete-pl'
+import { Parser, Interpreter, transform, fr_writer, Errors, Value, Failure, Success, S3 } from 'interprete-pl'
 import OutputPanel from './components/OutputPanel'
 import EditorPanel from './components/EditorPanel'
 import CodePanel from './components/CodePanel'
 import { DragManager } from './DragManager'
+import { Action, ActionKind } from './Actions'
 
-function create_handle(i: number) {
-    const elem = document.createElement('div')
-    elem.className = 'handle'
-    elem.id = `handle${i}`
-    return elem
+export class Dispatcher {
+    controller: Controller
+
+    constructor(c: Controller) {
+        this.controller = c
+    }
+
+    dispatch(a: Action) {
+        this.controller.do(a)
+    }
 }
 
-const app_container = document.getElementById('app')
+export interface AppOptions {
+    debug?: boolean
+}
 
-const editor_panel = new EditorPanel($('#app'), { debug: true, links: false })
+const default_options: AppOptions = {
+    debug: false
+}
 
-const handle_1 = create_handle(0)
-app_container.appendChild(handle_1)
+class AppUI {
+    container: JQuery
+    parent: JQuery
+    private editor_panel: EditorPanel
+    private output_panel: OutputPanel
+    private dispatcher: Dispatcher
+    code_panel: CodePanel
+    options: AppOptions
+    dm: DragManager
+    handles: JQuery[]
 
-const code_panel = new CodePanel($('#app'))
+    constructor(parent: JQuery, container: JQuery, d: Dispatcher, options?: AppOptions) {
+        this.parent = parent
 
-const handle_2 = create_handle(1)
-app_container.appendChild(handle_2)
+        this.dispatcher = d
 
-const output_panel = new OutputPanel($('#app'))
+        this.handles = []
 
-editor_panel.status_bar.error_count = 0
+        this.container = $('<div id="app" class="flex-row"></div>')
 
-const ejecutar = document.getElementById('ejecutar') as HTMLButtonElement
+        this.parent.append(this.container)
 
-const compilar = document.getElementById('compilar') as HTMLButtonElement
+        // aplicar la configuracion
 
-let error_count = 0
+        if (options) {
+            this.options = { ...default_options, ...options }
+        }
+        else {
+            this.options = default_options
+        }
 
-const parser = new Parser()
+        this.dm = new DragManager()
 
-const dragger = new DragManager()
-dragger.add_ui_container($('#app'), 'horizontal')
-dragger.add_ui_panel(0, 0, 50, editor_panel.panel)
-dragger.add_ui_panel(0, 1, 25, code_panel.container)
-dragger.add_ui_panel(0, 2, 25, output_panel.container)
-dragger.add_handle(0, $('#handle0'))
-dragger.add_handle(0, $('#handle1'))
+        this.dm.add_ui_container(this.container, 'horizontal')
 
-$(document).mouseup(() => {
-    if (dragger.is_grabbed) {
-        dragger.is_grabbed = false
-        dragger.grabbed_handle = null
-    }
-})
+        // crear los paneles necesarios
+        this.editor_panel = new EditorPanel(this.container, d, { debug: this.options.debug, links: false })
 
-$(document).mousemove(m => {
-    if (dragger.is_grabbed) {
-        const pos = dragger.grabbed_handle.element.position()
+        if (this.options.debug) {
+            this.add_panel(this.editor_panel.container, 0, 0, 50)
 
-        dragger.drag_handle(dragger.grabbed_handle, { x: pos.left, y: pos.top }, { x: m.pageX, y: m.pageY })
-    }
-})
+            this.code_panel = new CodePanel(this.container)
 
-output_panel.output.on('evaluation-error', (error: Errors.Base) => {
-    error_count++
-    editor_panel.status_bar.error_count = error_count
-    editor_panel.message_panel.add_message(error)
-})
+            this.add_panel(this.code_panel.container, 0, 1, 25)
 
-/**
- * Falta asignar callbacks a los eventos de parser
- */
+            this.output_panel = new OutputPanel(this.container, this.dispatcher)
 
-function ejecutar_codigo (): void {
-    /**
-     * Limpiar los restos de la ejecucion anterior...
-     */
-    editor_panel.status_bar.error_count = 0
-    output_panel.output.clear()
-    if (editor_panel.message_panel.dirty) {
-        editor_panel.message_panel.reset()
-    }
-    else if (editor_panel.message_panel.collapsed == false) {
-        editor_panel.message_panel.collapse()
-    }
+            this.add_panel(this.output_panel.container, 0, 2, 25)
+        }
+        else {
+            this.code_panel = null
 
-    const codigo = editor_panel.editor.getValue()
-    ejecutar.disabled = true
-    compilar.disabled = true
+            // agregar panel de codigo
+            this.add_panel(this.editor_panel.container, 0, 0, 60)
 
-    try {
-        const parsed = parser.parse(codigo)
+            this.output_panel = new OutputPanel(this.container, this.dispatcher)
 
-        if (parsed.error == false) {
-            const transformed = transform(parsed.result)
+            this.add_panel(this.output_panel.container, 0, 2, 40)
+        }
 
-            if (transformed.error == false) {
-                /**
-                 * mostrar el programa compilado
-                 */
-                code_panel.contents = fr_writer(transformed.result)
-                /**
-                 * ejecutar el programa!
-                 */
-                output_panel.output.run(transformed.result)
+        $(document).mouseup(() => {
+            if (this.dm.is_grabbed) {
+                this.dm.is_grabbed = false
+                this.dm.grabbed_handle = null
             }
-            else if (transformed.error) {
-                /**
-                 * Se encontraron errores durante la transformacion
-                 * o el chequeo de tipos
-                 */
-                for (let error of transformed.result) {
-                    error_count++
-                    editor_panel.message_panel.add_message(error)
+        })
+
+        $(document).mousemove(m => {
+            if (this.dm.is_grabbed) {
+                const pos = this.dm.grabbed_handle.element.position()
+
+                this.dm.drag_handle(this.dm.grabbed_handle, { x: pos.left, y: pos.top }, { x: m.pageX, y: m.pageY })
+            }
+        })
+
+        this.editor_panel.refresh()
+    }
+
+    add_panel(element: JQuery, container_index: number, panel_index: number, panel_width: number) {
+        if (this.dm.ui_panel_containers[container_index].panels.length >= 1) {
+            const handle = $(`<div id="handle${this.handles.length + 1}" class="handle"></div>`)
+            this.dm.add_handle(container_index, handle)
+            this.handles.push(handle)
+            this.container.append(handle)
+        }
+        
+        this.dm.add_ui_panel(container_index, panel_index, panel_width, element)
+
+        this.container.append(element)
+    }
+
+    clear_messages() {
+        this.editor_panel.message_panel.clear()
+        this.editor_panel.status_bar.error_count = 0
+    }
+
+    show_message(message: Errors.Base) {
+        this.editor_panel.message_panel.add_message(message)
+        this.editor_panel.status_bar.error_count += 1
+    }
+
+    get_editor_contents(): string {
+        return this.editor_panel.editor_contents
+    }
+
+    write(v: Value) {
+        this.output_panel.write(v)
+    }
+
+    read() {
+        this.output_panel.read()
+    }
+
+    clear_output() {
+        this.output_panel.clear()
+    }
+
+    move_cursor(line: number, column: number, focus?: boolean) {
+        if (focus) {
+            this.editor_panel.focus_editor()
+        }
+
+        this.editor_panel.move_cursor(line, column)
+    }
+}
+
+export class Controller {
+    private app_ui: AppUI
+    private interpreter: Interpreter
+    private parser: Parser
+    private program_running: boolean
+
+    constructor(container: JQuery, debug: boolean) {
+        const action_dispatcher = new Dispatcher(this)
+
+        this.program_running = false
+
+        this.app_ui = new AppUI($('body'), container, action_dispatcher, { debug: debug })
+
+        this.interpreter = new Interpreter()
+
+        this.interpreter.on('write', v => this.write(v))
+        this.interpreter.on('read', () => { this.read() })
+        this.interpreter.on('program-started', () => { this.program_running = true })
+        this.interpreter.on('program-finished', () => { this.program_running = false })
+
+        this.parser = new Parser()
+    }
+
+    do(a: Action) {
+        switch (a.kind) {
+            case ActionKind.Execute:
+                this.do({ kind: ActionKind.ClearMessages })
+                if (!this.program_running) {
+                    const { result } = this.compile(a.code)
+                    this.do({ kind: ActionKind.SetUpInterpreter, program: result })
+                    if (result != null) {
+                        this.do({ kind: ActionKind.ShowCompiledCode, code: fr_writer(result) })
+                    }
+                }
+                this.execute()
+                break
+            case ActionKind.Step:
+                break
+            case ActionKind.MoveCursor:
+                this.move_cursor(a.line, a.column)
+                break
+            case ActionKind.DragHandle:
+                break
+            case ActionKind.ShowMessage:
+                this.show_message(a.message)
+                break
+            case ActionKind.ClearMessages:
+                this.clear_messages()
+                break
+            case ActionKind.SendInput:
+                this.send_input(a.input)
+                break
+            case ActionKind.Write:
+                this.write(a.value)
+                break
+            case ActionKind.ClearOutput:
+                this.clear_output()
+                break
+            case ActionKind.ShowCompiledCode:
+                this.do({ kind: ActionKind.ClearMessages })
+                this.do({ kind: ActionKind.ClearOutput })
+                {
+                    const { result } = this.compile(a.code)
+                    if (result != null) {
+                        this.show_compiled_code(fr_writer(result))
+                    }
+                }
+                break
+            case ActionKind.SetUpInterpreter:
+                this.set_up_interpreter(a.program)
+                break
+        }
+    }
+
+    set_up_interpreter(program: S3.Program) {
+        if (program != null) {
+            this.interpreter.program = program
+        }
+    }
+
+    move_cursor(line: number, column: number) {
+        this.app_ui.move_cursor(line, column, true)
+    }
+
+    show_compiled_code(code: string) {
+        if (code != null) {
+            this.app_ui.code_panel.contents = code
+        }
+    }
+
+    clear_output() {
+        this.app_ui.clear_output()
+    }
+
+    clear_messages() {
+        this.app_ui.clear_messages()
+    }
+
+    show_message(m: Errors.Base) {
+        this.app_ui.show_message(m)
+    }
+
+    execute() {
+        // si esto es verdadero...
+        if (this.program_running) {
+            // ...se esta resumiendo un programa que fue pausado para leer algo
+            this.interpreter.run()
+        }
+        else {
+            // ...y si no, se esta por ejecutar un programa por primera vez
+            this.do({ kind: ActionKind.ClearOutput })
+            this.interpreter.run()
+        }
+    }
+
+    compile(code: string): Failure<null> | Success<S3.Program> {
+        const parsed_program = this.parser.parse(code)
+
+        if (parsed_program.error == false) {
+            const transformed_program = transform(parsed_program.result)
+
+            if (transformed_program.error == false) {
+                return transformed_program
+            }
+            else {
+                const errors = transformed_program.result
+
+                for (let error of errors) {
+                    this.do({ kind: ActionKind.ShowMessage, message: error })
                 }
 
-                editor_panel.status_bar.error_count = error_count
+                return { error: true, result: null }
             }
         }
         else {
-            /**
-             * Se encontraron errores lexicos o sintacticos
-             */
-            for (let error of parsed.result) {
-                error_count++
-                editor_panel.message_panel.add_message(error)
+            const errors = parsed_program.result
+
+            for (let error of errors) {
+                this.do({ kind: ActionKind.ShowMessage, message: error })
             }
-            editor_panel.status_bar.error_count = error_count
+
+            return { error: true, result: null }
         }
-    } catch (error) {
-        /**
-         * En caso de que haya alguna excepcion...
-         */
-        console.log(error)
-        ejecutar.disabled = false
-        compilar.disabled = false
-        editor_panel.status_bar.error_count = 0
-        error_count = 0
-        editor_panel.message_panel.reset()
     }
 
-    compilar.disabled = false
-    ejecutar.disabled = false
-    error_count = 0
+    send_input(input: string) {
+        this.interpreter.send(input)
+        this.do({ kind: ActionKind.Execute, code: '' })
+    }
+
+    write(v: Value) {
+        this.app_ui.write(v)
+    }
+
+    read() {
+        this.app_ui.read()
+    }
 }
 
-function compilar_codigo (): void {
-    /**
-     * Limpiar los restos de la ejecucion anterior...
-     */
-    code_panel.contents = ''
-    editor_panel.status_bar.error_count = 0
-    output_panel.output.clear()
-    if (editor_panel.message_panel.dirty) {
-        editor_panel.message_panel.reset()
-    }
-    else if (editor_panel.message_panel.collapsed == false) {
-        editor_panel.message_panel.collapse()
-    }
-
-    const codigo = editor_panel.editor.getValue()
-    ejecutar.disabled = true
-    compilar.disabled = true
-
-    try {
-        const parsed = parser.parse(codigo)
-
-        if (parsed.error == false) {
-            const transformed = transform(parsed.result)
-
-            if (transformed.error == false) {
-                /**
-                 * mostrar el programa compilado
-                 */
-                code_panel.contents = fr_writer(transformed.result)
-            }
-            else if (transformed.error) {
-                /**
-                 * Se encontraron errores durante la transformacion
-                 * o el chequeo de tipos
-                 */
-                for (let error of transformed.result) {
-                    error_count++
-                    editor_panel.message_panel.add_message(error)
-                }
-
-                editor_panel.status_bar.error_count = error_count
-            }
-        }
-        else {
-            /**
-             * Se encontraron errores lexicos o sintacticos
-             */
-            for (let error of parsed.result) {
-                error_count++
-                editor_panel.message_panel.add_message(error)
-            }
-            editor_panel.status_bar.error_count = error_count
-        }
-    } catch (error) {
-        /**
-         * En caso de que haya alguna excepcion...
-         */
-        console.log(error)
-        ejecutar.disabled = false
-        compilar.disabled = false
-        editor_panel.status_bar.error_count = 0
-        error_count = 0
-        editor_panel.message_panel.reset()
-    }
-
-    ejecutar.disabled = false
-    compilar.disabled = false
-    error_count = 0
-}
-
-editor_panel.run_button.click(ejecutar_codigo)
-editor_panel.compile_button.click(compilar_codigo)
+const app = new Controller($('body'), true)

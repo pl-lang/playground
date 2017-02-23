@@ -3,7 +3,7 @@ import * as $ from 'jquery'
 export default class CodePanel {
     parent: JQuery
     container: JQuery
-    code: JQuery
+    private code: JQuery
 
     constructor(parent: JQuery) {
         this.parent = parent
@@ -25,8 +25,6 @@ export default class CodePanel {
         pre_wrapper.append(this.code)
 
         this.container.append(pre_wrapper)
-
-        this.parent.append(this.container)
     }
 
     set contents(c: string) {

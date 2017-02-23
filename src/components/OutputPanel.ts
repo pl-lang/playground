@@ -1,13 +1,17 @@
 import * as $ from 'jquery'
 import Window from './Window'
+import { Dispatcher } from '../app.dev'
+import { Value } from 'interprete-pl'
 
 export default class {
-    output: Window
     parent: JQuery
     container: JQuery
+    private output: Window
+    private dispatcher: Dispatcher
 
-    constructor(container: JQuery) {
+    constructor(container: JQuery, d: Dispatcher) {
         this.parent = container
+        this.dispatcher = d
 
         this.container = $('<div class="output_container"></div>')
 
@@ -19,10 +23,20 @@ export default class {
 
         const output_container = $('<div class="output"></div>')
 
-        this.output = new Window(output_container)
+        this.output = new Window(output_container, this.dispatcher)
 
         this.container.append(bar).append(output_container)
+    }
 
-        this.parent.append(this.container)
+    write(v: Value) {
+        this.output.write(v)
+    }
+
+    read() {
+        this.output.read()
+    }
+
+    clear() {
+        this.output.clear()
     }
 }

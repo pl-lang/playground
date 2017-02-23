@@ -1,18 +1,21 @@
 import * as $ from 'jquery'
-import {Editor, EditorFromTextArea} from 'codemirror'
-import {Errors} from 'interprete-pl'
+import { Errors } from 'interprete-pl'
 import get_template from './Templates'
+import { Action, ActionKind } from '../Actions'
+import { Dispatcher } from '../app.dev'
 
 export default class MessagePanel {
     private message_list: JQuery
-    public collapsed: boolean
-    dirty: boolean
+    private collapsed: boolean
+    private dirty: boolean
+    private dispatcher: Dispatcher
 
-    constructor (readonly container: JQuery,  readonly editor_instance: Editor | EditorFromTextArea) {
+    constructor (readonly container: JQuery, d: Dispatcher) {
         this.message_list = $('<div id="message_list" class="flex-col msg_list-collapsed"></div>')
         this.container.append(this.message_list)
         this.collapsed = true
         this.dirty = false
+        this.dispatcher = d
     }
 
     add_message (data: Errors.Base) {
@@ -72,8 +75,7 @@ export default class MessagePanel {
             title_bar.addClass('pointer')
 
             message.on('click', () => {
-                this.editor_instance.focus()
-                this.editor_instance.getDoc().setCursor({line:data.pos.line, ch:data.pos.column})
+                this.dispatcher.dispatch({ kind: ActionKind.MoveCursor, line: data.pos.line, column: data.pos.column })
             })
         }
 
@@ -85,11 +87,13 @@ export default class MessagePanel {
         this.message_list.append(message)
     }
 
-    reset () {
-        this.collapsed = true
-        this.message_list.toggleClass('msg_list-expanded')
-        this.message_list.empty()
-        this.dirty = false
+    clear () {
+        if (this.dirty) {
+            this.collapsed = true
+            this.message_list.toggleClass('msg_list-expanded')
+            this.message_list.empty()
+            this.dirty = false
+        }
     }
 
     collapse () {

@@ -2,6 +2,8 @@ import * as $ from 'jquery'
 import * as CodeMirror from 'codemirror'
 import MessagePanel from './MessagePanel'
 import StatusBar from './StatusBar'
+import { Action, ActionKind } from '../Actions'
+import { Dispatcher } from '../app.dev'
 
 export interface EditorOptions {
     debug?: boolean
@@ -14,16 +16,17 @@ const defaults: EditorOptions = {
 }
 
 export default class EditorPanel {
-    run_button: JQuery
-    compile_button: JQuery
+    private run_button: JQuery
+    private compile_button: JQuery
+    private parent: JQuery
     container: JQuery
-    panel: JQuery
-    editor: CodeMirror.EditorFromTextArea
+    private editor: CodeMirror.EditorFromTextArea
     message_panel: MessagePanel
     status_bar: StatusBar
-    options: EditorOptions
+    private options: EditorOptions
+    private dispatcher: Dispatcher
 
-    constructor (container: JQuery, options: EditorOptions) {
+    constructor(container: JQuery, d: Dispatcher, options: EditorOptions) {
         if (options) {
             this.options = { ...defaults, ...options }
         }
@@ -31,28 +34,40 @@ export default class EditorPanel {
             this.options = defaults
         }
 
-        this.container = container
+        this.parent = container
 
-        this.panel = $('<div id="editor-div" class="flex-col">')
+        this.dispatcher = d
 
-        this.container.append(this.panel)
+        this.container = $('<div id="editor-div" class="flex-col">')
 
         const title_bar = this.create_title_bar()
 
-        this.panel.append(title_bar)
+        this.container.append(title_bar)
 
         // agregar textarea para codemirror
-        this.panel.append($('<textarea id="editor"></textarea>'))
+        this.container.append($('<textarea id="editor"></textarea>'))
 
-        this.editor = CodeMirror.fromTextArea(this.panel.children('#editor')[0] as HTMLTextAreaElement, { lineNumbers: true, firstLineNumber: 0 })
+        this.editor = CodeMirror.fromTextArea(this.container.children('#editor')[0] as HTMLTextAreaElement, { lineNumbers: true, firstLineNumber: 0 })
 
         const info_panel = $('<div id="info_panel"></div>')
 
         this.status_bar = new StatusBar(info_panel)
 
-        this.message_panel = new MessagePanel(info_panel, this.editor)
+        this.message_panel = new MessagePanel(info_panel, this.dispatcher)
 
-        this.panel.append(info_panel)        
+        // registrar callbacks para los botones
+
+        this.run_button.click(() => {
+            this.dispatcher.dispatch({ kind: ActionKind.Execute, code: this.editor_contents })
+        })
+
+        if (this.compile_button != null) {
+            this.compile_button.click(() => {
+                this.dispatcher.dispatch({ kind: ActionKind.ShowCompiledCode, code: this.editor_contents })
+            })
+        }
+
+        this.container.append(info_panel)
     }
 
     create_title_bar() {
@@ -93,5 +108,17 @@ export default class EditorPanel {
 
     set editor_contents(contents: string) {
         this.editor.setValue(contents)
+    }
+
+    refresh() {
+        this.editor.refresh()
+    }
+
+    focus_editor() {
+        this.editor.focus()
+    }
+
+    move_cursor(line: number, column: number) {
+        this.editor.getDoc().setCursor({ line, ch: column })
     }
 }

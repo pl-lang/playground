@@ -14,19 +14,19 @@ export class DragLogic {
         this.containers = []
     }
 
-    protected add_panel(container_index: number, index: number, new_panel_width: number) {
+    protected add_panel(container_index: number, index: number, new_panel_length: number) {
         if (container_index >= 0 && container_index < this.containers.length) {
-            const new_width: number[] = []
-            const panel_width = this.containers[container_index].panel_length
-            for (let i = 0; i <= panel_width.length; i++) {
+            const new_length: number[] = []
+            const panel_length = this.containers[container_index].panel_length
+            for (let i = 0; i <= panel_length.length; i++) {
                 if (i == index) {
-                    new_width[i] = new_panel_width
+                    new_length[i] = new_panel_length
                 }
                 else {
-                    new_width[i] = panel_width[i]
+                    new_length[i] = panel_length[i]
                 }
             }
-            this.containers[container_index].panel_length = new_width
+            this.containers[container_index].panel_length = new_length
         }
         else {
             throw new Error(`Invalid container_index (${container_index})`)

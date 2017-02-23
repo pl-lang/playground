@@ -1,15 +1,16 @@
-import {S3, Interpreter, Value} from 'interprete-pl'
+import { Dispatcher } from '../app.dev'
+import { Value } from 'interprete-pl'
 import Emitter from './Emitter'
 import Prompt from './Prompt'
 import * as $ from 'jquery'
 
 export default class Window extends Emitter {
-    
-    private interpreter: Interpreter
+    private dispatcher: Dispatcher
 
-    constructor (readonly container: JQuery) {
+    constructor (readonly container: JQuery, d: Dispatcher) {
         super(['evaluation-error'])
         this.container.append($('<div class="line"></div>'))
+        this.dispatcher = d
     }
 
     write (v: Value) {
@@ -17,28 +18,8 @@ export default class Window extends Emitter {
     }
 
     read () {
-        const p = new Prompt(this.container, this.interpreter)
-    }
-
-    run (p: S3.Program) {
-        this.interpreter = new Interpreter(p)
-
-        this.interpreter.on('write', v => this.write(v))
-
-        this.interpreter.on('read', () => {this.read()})
-
-        this.interpreter.on('evaluation-error', (error_info) => {
-            this.container.append($('<br>'))
-            this.container.append($('<div class="line"><span>Programa finalizado debido a un error</span></div>'))
-            this.emit('evaluation-error', error_info)
-        })
-
-        this.interpreter.on('program-finished', () => {
-            this.container.append($('<br>'))
-            this.container.append($('<div class="line"><span>Programa finalizado</span></div>'))
-        })
-
-        this.interpreter.run()
+        // hace falta almacenar Prompt en p?
+        const p = new Prompt(this.container, this.dispatcher)
     }
 
     clear () {
