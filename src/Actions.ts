@@ -12,6 +12,9 @@ export enum ActionKind {
     ClearOutput,
     ShowCompiledCode,
     SetUpInterpreter,
+    ExecuteBySteps,
+    StopExecution,
+    CompileAndShow,
     RemovePanel
 }
 
@@ -25,7 +28,24 @@ export type Action = Execute
     | Write
     | ClearOutput
     | ShowCompiledCode
-    | SetUpInterpreter;
+    | SetUpInterpreter
+    | ExecuteBySteps
+    | StopExecution
+    | CompileAndShow;
+
+export interface CompileAndShow {
+    kind: ActionKind.CompileAndShow
+    code: string
+}
+
+export interface StopExecution {
+    kind: ActionKind.StopExecution
+}
+
+export interface ExecuteBySteps {
+    kind: ActionKind.ExecuteBySteps
+    code: string
+}
 
 export interface SetUpInterpreter {
     kind: ActionKind.SetUpInterpreter

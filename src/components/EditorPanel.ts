@@ -26,6 +26,7 @@ const defaults: EditorOptions = {
 export default class EditorPanel {
     private run_button: JQuery
     private compile_button: JQuery
+    private step_run: JQuery
     private parent: JQuery
     container: JQuery
     private editor: CodeMirror.EditorFromTextArea
@@ -69,9 +70,13 @@ export default class EditorPanel {
             this.dispatcher.dispatch({ kind: ActionKind.Execute, code: this.editor_contents })
         })
 
+        this.step_run.click(() => {
+            this.dispatcher.dispatch({ kind: ActionKind.ExecuteBySteps, code: this.editor_contents })
+        })
+
         if (this.compile_button != null) {
             this.compile_button.click(() => {
-                this.dispatcher.dispatch({ kind: ActionKind.ShowCompiledCode, code: this.editor_contents })
+                this.dispatcher.dispatch({ kind: ActionKind.CompileAndShow, code: this.editor_contents })
             })
         }
 
@@ -82,9 +87,10 @@ export default class EditorPanel {
         const bar = $('<div class="bar bar-bottom-border flex-row center-align"></div>')
         const icon = $('<span style="margin-left:10px" class="octicon octicon-pencil"></span>')
         const title = $('<span class="title">EDITOR</span>')
-        const run_button = $('<button id="ejecutar" class="boton-ejecutar"><span class="button-label">Ejecutar programa</span><span></button>')
+        const run_button = $('<button class="green-button"><span class="button-label bold">Ejecutar</span><span></button>')
+        const step_run = $('<button class="green-button"><span class="button-label bold">Ejecutar paso a paso</span><span></button>')
 
-        bar.append(icon).append(title).append(run_button)
+        bar.append(icon).append(title).append(run_button).append(step_run)
 
         if (this.options.links) {
             const help_icon = $('<span style="margin-left:15px;" class="octicon octicon-repo"></span>')
@@ -96,9 +102,10 @@ export default class EditorPanel {
         }
 
         this.run_button = run_button
+        this.step_run = step_run
 
         if (this.options.debug) {
-            const compile_button = $('<button id="compilar" class="boton-compilar"><span class="button-label">Compilar programa</span><span></button>')
+            const compile_button = $('<button id="compilar" class="grey-button"><span class="button-label">Compilar</span><span></button>')
 
             bar.append(compile_button)
             this.compile_button = compile_button

@@ -150,6 +150,14 @@ class AppUI {
 
         this.editor_panel.move_cursor(line, column)
     }
+
+    show_step_controls() {
+        this.output_panel.show_controls()
+    }
+
+    hide_step_controls() {
+        this.output_panel.hide_controls()
+    }
 }
 
 export class Controller {
@@ -179,6 +187,7 @@ export class Controller {
         switch (a.kind) {
             case ActionKind.Execute:
                 this.do({ kind: ActionKind.ClearMessages })
+                this.do({ kind: ActionKind.ClearOutput })
                 if (!this.program_running) {
                     const { result } = this.compile(a.code)
                     this.do({ kind: ActionKind.SetUpInterpreter, program: result })
@@ -189,6 +198,8 @@ export class Controller {
                 this.execute()
                 break
             case ActionKind.Step:
+                this.do({ kind: ActionKind.ClearMessages })
+                this.step()
                 break
             case ActionKind.MoveCursor:
                 this.move_cursor(a.line, a.column)
@@ -211,18 +222,50 @@ export class Controller {
                 this.clear_output()
                 break
             case ActionKind.ShowCompiledCode:
-                this.do({ kind: ActionKind.ClearMessages })
-                this.do({ kind: ActionKind.ClearOutput })
-                {
-                    const { result } = this.compile(a.code)
-                    if (result != null) {
-                        this.show_compiled_code(fr_writer(result))
-                    }
-                }
+                this.show_compiled_code(a.code)
                 break
             case ActionKind.SetUpInterpreter:
                 this.set_up_interpreter(a.program)
                 break
+            case ActionKind.ExecuteBySteps:
+                this.do({ kind: ActionKind.ClearMessages })
+                this.do({ kind: ActionKind.ClearOutput })
+                this.app_ui.show_step_controls()
+                if (!this.program_running) {
+                    const { result } = this.compile(a.code)
+                    this.do({ kind: ActionKind.SetUpInterpreter, program: result })
+                    if (result != null) {
+                        this.do({ kind: ActionKind.ShowCompiledCode, code: fr_writer(result) })
+                    }
+                }
+                this.do({ kind: ActionKind.Step })
+                break
+            case ActionKind.StopExecution:
+                this.app_ui.hide_step_controls()
+                break
+            case ActionKind.CompileAndShow:
+                this.do({ kind: ActionKind.ClearMessages })
+                this.do({ kind: ActionKind.ClearOutput })
+                const { result } = this.compile(a.code)
+                if (result != null) {
+                    this.do({ kind: ActionKind.ShowCompiledCode, code: fr_writer(result) })
+                }
+                break
+        }
+    }
+
+    step() {
+        const output = this.interpreter.step()
+
+        if (output.kind == 'info') {
+            if (output.is_user_statement) {
+                this.do({ kind: ActionKind.MoveCursor, line: output.pos.line, column: output.pos.column })
+            }
+        }
+        else {
+            if (output.done) {
+                this.do({ kind: ActionKind.StopExecution })
+            }
         }
     }
 

@@ -41,9 +41,17 @@ a:visited {
 
 button {
   margin-left: 7px;
-  margin-right: 7px;
   padding: 2px 5px 2px 5px;
   border-radius: 2px;
+}
+
+.bold {
+  font-weight: bold;
+}
+
+.icon-button {
+  height: 22px;
+  width: 22px;
 }
 
 pre {
