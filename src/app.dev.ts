@@ -1,4 +1,3 @@
-import * as CodeMirror from 'codemirror'
 import * as $ from 'jquery'
 import { Parser, Interpreter, transform, fr_writer, Errors, Value, Failure, Success, S3 } from 'interprete-pl'
 import OutputPanel from './components/OutputPanel'

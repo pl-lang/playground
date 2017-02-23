@@ -4,6 +4,14 @@ import MessagePanel from './MessagePanel'
 import StatusBar from './StatusBar'
 import { Action, ActionKind } from '../Actions'
 import { Dispatcher } from '../app.dev'
+import 'codemirror/addon/selection/active-line'
+
+declare module "codemirror" {
+    interface EditorConfiguration {
+        //  when set to true, adds 'CodeMirror-activeline' and 'CodeMirror-activeline-background' to the current line
+        styleActiveLine?: boolean;
+    }
+}
 
 export interface EditorOptions {
     debug?: boolean
@@ -47,7 +55,7 @@ export default class EditorPanel {
         // agregar textarea para codemirror
         this.container.append($('<textarea id="editor"></textarea>'))
 
-        this.editor = CodeMirror.fromTextArea(this.container.children('#editor')[0] as HTMLTextAreaElement, { lineNumbers: true, firstLineNumber: 0 })
+        this.editor = CodeMirror.fromTextArea(this.container.children('#editor')[0] as HTMLTextAreaElement, { lineNumbers: true, firstLineNumber: 0, styleActiveLine: true })
 
         const info_panel = $('<div id="info_panel"></div>')
 
