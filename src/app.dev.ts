@@ -1,5 +1,5 @@
 import * as $ from 'jquery'
-import { Parser, Interpreter, transform, fr_writer, Errors, Value, Failure, Success, S3 } from 'interprete-pl'
+import { Parser, Interpreter, transform, fr_writer, Errors, Value, Failure, Success, S3, InterpreterRead, InterpreterState, InterpreterStatementInfo, InterpreterWrite  } from 'interprete-pl'
 import OutputPanel from './components/OutputPanel'
 import EditorPanel from './components/EditorPanel'
 import CodePanel from './components/CodePanel'
@@ -144,9 +144,9 @@ class AppUI {
     }
 
     move_cursor(line: number, column: number, focus?: boolean) {
-        if (focus) {
-            this.editor_panel.focus_editor()
-        }
+        // if (focus) {
+        //     this.editor_panel.focus_editor()
+        // }
 
         this.editor_panel.move_cursor(line, column)
     }
@@ -165,20 +165,17 @@ export class Controller {
     private interpreter: Interpreter
     private parser: Parser
     private program_running: boolean
+    private by_steps: boolean
 
     constructor(container: JQuery, debug: boolean) {
         const action_dispatcher = new Dispatcher(this)
 
         this.program_running = false
+        this.by_steps = false
 
         this.app_ui = new AppUI($('body'), container, action_dispatcher, { debug: debug })
 
         this.interpreter = new Interpreter()
-
-        this.interpreter.on('write', v => this.write(v))
-        this.interpreter.on('read', () => { this.read() })
-        this.interpreter.on('program-started', () => { this.program_running = true })
-        this.interpreter.on('program-finished', () => { this.program_running = false })
 
         this.parser = new Parser()
     }
@@ -189,6 +186,8 @@ export class Controller {
                 this.do({ kind: ActionKind.ClearMessages })
                 this.do({ kind: ActionKind.ClearOutput })
                 if (!this.program_running) {
+                    this.by_steps = false
+                    this.program_running = true
                     const { result } = this.compile(a.code)
                     this.do({ kind: ActionKind.SetUpInterpreter, program: result })
                     if (result != null) {
@@ -214,6 +213,7 @@ export class Controller {
                 break
             case ActionKind.SendInput:
                 this.send_input(a.input)
+                this.resume_program()
                 break
             case ActionKind.Write:
                 this.write(a.value)
@@ -232,6 +232,8 @@ export class Controller {
                 this.do({ kind: ActionKind.ClearOutput })
                 this.app_ui.show_step_controls()
                 if (!this.program_running) {
+                    this.by_steps = true
+                    this.program_running = true
                     const { result } = this.compile(a.code)
                     this.do({ kind: ActionKind.SetUpInterpreter, program: result })
                     if (result != null) {
@@ -241,6 +243,7 @@ export class Controller {
                 this.do({ kind: ActionKind.Step })
                 break
             case ActionKind.StopExecution:
+                this.program_running = false
                 this.app_ui.hide_step_controls()
                 break
             case ActionKind.CompileAndShow:
@@ -254,18 +257,50 @@ export class Controller {
         }
     }
 
+    interpreter_action(a: InterpreterState | InterpreterStatementInfo | InterpreterRead | InterpreterWrite) {
+        switch (a.kind) {
+            case 'action':
+                switch (a.action) {
+                    case 'read':
+                        this.read()
+                        break
+                    case 'write':
+                        this.write(a.value)
+                        break
+                }
+                break
+            case 'info':
+                switch (a.type) {
+                    case 'statement':
+                        this.move_cursor(a.pos.line, a.pos.column)
+                        break
+                    case 'interpreter':
+                        this.program_running = a.done
+                        break
+                }
+        }
+    }
+
+    resume_program() {
+        if (this.by_steps) {
+            this.step()
+        }
+        else {
+            this.execute()
+        }
+    }
+
     step() {
         const output = this.interpreter.step()
 
-        if (output.kind == 'info') {
-            if (output.is_user_statement) {
-                this.do({ kind: ActionKind.MoveCursor, line: output.pos.line, column: output.pos.column })
+        if (output.error == false) {
+            this.interpreter_action(output.result)
+            if (output.result.done) {
+                this.do({ kind: ActionKind.StopExecution })
             }
         }
         else {
-            if (output.done) {
-                this.do({ kind: ActionKind.StopExecution })
-            }
+            this.do({ kind: ActionKind.ShowMessage, message: output.result })
         }
     }
 
@@ -298,15 +333,13 @@ export class Controller {
     }
 
     execute() {
-        // si esto es verdadero...
-        if (this.program_running) {
-            // ...se esta resumiendo un programa que fue pausado para leer algo
-            this.interpreter.run()
-        }
-        else {
-            // ...y si no, se esta por ejecutar un programa por primera vez
-            this.do({ kind: ActionKind.ClearOutput })
-            this.interpreter.run()
+        const output = this.interpreter.run()
+
+        if (output.error == false) {
+            this.interpreter_action(output.result)
+            if (output.result.done) {
+                this.do({ kind: ActionKind.StopExecution })
+            }
         }
     }
 
@@ -342,7 +375,6 @@ export class Controller {
 
     send_input(input: string) {
         this.interpreter.send(input)
-        this.do({ kind: ActionKind.Execute, code: '' })
     }
 
     write(v: Value) {
