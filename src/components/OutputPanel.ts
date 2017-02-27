@@ -24,7 +24,7 @@ export default class {
         this.bar = bar
 
         this.step_button.click(() => { this.dispatcher.dispatch({ kind: ActionKind.Step }) })
-        this.stop_button.click(() => { this.dispatcher.dispatch({ kind: ActionKind.StopExecution }) })
+        this.stop_button.click(() => { this.dispatcher.dispatch({ kind: ActionKind.StopExecutionUser }) })
 
         const output_container = $('<div class="output"></div>')
 

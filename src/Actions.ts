@@ -15,6 +15,8 @@ export enum ActionKind {
     ExecuteBySteps,
     StopExecution,
     CompileAndShow,
+    StopExecutionWithError,
+    StopExecutionUser,
     RemovePanel
 }
 
@@ -31,7 +33,17 @@ export type Action = Execute
     | SetUpInterpreter
     | ExecuteBySteps
     | StopExecution
-    | CompileAndShow;
+    | CompileAndShow
+    | StopExecutionWithError
+    | StopExecutionUser;
+
+export interface StopExecutionWithError {
+    kind: ActionKind.StopExecutionWithError
+}
+
+export interface StopExecutionUser {
+    kind: ActionKind.StopExecutionUser
+}
 
 export interface CompileAndShow {
     kind: ActionKind.CompileAndShow

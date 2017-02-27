@@ -1,5 +1,5 @@
 import * as $ from 'jquery'
-import { Parser, Interpreter, transform, fr_writer, Errors, Value, Failure, Success, S3, InterpreterRead, InterpreterState, InterpreterStatementInfo, InterpreterWrite  } from 'interprete-pl'
+import { Parser, Interpreter, transform, fr_writer, Errors, Value, Failure, Success, S3, InterpreterRead, InterpreterStatementInfo, InterpreterWrite, InterpreterDone  } from 'interprete-pl'
 import OutputPanel from './components/OutputPanel'
 import EditorPanel from './components/EditorPanel'
 import CodePanel from './components/CodePanel'
@@ -245,6 +245,17 @@ export class Controller {
             case ActionKind.StopExecution:
                 this.program_running = false
                 this.app_ui.hide_step_controls()
+                this.app_ui.write('Programa finalizado correctamente.')
+                break
+            case ActionKind.StopExecutionWithError:
+                this.program_running = false
+                this.app_ui.hide_step_controls()
+                this.app_ui.write('Programa finalizado con un error.')
+                break
+            case ActionKind.StopExecutionUser:
+                this.program_running = false
+                this.app_ui.hide_step_controls()
+                this.app_ui.write('Programa finalizado por el usuario.')
                 break
             case ActionKind.CompileAndShow:
                 this.do({ kind: ActionKind.ClearMessages })
@@ -257,7 +268,7 @@ export class Controller {
         }
     }
 
-    interpreter_action(a: InterpreterState | InterpreterStatementInfo | InterpreterRead | InterpreterWrite) {
+    interpreter_action(a: InterpreterStatementInfo | InterpreterRead | InterpreterWrite) {
         switch (a.kind) {
             case 'action':
                 switch (a.action) {
@@ -270,14 +281,8 @@ export class Controller {
                 }
                 break
             case 'info':
-                switch (a.type) {
-                    case 'statement':
-                        this.move_cursor(a.pos.line, a.pos.column)
-                        break
-                    case 'interpreter':
-                        this.program_running = a.done
-                        break
-                }
+                this.move_cursor(a.pos.line, a.pos.column)
+                break
         }
     }
 
@@ -291,16 +296,19 @@ export class Controller {
     }
 
     step() {
-        const output = this.interpreter.step()
+        if (!this.interpreter.is_done()) {
+            const output = this.interpreter.step()
 
-        if (output.error == false) {
-            this.interpreter_action(output.result)
-            if (output.result.done) {
-                this.do({ kind: ActionKind.StopExecution })
+            if (output.error == false) {
+                this.interpreter_action(output.result)
+            }
+            else {
+                this.do({ kind: ActionKind.StopExecutionWithError })
+                this.do({ kind: ActionKind.ShowMessage, message: output.result })
             }
         }
         else {
-            this.do({ kind: ActionKind.ShowMessage, message: output.result })
+            this.do({ kind: ActionKind.StopExecution })
         }
     }
 
@@ -333,13 +341,28 @@ export class Controller {
     }
 
     execute() {
-        const output = this.interpreter.run()
+        if (!this.interpreter.is_done()) {
+            let output = this.interpreter.run()
 
-        if (output.error == false) {
-            this.interpreter_action(output.result)
-            if (output.result.done) {
+            while (!this.interpreter.is_done() && output.error == false) {
+                let action: InterpreterRead | InterpreterWrite;
+                if (output.result.kind == 'action') {
+                    action = output.result
+                }
+                this.interpreter_action(action)
+                output = this.interpreter.run()
+            }
+
+            if (output.error == true) {
+                this.do({ kind: ActionKind.ShowMessage, message: output.result })
+                this.do({ kind: ActionKind.StopExecutionWithError })
+            }
+            else {
                 this.do({ kind: ActionKind.StopExecution })
             }
+        }
+        else {
+            this.do({ kind: ActionKind.StopExecution })
         }
     }
 
