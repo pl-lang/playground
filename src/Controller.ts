@@ -95,11 +95,11 @@ export class Controller {
             case ActionKind.ExecuteBySteps:
                 this.do({ kind: ActionKind.ClearMessages })
                 this.do({ kind: ActionKind.ClearOutput })
-                this.app_ui.show_step_controls()
                 if (!this.program_running) {
                     this.by_steps = true
                     const compiled_program_maybe = this.compile(a.code)
                     if (!compiled_program_maybe.error) {
+                        this.app_ui.show_step_controls()
                         this.program_running = true
                         const program = compiled_program_maybe.result
                         this.do({ kind: ActionKind.SetUpInterpreter, program: program })
