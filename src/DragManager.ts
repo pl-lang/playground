@@ -78,6 +78,7 @@ export class DragLogic {
                 const total_panel_length = container.mode == 'vertical' ? container.height : container.width
                 
                 // con esto me aseguro de que la posicion final este dentro del panel
+                from = this.clamp(container_index, from)
                 to = this.clamp(container_index, to)
 
                 const delta = this.substract(to, from)
@@ -88,74 +89,46 @@ export class DragLogic {
 
                 // determinar que panel se achica en funcion de la direccion del movimiento de la manija
                 if (positive_direction) {
-                    let shrinking_panel_index = handle_index + 1
+                    const shrinking_panel_index = handle_index + 1
 
                     const total_delta = container.mode == 'vertical' ? delta_percentage.y : delta_percentage.x
 
-                    let remaining_delta = total_delta
+                    let acc = 0
 
-                    let a_panel_shrinked = false
+                    for (let i = shrinking_panel_index; i < container.panel_length.length && acc < total_delta; i++){
+                        acc += container.panel_length[i]
 
-                    // distribuir el delta a lo largo de los paneles
-                    while (remaining_delta > 0 && shrinking_panel_index < container.panel_length.length) {
-                        const old_length = container.panel_length[shrinking_panel_index]
-
-                        const difference = old_length - remaining_delta
-
-                        if (difference < 0) {
-                            container.panel_length[shrinking_panel_index] = 0
+                        if (acc < total_delta) {
+                            container.panel_length[i] = 0
                         }
                         else {
-                            a_panel_shrinked = true
-                            container.panel_length[shrinking_panel_index] = difference
+                            container.panel_length[i] = acc - total_delta
                         }
-
-                        remaining_delta = total_delta - old_length
-
-                        shrinking_panel_index++
                     }
 
-                    // si algun panel se encogio...
-                    if (a_panel_shrinked) {
-                        // ...hacer que el panel a la izquierda de la manija crezca
-                        container.panel_length[handle_index] = container.panel_length[handle_index] + total_delta
-                    }
+                    container.panel_length[handle_index] = container.panel_length[handle_index] + total_delta
 
                     return container.panel_length
                 }
                 else {
-                    let shrinking_panel_index = handle_index
+                    const shrinking_panel_index = handle_index
 
                     const total_delta = container.mode == 'vertical' ? delta_percentage.y : delta_percentage.x
 
-                    let remaining_delta = total_delta
+                    let acc = 0
 
-                    let a_panel_shrinked = false
+                    for (let i = shrinking_panel_index; i >= 0 && acc < total_delta; i--) {
+                        acc += container.panel_length[i]
 
-                    // distribuir el delta a lo largo de los paneles
-                    while (remaining_delta > 0 && shrinking_panel_index >= 0) {
-                        const old_length = container.panel_length[shrinking_panel_index]
-
-                        const difference = old_length - remaining_delta
-
-                        if (difference < 0) {
-                            container.panel_length[shrinking_panel_index] = 0
+                        if (acc < total_delta) {
+                            container.panel_length[i] = 0
                         }
                         else {
-                            a_panel_shrinked = true
-                            container.panel_length[shrinking_panel_index] = difference
+                            container.panel_length[i] = acc - total_delta
                         }
-
-                        remaining_delta = total_delta - old_length
-
-                        shrinking_panel_index--
                     }
 
-                    // si algun panel se encogio...
-                    if (a_panel_shrinked) {
-                        // ...hacer que el panel a la derecha de la manija crezca
-                        container.panel_length[handle_index + 1] = container.panel_length[handle_index + 1] + total_delta
-                    }
+                    container.panel_length[handle_index + 1] = container.panel_length[handle_index + 1] + total_delta
 
                     return container.panel_length
                 }
@@ -169,7 +142,7 @@ export class DragLogic {
         }
     }
 
-    private clamp(container_index: number, vector: { x: number, y: number }): { x: number, y: number } {
+    protected clamp(container_index: number, vector: { x: number, y: number }): { x: number, y: number } {
         const container = this.containers[container_index]
 
         let { x, y } = vector

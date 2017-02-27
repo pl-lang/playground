@@ -21,9 +21,22 @@ class DragTestWrapper extends DragLogic {
     get_container(container_index: number): Container {
         return super.get_container(container_index)
     }
+
+    clamp(container_index: number, vector: { x: number, y: number }): { x: number, y: number } {
+        return super.clamp(container_index, vector)
+    }
 }
 
 describe('DragLogic', () => {
+    it('clamp', () => {
+        const dl = new DragTestWrapper()
+        dl.add_container(500, 500, 'horizontal')
+
+        const v = dl.clamp(0, { x: 600, y: 700 })
+
+        v.should.deepEqual({ x: 500, y: 500 })
+    })
+
     it('modificar paneles horizontales y verticales', () => {
         const dl = new DragTestWrapper()
         dl.add_container(500, 500, 'horizontal')
