@@ -158,6 +158,14 @@ class AppUI {
     hide_step_controls() {
         this.output_panel.hide_controls()
     }
+
+    disable_buttons() {
+        this.editor_panel.disable_buttons()
+    }
+
+    enable_buttons() {
+        this.editor_panel.enable_buttons()
+    }
 }
 
 export class Controller {
@@ -193,6 +201,7 @@ export class Controller {
                         const program = compiled_program_maybe.result
                         this.do({ kind: ActionKind.SetUpInterpreter, program: program })
                         this.do({ kind: ActionKind.ShowCompiledCode, code: fr_writer(program) })
+                        this.do({ kind: ActionKind.DisableButtons })
                         this.execute()
                     }
                 }
@@ -243,6 +252,7 @@ export class Controller {
                         const program = compiled_program_maybe.result
                         this.do({ kind: ActionKind.SetUpInterpreter, program: program })
                         this.do({ kind: ActionKind.ShowCompiledCode, code: fr_writer(program) })
+                        this.do({ kind: ActionKind.DisableButtons })
                         this.do({ kind: ActionKind.Step })
                     }
                 }
@@ -251,16 +261,19 @@ export class Controller {
                 this.program_running = false
                 this.app_ui.hide_step_controls()
                 this.app_ui.write('Programa finalizado correctamente.')
+                this.do({ kind: ActionKind.EnableButtons })
                 break
             case ActionKind.StopExecutionWithError:
                 this.program_running = false
                 this.app_ui.hide_step_controls()
                 this.app_ui.write('Programa finalizado con un error.')
+                this.do({ kind: ActionKind.EnableButtons })
                 break
             case ActionKind.StopExecutionUser:
                 this.program_running = false
                 this.app_ui.hide_step_controls()
                 this.app_ui.write('Programa finalizado por el usuario.')
+                this.do({ kind: ActionKind.EnableButtons })
                 break
             case ActionKind.CompileAndShow:
                 this.do({ kind: ActionKind.ClearMessages })
@@ -269,6 +282,12 @@ export class Controller {
                 if (result != null) {
                     this.do({ kind: ActionKind.ShowCompiledCode, code: fr_writer(result) })
                 }
+                break
+            case ActionKind.DisableButtons:
+                this.app_ui.disable_buttons()
+                break
+            case ActionKind.EnableButtons:
+                this.app_ui.enable_buttons()
                 break
         }
     }

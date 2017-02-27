@@ -18,6 +18,8 @@ export enum ActionKind {
     StopExecutionWithError,
     StopExecutionUser,
     FocusEditor,
+    DisableButtons,
+    EnableButtons,
     RemovePanel
 }
 
@@ -37,7 +39,17 @@ export type Action = Execute
     | CompileAndShow
     | StopExecutionWithError
     | StopExecutionUser
-    | FocusEditor;
+    | FocusEditor
+    | DisableButtons
+    | EnableButtons;
+
+export interface EnableButtons {
+    kind: ActionKind.EnableButtons
+}
+
+export interface DisableButtons {
+    kind: ActionKind.DisableButtons
+}
 
 export interface FocusEditor {
     kind: ActionKind.FocusEditor

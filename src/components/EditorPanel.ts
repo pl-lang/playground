@@ -26,7 +26,7 @@ const defaults: EditorOptions = {
 export default class EditorPanel {
     private run_button: JQuery
     private compile_button: JQuery
-    private step_run: JQuery
+    private step_button: JQuery
     private parent: JQuery
     container: JQuery
     private editor: CodeMirror.EditorFromTextArea
@@ -70,7 +70,7 @@ export default class EditorPanel {
             this.dispatcher.dispatch({ kind: ActionKind.Execute, code: this.editor_contents })
         })
 
-        this.step_run.click(() => {
+        this.step_button.click(() => {
             this.dispatcher.dispatch({ kind: ActionKind.ExecuteBySteps, code: this.editor_contents })
         })
 
@@ -88,9 +88,9 @@ export default class EditorPanel {
         const icon = $('<span style="margin-left:10px" class="octicon octicon-pencil"></span>')
         const title = $('<span class="title">EDITOR</span>')
         const run_button = $('<button class="green-button"><span class="button-label bold">Ejecutar</span><span></button>')
-        const step_run = $('<button class="green-button"><span class="button-label bold">Ejecutar paso a paso</span><span></button>')
+        const step_button = $('<button class="green-button"><span class="button-label bold">Ejecutar paso a paso</span><span></button>')
 
-        bar.append(icon).append(title).append(run_button).append(step_run)
+        bar.append(icon).append(title).append(run_button).append(step_button)
 
         if (this.options.links) {
             const help_icon = $('<span style="margin-left:15px;" class="octicon octicon-repo"></span>')
@@ -102,7 +102,7 @@ export default class EditorPanel {
         }
 
         this.run_button = run_button
-        this.step_run = step_run
+        this.step_button = step_button
 
         if (this.options.debug) {
             const compile_button = $('<button id="compilar" class="grey-button"><span class="button-label">Compilar</span><span></button>')
@@ -135,5 +135,23 @@ export default class EditorPanel {
 
     move_cursor(line: number, column: number) {
         this.editor.getDoc().setCursor({ line, ch: column })
+    }
+
+    disable_buttons() {
+        this.run_button.prop('disabled', true)
+        this.step_button.prop('disabled', true)
+
+        if (this.compile_button) {
+            this.compile_button.prop('disabled', true)
+        }
+    }
+
+    enable_buttons() {
+        this.run_button.prop('disabled', false)
+        this.step_button.prop('disabled', false)
+
+        if (this.compile_button) {
+            this.compile_button.prop('disabled', false)
+        }
     }
 }
