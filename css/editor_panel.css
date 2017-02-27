@@ -14,37 +14,58 @@
 
 /*------BOTONES-------*/
 
-.boton-ejecutar {
-  background-color: hsl(120, 61%, 53%);
+.green-button {
+  background-color: hsl(120, 61%, 50%);
   color: white;
-  border: 1px solid hsl(120, 61%, 45%);
-  font-weight: bold;
+  border: 1px solid hsl(120, 61%, 35%);
 }
 
-.boton-ejecutar:hover {
-  background-color: hsl(120, 61%, 45%);
+.green-button:hover {
+  background-color: hsl(120, 61%, 55%);
 }
 
-.boton-ejecutar:active {
-  background-color: hsl(120, 61%, 40%);
+.green-button:active {
+  background-color: hsl(120, 61%, 35%);
 }
 
-.boton-ejecutar:disabled {
-  background-color: red;
+.green-button:disabled {
+  background-color: hsl(120, 61%, 35%);
 }
 
-.boton-compilar {		
- background-color: hsl(119.9, 10.7%, 80.2%);		
- color: black;		
- border: 1px solid hsl(119.9, 4.8%, 60%);		
+.grey-button {		
+ background-color: hsl(207, 100%, 50%);
+ color: white;		
+ border: 1px solid hsl(207, 100%, 35%);		
 }		
 		
-.boton-compilar:hover {		
- background-color: hsl(119.9, 10.7%, 70%);		
+.grey-button:hover {		
+ background-color: hsl(207, 100%, 55%);
 }		
 		
-.boton-compilar:active {		
- background-color: hsl(119.9, 10.7%, 50%);		
+.grey-button:active {		
+ background-color: hsl(207, 100%, 35%);
+}
+
+.grey-button:disabled {		
+ background-color: hsl(207, 100%, 35%);
+}
+
+.red-button {
+  background-color: hsl(0, 100%, 50%);
+  color: white;
+  border: 1px solid hsl(0, 100%, 35%);
+}
+
+.red-button:hover {
+  background-color: hsl(0, 100%, 55%);
+}
+
+.red-button:active {
+  background-color: hsl(0, 100%, 35%);
+}
+
+.red-button:disabled {
+  background-color: hsl(0, 100%, 35%);
 }
 
 /* ---- MessagePanel ----*/
