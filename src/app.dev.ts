@@ -188,13 +188,14 @@ export class Controller {
                 if (!this.program_running) {
                     this.by_steps = false
                     this.program_running = true
-                    const { result } = this.compile(a.code)
-                    this.do({ kind: ActionKind.SetUpInterpreter, program: result })
-                    if (result != null) {
-                        this.do({ kind: ActionKind.ShowCompiledCode, code: fr_writer(result) })
+                    const compiled_program_maybe = this.compile(a.code)
+                    if (!compiled_program_maybe.error) {
+                        const program = compiled_program_maybe.result
+                        this.do({ kind: ActionKind.SetUpInterpreter, program: program })
+                        this.do({ kind: ActionKind.ShowCompiledCode, code: fr_writer(program) })
+                        this.execute()
                     }
                 }
-                this.execute()
                 break
             case ActionKind.Step:
                 this.do({ kind: ActionKind.ClearMessages })
@@ -234,13 +235,14 @@ export class Controller {
                 if (!this.program_running) {
                     this.by_steps = true
                     this.program_running = true
-                    const { result } = this.compile(a.code)
-                    this.do({ kind: ActionKind.SetUpInterpreter, program: result })
-                    if (result != null) {
-                        this.do({ kind: ActionKind.ShowCompiledCode, code: fr_writer(result) })
+                    const compiled_program_maybe = this.compile(a.code)
+                    if (!compiled_program_maybe.error) {
+                        const program = compiled_program_maybe.result
+                        this.do({ kind: ActionKind.SetUpInterpreter, program: program })
+                        this.do({ kind: ActionKind.ShowCompiledCode, code: fr_writer(program) })
+                        this.do({ kind: ActionKind.Step })
                     }
                 }
-                this.do({ kind: ActionKind.Step })
                 break
             case ActionKind.StopExecution:
                 this.program_running = false
