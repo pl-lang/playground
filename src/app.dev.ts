@@ -187,9 +187,9 @@ export class Controller {
                 this.do({ kind: ActionKind.ClearOutput })
                 if (!this.program_running) {
                     this.by_steps = false
-                    this.program_running = true
                     const compiled_program_maybe = this.compile(a.code)
                     if (!compiled_program_maybe.error) {
+                        this.program_running = true
                         const program = compiled_program_maybe.result
                         this.do({ kind: ActionKind.SetUpInterpreter, program: program })
                         this.do({ kind: ActionKind.ShowCompiledCode, code: fr_writer(program) })
@@ -237,9 +237,9 @@ export class Controller {
                 this.app_ui.show_step_controls()
                 if (!this.program_running) {
                     this.by_steps = true
-                    this.program_running = true
                     const compiled_program_maybe = this.compile(a.code)
                     if (!compiled_program_maybe.error) {
+                        this.program_running = true
                         const program = compiled_program_maybe.result
                         this.do({ kind: ActionKind.SetUpInterpreter, program: program })
                         this.do({ kind: ActionKind.ShowCompiledCode, code: fr_writer(program) })
