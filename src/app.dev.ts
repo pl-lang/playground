@@ -143,12 +143,12 @@ class AppUI {
         this.output_panel.clear()
     }
 
-    move_cursor(line: number, column: number, focus?: boolean) {
-        // if (focus) {
-        //     this.editor_panel.focus_editor()
-        // }
-
+    move_cursor(line: number, column: number) {
         this.editor_panel.move_cursor(line, column)
+    }
+
+    focus_editor() {
+        this.editor_panel.focus_editor()
     }
 
     show_step_controls() {
@@ -200,6 +200,9 @@ export class Controller {
             case ActionKind.Step:
                 this.do({ kind: ActionKind.ClearMessages })
                 this.step()
+                break
+            case ActionKind.FocusEditor:
+                this.app_ui.focus_editor()
                 break
             case ActionKind.MoveCursor:
                 this.move_cursor(a.line, a.column)
@@ -321,7 +324,7 @@ export class Controller {
     }
 
     move_cursor(line: number, column: number) {
-        this.app_ui.move_cursor(line, column, true)
+        this.app_ui.move_cursor(line, column)
     }
 
     show_compiled_code(code: string) {
@@ -346,13 +349,22 @@ export class Controller {
         if (!this.interpreter.is_done()) {
             let output = this.interpreter.run()
 
-            while (!this.interpreter.is_done() && output.error == false) {
+            let done = false
+
+            while (!done && output.error == false) {
                 let action: InterpreterRead | InterpreterWrite;
+
                 if (output.result.kind == 'action') {
                     action = output.result
+                    this.interpreter_action(action)
                 }
-                this.interpreter_action(action)
-                output = this.interpreter.run()
+
+                if (!this.interpreter.is_done()) {
+                    output = this.interpreter.run()
+                }
+                else {
+                    done = true
+                }
             }
 
             if (output.error == true) {
