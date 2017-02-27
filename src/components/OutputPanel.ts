@@ -38,8 +38,8 @@ export default class {
         const icon = $('<span style="margin-left:10px" class="octicon octicon-terminal"></span>')
         const title = $('<span class="title">SALIDA</span>')
 
-        this.step_button = $('<button class="green-button icon-button"><span class="button-label octicon octicon-triangle-right"></span></button>')
-        this.stop_button = $('<button class="red-button icon-button"><span class="button-label octicon octicon-primitive-square"></span></button>')
+        this.step_button = $('<button class="green-button icon-button"><span class="button-icon octicon octicon-triangle-right"></span></button>')
+        this.stop_button = $('<button class="red-button icon-button"><span class="button-icon octicon octicon-primitive-square"></span></button>')
 
         bar.append(icon, title, this.step_button, this.stop_button)
 
