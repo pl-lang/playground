@@ -15,53 +15,57 @@
 /*------BOTONES-------*/
 
 .green-button {
-  background-color: hsl(120, 61%, 53%);
+  background-color: hsl(120, 61%, 50%);
   color: white;
   border: 1px solid hsl(120, 61%, 45%);
 }
 
 .green-button:hover {
-  background-color: hsl(120, 61%, 45%);
+  background-color: hsl(120, 61%, 55%);
 }
 
 .green-button:active {
-  background-color: hsl(120, 61%, 40%);
+  background-color: hsl(120, 61%, 45%);
 }
 
 .green-button:disabled {
-  background-color: hsl(120, 61%, 53%);
+  background-color: hsl(120, 61%, 45%);
 }
 
 .grey-button {		
- background-color: hsl(119.9, 10.7%, 80.2%);		
- color: black;		
- border: 1px solid hsl(119.9, 4.8%, 60%);		
+ background-color: hsl(207, 100%, 50%);
+ color: white;		
+ border: 1px solid hsl(207, 100%, 45%);		
 }		
 		
 .grey-button:hover {		
- background-color: hsl(119.9, 10.7%, 70%);		
+ background-color: hsl(207, 100%, 55%);
 }		
 		
 .grey-button:active {		
- background-color: hsl(119.9, 10.7%, 50%);		
+ background-color: hsl(207, 100%, 45%);
+}
+
+.grey-button:disabled {		
+ background-color: hsl(207, 100%, 45%);
 }
 
 .red-button {
-  background-color: hsl(0, 100%, 49%);
+  background-color: hsl(0, 100%, 50%);
   color: white;
-  border: 1px solid hsl(0, 100%, 36%);
+  border: 1px solid hsl(0, 100%, 45%);
 }
 
 .red-button:hover {
-  background-color: hsl(0, 100%, 46%);
+  background-color: hsl(0, 100%, 55%);
 }
 
 .red-button:active {
-  background-color: hsl(0, 100%, 40%);
+  background-color: hsl(0, 100%, 45%);
 }
 
 .red-button:disabled {
-  background-color: hsl(0, 100%, 49%);
+  background-color: hsl(0, 100%, 45%);
 }
 
 /* ---- MessagePanel ----*/

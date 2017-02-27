@@ -96,7 +96,7 @@ export default class EditorPanel {
             const help_icon = $('<span style="margin-left:15px;" class="octicon octicon-repo"></span>')
             const help_link = $('<a style="margin-left: 5px;" class="button-label" href="https://github.com/pl-lang/jsplint/wiki/Sintaxis/">Ayuda sobre el lenguaje</a>')
             const repo_icon = $('<span style="margin-left:15px;" class="octicon octicon-mark-github"></span>')
-            const repo_link = $('<a style="margin-left:5px" class="button-label" href="https://github.com/pl-lang/playground/">Visita el proyecto en GitHub</a>')
+            const repo_link = $('<a style="margin-left:5px" class="button-label bold" href="https://github.com/pl-lang/playground/">Visita el proyecto en GitHub</a>')
 
             bar.append(help_icon).append(help_link).append(repo_icon).append(repo_link)
         }
