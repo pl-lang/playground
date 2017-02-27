@@ -106,7 +106,9 @@ export class DragLogic {
                         }
                     }
 
-                    container.panel_length[handle_index] = container.panel_length[handle_index] + total_delta
+                    const growing_panel_width = container.panel_length[handle_index]
+
+                    container.panel_length[handle_index] = (growing_panel_width + total_delta) > 100 ? 100 : growing_panel_width + total_delta
 
                     return container.panel_length
                 }
@@ -128,7 +130,9 @@ export class DragLogic {
                         }
                     }
 
-                    container.panel_length[handle_index + 1] = container.panel_length[handle_index + 1] + total_delta
+                    const growing_panel_width = container.panel_length[handle_index + 1]
+
+                    container.panel_length[handle_index + 1] = (growing_panel_width + total_delta) > 100 ? 100 : growing_panel_width + total_delta
 
                     return container.panel_length
                 }
