@@ -6,8 +6,8 @@ class DragTestWrapper extends DragLogic {
         super()
     }
 
-    drag(container_index: number, handle_index: number, from: { x: number, y: number }, to: { x: number, y: number }): number[] {
-        return super.drag(container_index, handle_index, from, to)
+    drag(container_index: number, handle_index: number, from: { x: number, y: number }, to: { x: number, y: number }) {
+        super.drag(container_index, handle_index, from, to)
     }
 
     add_container(width: number, height: number, mode: 'vertical' | 'horizontal') {
@@ -58,8 +58,10 @@ describe('DragLogic', () => {
         const h_container = dl.get_container(0)
         const v_container = dl.get_container(1)
 
-        h_container.panel_length.should.deepEqual([100, 0])
-        v_container.panel_length.should.deepEqual([100, 0])
+        h_container.panels[0].length.should.deepEqual(100)
+        h_container.panels[1].length.should.deepEqual(0)
+        v_container.panels[0].length.should.deepEqual(100)
+        v_container.panels[1].length.should.deepEqual(0)
     })
 
     it('intentar achicar un panel que ya tiene longitud 0%', () => {
@@ -79,7 +81,8 @@ describe('DragLogic', () => {
         const h_container = dl.get_container(0)
 
         // no deberian haberse registrado cambios en el ancho del contenedor
-        h_container.panel_length.should.deepEqual([100, 0])
+        h_container.panels[0].length.should.deepEqual(100)
+        h_container.panels[1].length.should.deepEqual(0)
     })
 
     it('intentar desplazar una manija mas alla del final de su contenedor', () => {
@@ -97,7 +100,8 @@ describe('DragLogic', () => {
 
         // no deberian haberse registrado cambios luego de que el panel
         // a la izquierda de la manija haya llegado al 100% de la longitud del contenedor
-        h_container.panel_length.should.deepEqual([100, 0])
+        h_container.panels[0].length.should.deepEqual(100)
+        h_container.panels[1].length.should.deepEqual(0)
     })
 
     it('si un panel tiene longitud 0, al achicarlo se achica el panel posterior', () => {
@@ -112,17 +116,26 @@ describe('DragLogic', () => {
 
         const h_container = dl.get_container(0)
 
-        h_container.panel_length.should.deepEqual([25, 25, 25, 25])
+        h_container.panels[0].length.should.deepEqual(25)
+        h_container.panels[1].length.should.deepEqual(25)
+        h_container.panels[2].length.should.deepEqual(25)
+        h_container.panels[3].length.should.deepEqual(25)
         
         // desplazar la manija hasta colapsar el panel a su derecha
         dl.drag(0, 0, { x: 125, y: 0 }, { x: 250, y: 0 })
 
-        h_container.panel_length.should.deepEqual([50, 0, 25, 25])
+        h_container.panels[0].length.should.deepEqual(50)
+        h_container.panels[1].length.should.deepEqual(0)
+        h_container.panels[2].length.should.deepEqual(25)
+        h_container.panels[3].length.should.deepEqual(25)
 
         // desplazar la manija un poco mas a la derecha
         dl.drag(0, 0, { x: 250, y: 0 }, { x: 300, y: 0 })
 
-        h_container.panel_length.should.deepEqual([60, 0, 15, 25])
+        h_container.panels[0].length.should.deepEqual(60)
+        h_container.panels[1].length.should.deepEqual(0)
+        h_container.panels[2].length.should.deepEqual(15)
+        h_container.panels[3].length.should.deepEqual(25)
     })
 
     it('si un panel tiene longitud 0, al achicarlo se achican los paneles posteriores', () => {
@@ -137,22 +150,34 @@ describe('DragLogic', () => {
 
         const h_container = dl.get_container(0)
 
-        h_container.panel_length.should.deepEqual([25, 25, 25, 25])
+        h_container.panels[0].length.should.deepEqual(25)
+        h_container.panels[1].length.should.deepEqual(25)
+        h_container.panels[2].length.should.deepEqual(25)
+        h_container.panels[3].length.should.deepEqual(25)
 
         // desplazar la manija hasta colapsar el panel a su derecha
         dl.drag(0, 0, { x: 125, y: 0 }, { x: 250, y: 0 })
 
-        h_container.panel_length.should.deepEqual([50, 0, 25, 25])
+        h_container.panels[0].length.should.deepEqual(50)
+        h_container.panels[1].length.should.deepEqual(0)
+        h_container.panels[2].length.should.deepEqual(25)
+        h_container.panels[3].length.should.deepEqual(25)
 
         // desplazar la manija hasta colapsar el panel siguiente
         dl.drag(0, 0, { x: 250, y: 0 }, { x: 375, y: 0 })
 
-        h_container.panel_length.should.deepEqual([75, 0, 0, 25])
+        h_container.panels[0].length.should.deepEqual(75)
+        h_container.panels[1].length.should.deepEqual(0)
+        h_container.panels[2].length.should.deepEqual(0)
+        h_container.panels[3].length.should.deepEqual(25)
 
         // desplazar la manija hasta colapsar el ultimo panel
         dl.drag(0, 0, { x: 375, y: 0 }, { x: 500, y: 0 })
 
-        h_container.panel_length.should.deepEqual([100, 0, 0, 0])
+        h_container.panels[0].length.should.deepEqual(100)
+        h_container.panels[1].length.should.deepEqual(0)
+        h_container.panels[2].length.should.deepEqual(0)
+        h_container.panels[3].length.should.deepEqual(0)
         
     })
 })

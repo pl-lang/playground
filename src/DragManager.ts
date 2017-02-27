@@ -1,9 +1,14 @@
 import * as $ from 'jquery'
 
+export interface Panel {
+    fixed_length: boolean
+    length: number
+}
+
 export interface Container {
     width: number
     height: number
-    panel_length: number[]
+    panels: Panel[]
     mode: 'vertical' | 'horizontal'
 }
 
@@ -16,17 +21,17 @@ export class DragLogic {
 
     protected add_panel(container_index: number, index: number, new_panel_length: number) {
         if (container_index >= 0 && container_index < this.containers.length) {
-            const new_length: number[] = []
-            const panel_length = this.containers[container_index].panel_length
-            for (let i = 0; i <= panel_length.length; i++) {
+            const new_panels: Panel[] = []
+            const panels = this.containers[container_index].panels
+            for (let i = 0; i <= panels.length; i++) {
                 if (i == index) {
-                    new_length[i] = new_panel_length
+                    new_panels[i] = { ...panels[i], length: new_panel_length }
                 }
                 else {
-                    new_length[i] = panel_length[i]
+                    new_panels[i] = panels[i]
                 }
             }
-            this.containers[container_index].panel_length = new_length
+            this.containers[container_index].panels = new_panels
         }
         else {
             throw new Error(`Invalid container_index (${container_index})`)
@@ -34,7 +39,7 @@ export class DragLogic {
     }
 
     protected add_container(width: number, height: number, mode: 'vertical' | 'horizontal') {
-        this.containers.push({ width, height, mode, panel_length: [] })
+        this.containers.push({ width, height, mode, panels: [] })
     }
 
     protected remove_container(container_index: number): Container {
@@ -70,9 +75,9 @@ export class DragLogic {
         }
     }
 
-    protected drag(container_index: number, handle_index: number, from: { x: number, y: number}, to: { x: number, y: number }): number[] {
+    protected drag(container_index: number, handle_index: number, from: { x: number, y: number}, to: { x: number, y: number }) {
         if (container_index >= 0 && container_index < this.containers.length) {
-            if (handle_index >= 0 && handle_index < this.containers[container_index].panel_length.length - 1) {
+            if (handle_index >= 0 && handle_index < this.containers[container_index].panels.length - 1) {
                 const container = this.containers[container_index]
 
                 const total_panel_length = container.mode == 'vertical' ? container.height : container.width
@@ -95,22 +100,20 @@ export class DragLogic {
 
                     let acc = 0
 
-                    for (let i = shrinking_panel_index; i < container.panel_length.length && acc < total_delta; i++){
-                        acc += container.panel_length[i]
+                    for (let i = shrinking_panel_index; i < container.panels.length && acc < total_delta; i++){
+                        acc += container.panels[i].length
 
                         if (acc < total_delta) {
-                            container.panel_length[i] = 0
+                            container.panels[i].length = 0
                         }
                         else {
-                            container.panel_length[i] = acc - total_delta
+                            container.panels[i].length = acc - total_delta
                         }
                     }
 
-                    const growing_panel_width = container.panel_length[handle_index]
+                    const growing_panel_width = container.panels[handle_index].length
 
-                    container.panel_length[handle_index] = (growing_panel_width + total_delta) > 100 ? 100 : growing_panel_width + total_delta
-
-                    return container.panel_length
+                    container.panels[handle_index].length = (growing_panel_width + total_delta) > 100 ? 100 : growing_panel_width + total_delta
                 }
                 else {
                     const shrinking_panel_index = handle_index
@@ -120,21 +123,19 @@ export class DragLogic {
                     let acc = 0
 
                     for (let i = shrinking_panel_index; i >= 0 && acc < total_delta; i--) {
-                        acc += container.panel_length[i]
+                        acc += container.panels[i].length
 
                         if (acc < total_delta) {
-                            container.panel_length[i] = 0
+                            container.panels[i].length = 0
                         }
                         else {
-                            container.panel_length[i] = acc - total_delta
+                            container.panels[i].length = acc - total_delta
                         }
                     }
 
-                    const growing_panel_width = container.panel_length[handle_index + 1]
+                    const growing_panel_width = container.panels[handle_index + 1].length
 
-                    container.panel_length[handle_index + 1] = (growing_panel_width + total_delta) > 100 ? 100 : growing_panel_width + total_delta
-
-                    return container.panel_length
+                    container.panels[handle_index + 1].length = (growing_panel_width + total_delta) > 100 ? 100 : growing_panel_width + total_delta
                 }
             }
             else {
@@ -264,17 +265,17 @@ export class DragManager extends DragLogic {
 
     drag_handle(handle: UIHandle, from: { x: number, y: number }, to: { x: number, y: number }) {
 
-        const panel_length = super.drag(handle.container_index, handle.handle_index, from, to)
+        super.drag(handle.container_index, handle.handle_index, from, to)
 
         const container = this.ui_panel_containers[handle.container_index]
 
         // aplicar las nuevas longitudes
         for (let i = 0; i < container.panels.length; i++) {
             if (container.mode == 'horizontal') {
-                container.panels[i].attr('style', `width: ${panel_length[i]}%;`)
+                container.panels[i].attr('style', `width: ${container.panels[i].length}%;`)
             }
             else {
-                container.panels[i].attr('style', `height: ${panel_length[i]}%;`)
+                container.panels[i].attr('style', `height: ${container.panels[i].length}%;`)
             }
         }
     }
