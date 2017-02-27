@@ -76,6 +76,7 @@ export default class MessagePanel {
 
             message.on('click', () => {
                 this.dispatcher.dispatch({ kind: ActionKind.MoveCursor, line: data.pos.line, column: data.pos.column })
+                this.dispatcher.dispatch({ kind: ActionKind.FocusEditor })
             })
         }
 
