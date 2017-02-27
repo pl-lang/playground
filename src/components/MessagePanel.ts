@@ -2,7 +2,7 @@ import * as $ from 'jquery'
 import { Errors } from 'interprete-pl'
 import get_template from './Templates'
 import { Action, ActionKind } from '../Actions'
-import { Dispatcher } from '../app.dev'
+import { Dispatcher } from '../Controller'
 
 export default class MessagePanel {
     private message_list: JQuery

@@ -1,4 +1,4 @@
-import { Dispatcher } from '../app.dev'
+import { Dispatcher } from '../Controller'
 import { Value } from 'interprete-pl'
 import Emitter from './Emitter'
 import Prompt from './Prompt'

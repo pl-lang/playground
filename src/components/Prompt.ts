@@ -1,6 +1,6 @@
 import * as $ from 'jquery'
 import { Action, ActionKind } from '../Actions'
-import { Dispatcher } from '../app.dev'
+import { Dispatcher } from '../Controller'
 
 export default class Prompt {
     private textarea: JQuery

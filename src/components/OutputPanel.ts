@@ -1,6 +1,6 @@
 import * as $ from 'jquery'
 import Window from './Window'
-import { Dispatcher } from '../app.dev'
+import { Dispatcher } from '../Controller'
 import { Action, ActionKind } from '../Actions'
 import { Value } from 'interprete-pl'
 
