@@ -34,6 +34,10 @@ class DragTestWrapper extends DragLogic {
     remove(ci: number, pi: number) {
         super.remove_panel(ci, pi)
     }
+
+    add_panel_after(ci: number, ppi: number, options?: { fixed: boolean, length: number }) {
+        super.add_panel_after(ci, ppi, options)
+    }
 }
 
 describe('DragLogic', () => {
@@ -130,6 +134,72 @@ describe('DragLogic', () => {
         h_container.panels.length.should.equal(1)
 
         h_container.panels[0].length.should.equal(50)
+    })
+
+    it('agregar un panel flexible entre otros dos', () => {
+        const dl = new DragTestWrapper()
+        dl.add_container(500, 500, 'horizontal')
+        dl.add_container(500, 500, 'vertical')
+
+        dl.add_panel(0)
+        dl.add_panel(0)
+        dl.add_panel_after(0, 0)
+
+        const h_container = dl.get_container(0)
+
+        h_container.panels[0].length.should.be.approximately(33.3, 0.05)
+        h_container.panels[1].length.should.be.approximately(33.3, 0.05)
+        h_container.panels[2].length.should.be.approximately(33.3, 0.05)
+    })
+
+    it('agregar un panel no-flexible entre dos paneles flexibles', () => {
+        const dl = new DragTestWrapper()
+        dl.add_container(500, 500, 'horizontal')
+        dl.add_container(500, 500, 'vertical')
+
+        dl.add_panel(0)
+        dl.add_panel(0)
+        dl.add_panel_after(0, 0, { fixed: true, length: 60 })
+
+        const h_container = dl.get_container(0)
+
+        h_container.panels[0].length.should.be.equal(20)
+        h_container.panels[1].length.should.be.equal(60)
+        h_container.panels[2].length.should.be.equal(20)
+    })
+
+    it('agregar un panel no-flexible entre dos paneles no-flexibles (no hay espacio suficiente para el nuevo)', () => {
+        const dl = new DragTestWrapper()
+        dl.add_container(500, 500, 'horizontal')
+        dl.add_container(500, 500, 'vertical')
+
+        dl.add_panel(0, { fixed: true, length: 40 })
+        dl.add_panel(0, { fixed: true, length: 40 })
+        dl.add_panel_after(0, 0, { fixed: true, length: 60 })
+
+        const h_container = dl.get_container(0)
+
+        h_container.panels[0].length.should.be.equal(40)
+        h_container.panels[1].fixed.should.be.equal(false)
+        h_container.panels[1].length.should.be.equal(20)
+        h_container.panels[2].length.should.be.equal(40)
+    })
+
+    it('agregar un panel no-flexible entre dos paneles no-flexibles (hay espacio suficiente para el nuevo)', () => {
+        const dl = new DragTestWrapper()
+        dl.add_container(500, 500, 'horizontal')
+        dl.add_container(500, 500, 'vertical')
+
+        dl.add_panel(0, { fixed: true, length: 20 })
+        dl.add_panel(0, { fixed: true, length: 20 })
+        dl.add_panel_after(0, 0, { fixed: true, length: 60 })
+
+        const h_container = dl.get_container(0)
+
+        h_container.panels[0].length.should.be.equal(20)
+        h_container.panels[1].fixed.should.be.equal(true)
+        h_container.panels[1].length.should.be.equal(60)
+        h_container.panels[2].length.should.be.equal(20)
     })
 
     it('modificar paneles horizontales y verticales', () => {

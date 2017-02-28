@@ -42,7 +42,7 @@ export class DragLogic {
             if (options) {
                 if (options.fixed) {
                     new_panel_length = available_length >= options.length ? options.length : available_length
-                    // si hay suficiente espacion como para que el panel tenga la longitud deseada
+                    // si hay suficiente espacio como para que el panel tenga la longitud deseada
                     // entonces puede tener longitud fija, si no tiene longitud flexible
                     fixed_length = available_length >= options.length
                 }
@@ -95,6 +95,96 @@ export class DragLogic {
         }
         else {
             throw new Error(`Invalid container_index (${container_index})`)
+        }
+    }
+
+    protected add_panel_after(container_index: number, previous_panel_index: number, options?: { fixed: boolean, length: number }) {
+        const container = this.containers[container_index]
+
+        if (previous_panel_index < container.panels.length) {
+            if (previous_panel_index == container.panels.length - 1) {
+                this.add_panel(container_index, options)
+            }
+            else {
+                let available_length = 0
+
+                if (container.panels.length > 0) {
+                    let fixed_length = 0
+                    for (let i = 0; i < container.panels.length; i++) {
+                        fixed_length += container.panels[i].fixed ? container.panels[i].length : 0
+                    }
+                    available_length = 100 - fixed_length
+                }
+                else {
+                    available_length = 100
+                }
+
+                let new_panel_length = 0
+                let fixed_length = false
+
+                if (options) {
+                    if (options.fixed) {
+                        new_panel_length = available_length >= options.length ? options.length : available_length
+                        // si hay suficiente espacio como para que el panel tenga la longitud deseada
+                        // entonces puede tener longitud fija, si no tiene longitud flexible
+                        fixed_length = available_length >= options.length
+                    }
+                    else {
+                        new_panel_length = available_length
+                    }
+                }
+                else {
+                    new_panel_length = available_length
+                }
+
+                if (fixed_length) {
+                    // si el panel tiene longitud fija le va a quitar espacio
+                    // a los paneles flexibles existentes
+
+                    // aplicar nuevas longitudes a los paneles (flexibles) existentes, si los hay
+                    const flex_panels = container.panels.filter(p => p.fixed == false).length
+
+                    if (flex_panels > 0) {
+                        let length = (available_length - new_panel_length) / flex_panels
+
+                        for (let i = 0; i < container.panels.length; i++) {
+                            if (!container.panels[i].fixed) {
+                                container.panels[i].length = length
+                            }
+                        }
+                    }
+
+                    // agregar panel
+                    const new_panel: Panel = { fixed: fixed_length, length: new_panel_length }
+
+                    const new_panels = [...container.panels.slice(0, previous_panel_index + 1), new_panel, ...container.panels.slice(previous_panel_index + 1)]
+
+                    container.panels = new_panels
+                }
+                else {
+                    // si no tiene longitud fija entonces comparte el espacio disponible
+                    // con el resto de los paneles flexibles
+                    const flex_panels = container.panels.filter(p => p.fixed == false).length + 1
+
+                    const length = available_length / flex_panels
+
+                    // aplicar nuevas longitudes a los paneles (flexibles) existentes
+                    for (let i = 0; i < container.panels.length; i++) {
+                        if (!container.panels[i].fixed) {
+                            container.panels[i].length = length
+                        }
+                    }
+
+                    const new_panel: Panel = { fixed: fixed_length, length }
+
+                    const new_panels = [...container.panels.slice(0, previous_panel_index + 1), new_panel, ...container.panels.slice(previous_panel_index + 1)]
+
+                    container.panels = new_panels
+                }
+            }
+        }
+        else {
+            throw new Error(`Tried to add a panel after container.panels[${previous_panel_index}] but this container only has ${container.panels.length} panels`)
         }
     }
 
