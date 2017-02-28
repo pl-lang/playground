@@ -13533,6 +13533,13 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony export (immutable) */ __webpack_exports__["__metadata"] = __metadata;
 /* harmony export (immutable) */ __webpack_exports__["__awaiter"] = __awaiter;
 /* harmony export (immutable) */ __webpack_exports__["__generator"] = __generator;
+/* harmony export (immutable) */ __webpack_exports__["__exportStar"] = __exportStar;
+/* harmony export (immutable) */ __webpack_exports__["__values"] = __values;
+/* harmony export (immutable) */ __webpack_exports__["__read"] = __read;
+/* harmony export (immutable) */ __webpack_exports__["__spread"] = __spread;
+/* harmony export (immutable) */ __webpack_exports__["__asyncGenerator"] = __asyncGenerator;
+/* harmony export (immutable) */ __webpack_exports__["__asyncDelegator"] = __asyncDelegator;
+/* harmony export (immutable) */ __webpack_exports__["__asyncValues"] = __asyncValues;
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation. All rights reserved.
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use
@@ -13575,22 +13582,22 @@ function __rest(s, e) {
         for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) if (e.indexOf(p[i]) < 0)
             t[p[i]] = s[p[i]];
     return t;
-};
+}
 
 function __decorate(decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
+}
 
 function __param(paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
-};
+}
 
 function __metadata(metadataKey, metadataValue) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(metadataKey, metadataValue);
-};
+}
 
 function __awaiter(thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -13599,11 +13606,11 @@ function __awaiter(thisArg, _arguments, P, generator) {
         function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
-};
+}
 
 function __generator(thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t;
-    return { next: verb(0), "throw": verb(1), "return": verb(2) };
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
@@ -13627,6 +13634,70 @@ function __generator(thisArg, body) {
         } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
+}
+
+function __exportStar(m, exports) {
+    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
+}
+
+function __values(o) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
+    if (m) return m.call(o);
+    return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+};
+
+function __read(o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
+
+function __spread() {
+    for (var ar = [], i = 0; i < arguments.length; i++)
+        ar = ar.concat(__read(arguments[i]));
+    return ar;
+};
+
+function __asyncGenerator(thisArg, _arguments, generator) {
+    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+    var g = generator.apply(thisArg, _arguments || []), q = [], c, i;
+    return i = { next: verb("next"), "throw": verb("throw"), "return": verb("return") }, i[Symbol.asyncIterator] = function () { return this; }, i;
+    function verb(n) { return function (v) { return new Promise(function (a, b) { q.push([n, v, a, b]), next(); }); }; }
+    function next() { if (!c && q.length) resume((c = q.shift())[0], c[1]); }
+    function resume(n, v) { try { step(g[n](v)); } catch (e) { settle(c[3], e); } }
+    function step(r) { r.done ? settle(c[2], r) : r.value[0] === "yield" ? settle(c[2], { value: r.value[1], done: false }) : Promise.resolve(r.value[1]).then(r.value[0] === "delegate" ? delegate : fulfill, reject); }
+    function delegate(r) { step(r.done ? r : { value: ["yield", r.value], done: false }); }
+    function fulfill(value) { resume("next", value); }
+    function reject(value) { resume("throw", value); }
+    function settle(f, v) { c = void 0, f(v), next(); }
+};
+
+function __asyncDelegator(o) {
+    var i = { next: verb("next"), "throw": verb("throw", function (e) { throw e; }), "return": verb("return", function (v) { return { value: v, done: true }; }) };
+    return o = __asyncValues(o), i[Symbol.iterator] = function () { return this; }, i;
+    function verb(n, f) { return function (v) { return { value: ["delegate", (o[n] || f).call(o, v)], done: false }; }; }
+};
+
+function __asyncValues(o) {
+    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+    var m = o[Symbol.asyncIterator];
+    return m ? m.call(o) : typeof __values === "function" ? __values(o) : o[Symbol.iterator]();
 };
 
 /***/ }),
@@ -22834,11 +22905,11 @@ var Controller = (function () {
             case Actions_1.ActionKind.ExecuteBySteps:
                 this.do({ kind: Actions_1.ActionKind.ClearMessages });
                 this.do({ kind: Actions_1.ActionKind.ClearOutput });
-                this.app_ui.show_step_controls();
                 if (!this.program_running) {
                     this.by_steps = true;
                     var compiled_program_maybe = this.compile(a.code);
                     if (!compiled_program_maybe.error) {
+                        this.app_ui.show_step_controls();
                         this.program_running = true;
                         var program = compiled_program_maybe.result;
                         this.do({ kind: Actions_1.ActionKind.SetUpInterpreter, program: program });
@@ -26838,19 +26909,19 @@ var AppUI = (function () {
         // crear los paneles necesarios
         this.editor_panel = new EditorPanel_1.default(this.container, d, { debug: this.options.debug, links: !this.options.debug });
         if (this.options.debug) {
-            this.add_panel(this.editor_panel.container, 0, 0, 50);
+            this.add_panel(this.editor_panel.container, 0, { fixed: true, length: 50 });
             this.code_panel = new CodePanel_1.default(this.container);
-            this.add_panel(this.code_panel.container, 0, 1, 25);
+            this.add_panel(this.code_panel.container, 0);
             this.output_panel = new OutputPanel_1.default(this.container, this.dispatcher);
-            this.add_panel(this.output_panel.container, 0, 2, 25);
+            this.add_panel(this.output_panel.container, 0);
         }
         else {
             // agregar panel de codigo
-            this.add_panel(this.editor_panel.container, 0, 0, 60);
+            this.add_panel(this.editor_panel.container, 0, { fixed: true, length: 60 });
             // cuando debug es falso el panel de codigo compilado no se muestra
             this.code_panel = null;
             this.output_panel = new OutputPanel_1.default(this.container, this.dispatcher);
-            this.add_panel(this.output_panel.container, 0, 1, 40);
+            this.add_panel(this.output_panel.container, 0);
         }
         $(document).mouseup(function () {
             if (_this.dm.is_grabbed) {
@@ -26866,14 +26937,14 @@ var AppUI = (function () {
         });
         this.editor_panel.refresh();
     }
-    AppUI.prototype.add_panel = function (element, container_index, panel_index, panel_width) {
+    AppUI.prototype.add_panel = function (element, container_index, options) {
         if (this.dm.ui_panel_containers[container_index].panels.length >= 1) {
             var handle = $("<div id=\"handle" + (this.handles.length + 1) + "\" class=\"handle\"></div>");
             this.dm.add_handle(container_index, handle);
             this.handles.push(handle);
             this.container.append(handle);
         }
-        this.dm.add_ui_panel(container_index, panel_index, panel_width, element);
+        this.dm.add_ui_panel(container_index, element, options);
         this.container.append(element);
     };
     AppUI.prototype.clear_messages = function () {
@@ -26931,26 +27002,74 @@ var DragLogic = (function () {
     function DragLogic() {
         this.containers = [];
     }
-    DragLogic.prototype.add_panel = function (container_index, index, new_panel_length) {
+    DragLogic.prototype.add_panel = function (container_index, options) {
         if (container_index >= 0 && container_index < this.containers.length) {
-            var new_length = [];
-            var panel_length = this.containers[container_index].panel_length;
-            for (var i = 0; i <= panel_length.length; i++) {
-                if (i == index) {
-                    new_length[i] = new_panel_length;
+            var container = this.containers[container_index];
+            var available_length = 0;
+            if (container.panels.length > 0) {
+                var fixed_length_1 = 0;
+                for (var i = 0; i < container.panels.length; i++) {
+                    fixed_length_1 += container.panels[i].flexible ? container.panels[i].length : 0;
+                }
+                available_length = 100 - fixed_length_1;
+            }
+            else {
+                available_length = 100;
+            }
+            var new_panel_length = 0;
+            var fixed_length = false;
+            if (options) {
+                if (options.fixed) {
+                    new_panel_length = available_length >= options.length ? options.length : available_length;
+                    // si hay suficiente espacion como para que el panel tenga la longitud deseada
+                    // entonces puede tener longitud fija, si no tiene longitud flexible
+                    fixed_length = available_length >= options.length;
                 }
                 else {
-                    new_length[i] = panel_length[i];
+                    new_panel_length = available_length;
                 }
             }
-            this.containers[container_index].panel_length = new_length;
+            else {
+                new_panel_length = available_length;
+            }
+            if (fixed_length) {
+                // si el panel tiene longitud fija le va a quitar espacio
+                // a los paneles flexibles existentes
+                // aplicar nuevas longitudes a los paneles (flexibles) existentes
+                var old_lengths = container.panels.map(function (p) { return p.length; });
+                var remaining_length = new_panel_length;
+                for (var i = 0; i < old_lengths.length; i++) {
+                    if (!container.panels[i].flexible) {
+                        var diff = old_lengths[i] - remaining_length;
+                        container.panels[i].length = diff < 0 ? 0 : diff;
+                        remaining_length = remaining_length - old_lengths[i];
+                    }
+                }
+                // agregar panel
+                var new_panel = { flexible: fixed_length, length: new_panel_length };
+                container.panels.push(new_panel);
+            }
+            else {
+                // si no tiene longitud fija entonces comparte el espacio disponible
+                // con el resto de los paneles flexibles
+                var flex_panels = container.panels.filter(function (p) { return p.flexible == false; }).length + 1;
+                var length_1 = available_length / flex_panels;
+                // aplicar nuevas longitudes a los paneles (flexibles) existentes
+                for (var i = 0; i < container.panels.length; i++) {
+                    if (!container.panels[i].flexible) {
+                        container.panels[i].length = length_1;
+                    }
+                }
+                var new_panel = { flexible: fixed_length, length: length_1 };
+                container.panels.push(new_panel);
+            }
         }
         else {
             throw new Error("Invalid container_index (" + container_index + ")");
         }
     };
     DragLogic.prototype.add_container = function (width, height, mode) {
-        this.containers.push({ width: width, height: height, mode: mode, panel_length: [] });
+        this.containers.push({ width: width, height: height, mode: mode, panels: [] });
     };
     DragLogic.prototype.remove_container = function (container_index) {
         if (container_index < 0 || container_index >= this.containers.length) {
@@ -26982,10 +27101,11 @@ var DragLogic = (function () {
     };
     DragLogic.prototype.drag = function (container_index, handle_index, from, to) {
         if (container_index >= 0 && container_index < this.containers.length) {
-            if (handle_index >= 0 && handle_index < this.containers[container_index].panel_length.length - 1) {
+            if (handle_index >= 0 && handle_index < this.containers[container_index].panels.length - 1) {
                 var container = this.containers[container_index];
                 var total_panel_length_1 = container.mode == 'vertical' ? container.height : container.width;
                 // con esto me aseguro de que la posicion final este dentro del panel
+                from = this.clamp(container_index, from);
                 to = this.clamp(container_index, to);
                 var delta = this.substract(to, from);
                 var positive_direction = container.mode == 'vertical' ? delta.y > 0 : delta.x > 0;
@@ -26994,54 +27114,34 @@ var DragLogic = (function () {
                 if (positive_direction) {
                     var shrinking_panel_index = handle_index + 1;
                     var total_delta = container.mode == 'vertical' ? delta_percentage.y : delta_percentage.x;
-                    var remaining_delta = total_delta;
-                    var a_panel_shrinked = false;
-                    // distribuir el delta a lo largo de los paneles
-                    while (remaining_delta > 0 && shrinking_panel_index < container.panel_length.length) {
-                        var old_length = container.panel_length[shrinking_panel_index];
-                        var difference = old_length - remaining_delta;
-                        if (difference < 0) {
-                            container.panel_length[shrinking_panel_index] = 0;
+                    var acc = 0;
+                    for (var i = shrinking_panel_index; i < container.panels.length && acc < total_delta; i++) {
+                        acc += container.panels[i].length;
+                        if (acc < total_delta) {
+                            container.panels[i].length = 0;
                         }
                         else {
-                            a_panel_shrinked = true;
-                            container.panel_length[shrinking_panel_index] = difference;
+                            container.panels[i].length = acc - total_delta;
                         }
-                        remaining_delta = total_delta - old_length;
-                        shrinking_panel_index++;
                     }
-                    // si algun panel se encogio...
-                    if (a_panel_shrinked) {
-                        // ...hacer que el panel a la izquierda de la manija crezca
-                        container.panel_length[handle_index] = container.panel_length[handle_index] + total_delta;
-                    }
-                    return container.panel_length;
+                    var growing_panel_width = container.panels[handle_index].length;
+                    container.panels[handle_index].length = (growing_panel_width + total_delta) > 100 ? 100 : growing_panel_width + total_delta;
                 }
                 else {
                     var shrinking_panel_index = handle_index;
                     var total_delta = container.mode == 'vertical' ? delta_percentage.y : delta_percentage.x;
-                    var remaining_delta = total_delta;
-                    var a_panel_shrinked = false;
-                    // distribuir el delta a lo largo de los paneles
-                    while (remaining_delta > 0 && shrinking_panel_index >= 0) {
-                        var old_length = container.panel_length[shrinking_panel_index];
-                        var difference = old_length - remaining_delta;
-                        if (difference < 0) {
-                            container.panel_length[shrinking_panel_index] = 0;
+                    var acc = 0;
+                    for (var i = shrinking_panel_index; i >= 0 && acc < total_delta; i--) {
+                        acc += container.panels[i].length;
+                        if (acc < total_delta) {
+                            container.panels[i].length = 0;
                         }
                         else {
-                            a_panel_shrinked = true;
-                            container.panel_length[shrinking_panel_index] = difference;
+                            container.panels[i].length = acc - total_delta;
                         }
-                        remaining_delta = total_delta - old_length;
-                        shrinking_panel_index--;
                     }
-                    // si algun panel se encogio...
-                    if (a_panel_shrinked) {
-                        // ...hacer que el panel a la derecha de la manija crezca
-                        container.panel_length[handle_index + 1] = container.panel_length[handle_index + 1] + total_delta;
-                    }
-                    return container.panel_length;
+                    var growing_panel_width = container.panels[handle_index + 1].length;
+                    container.panels[handle_index + 1].length = (growing_panel_width + total_delta) > 100 ? 100 : growing_panel_width + total_delta;
                 }
             }
             else {
@@ -27108,35 +27208,26 @@ var DragManager = (function (_super) {
         _super.prototype.add_container.call(this, element.width(), element.height(), mode);
         this.ui_panel_containers.push({ element: element, mode: mode, panels: [], last_handle_index: 0 });
     };
-    DragManager.prototype.add_ui_panel = function (container_index, index, panel_width, panel_element) {
-        _super.prototype.add_panel.call(this, container_index, index, panel_width);
+    DragManager.prototype.add_ui_panel = function (container_index, panel_element, options) {
         if (container_index >= 0 && container_index < this.ui_panel_containers.length) {
-            var new_panels = [];
-            var old_panels = this.ui_panel_containers[container_index].panels;
-            for (var i = 0; i <= old_panels.length; i++) {
-                if (i == index) {
-                    new_panels[i] = panel_element;
-                }
-                else {
-                    new_panels[i] = old_panels[i];
-                }
-            }
-            this.ui_panel_containers[container_index].panels = new_panels;
+            _super.prototype.add_panel.call(this, container_index, options);
+            this.ui_panel_containers[container_index].panels.push(panel_element);
         }
         else {
             throw new Error("Invalid container_index (" + container_index + ")");
         }
     };
     DragManager.prototype.drag_handle = function (handle, from, to) {
-        var panel_length = _super.prototype.drag.call(this, handle.container_index, handle.handle_index, from, to);
-        var container = this.ui_panel_containers[handle.container_index];
+        _super.prototype.drag.call(this, handle.container_index, handle.handle_index, from, to);
+        var ui_container = this.ui_panel_containers[handle.container_index];
+        var panels = _super.prototype.get_container.call(this, handle.container_index).panels;
         // aplicar las nuevas longitudes
-        for (var i = 0; i < container.panels.length; i++) {
-            if (container.mode == 'horizontal') {
-                container.panels[i].attr('style', "width: " + panel_length[i] + "%;");
+        for (var i = 0; i < ui_container.panels.length; i++) {
+            if (ui_container.mode == 'horizontal') {
+                ui_container.panels[i].attr('style', "width: " + panels[i].length + "%;");
             }
             else {
-                container.panels[i].attr('style', "height: " + panel_length[i] + "%;");
+                ui_container.panels[i].attr('style', "height: " + panels[i].length + "%;");
             }
         }
     };
