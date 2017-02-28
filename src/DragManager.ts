@@ -1,7 +1,7 @@
 import * as $ from 'jquery'
 
 export interface Panel {
-    flexible: boolean
+    fixed: boolean
     length: number
 }
 
@@ -28,7 +28,7 @@ export class DragLogic {
             if (container.panels.length > 0) {
                 let fixed_length = 0
                 for (let i = 0; i < container.panels.length; i++) {
-                    fixed_length += container.panels[i].flexible ? container.panels[i].length : 0
+                    fixed_length += container.panels[i].fixed ? container.panels[i].length : 0
                 }
                 available_length = 100 - fixed_length
             }
@@ -62,7 +62,7 @@ export class DragLogic {
                 const old_lengths = container.panels.map(p => p.length)
                 let remaining_length = new_panel_length
                 for (let i = 0; i < old_lengths.length; i++) {
-                    if (!container.panels[i].flexible) {
+                    if (!container.panels[i].fixed) {
                         const diff = old_lengths[i] - remaining_length
                         container.panels[i].length = diff < 0 ? 0 : diff
                         remaining_length = remaining_length - old_lengths[i]
@@ -70,31 +70,55 @@ export class DragLogic {
                 }
 
                 // agregar panel
-                const new_panel: Panel = { flexible: fixed_length, length: new_panel_length }
+                const new_panel: Panel = { fixed: fixed_length, length: new_panel_length }
 
                 container.panels.push(new_panel)
             }
             else {
                 // si no tiene longitud fija entonces comparte el espacio disponible
                 // con el resto de los paneles flexibles
-                const flex_panels = container.panels.filter(p => p.flexible == false).length + 1
+                const flex_panels = container.panels.filter(p => p.fixed == false).length + 1
 
                 const length = available_length / flex_panels
 
                 // aplicar nuevas longitudes a los paneles (flexibles) existentes
                 for (let i = 0; i < container.panels.length; i++) {
-                    if (!container.panels[i].flexible) {
+                    if (!container.panels[i].fixed) {
                         container.panels[i].length = length
                     }
                 }
 
-                const new_panel: Panel = { flexible: fixed_length, length }
+                const new_panel: Panel = { fixed: fixed_length, length }
 
                 container.panels.push(new_panel)
             }
         }
         else {
             throw new Error(`Invalid container_index (${container_index})`)
+        }
+    }
+
+    protected remove_panel(container_index: number, panel_index: number) {
+        const container = this.containers[container_index]
+        const removed_panel = container.panels[panel_index]
+
+        // remover panel
+        container.panels = container.panels.filter((p, i) => i != panel_index)
+
+        if (container.panels.length > 0) {
+            // repartir la longitud del panel removido entre los paneles flexibles
+            // de este contenedor
+            const flex_panels = container.panels.filter(p => p.fixed == false).length
+
+            if (flex_panels > 0) {
+                const extra_length = removed_panel.length / flex_panels
+
+                for (let i = 0; i < container.panels.length; i++) {
+                    if (container.panels[i].fixed == false) {
+                        container.panels[i].length += extra_length
+                    }
+                }
+            }
         }
     }
 

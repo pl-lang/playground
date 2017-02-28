@@ -30,6 +30,10 @@ class DragTestWrapper extends DragLogic {
     clamp(container_index: number, vector: { x: number, y: number }): { x: number, y: number } {
         return super.clamp(container_index, vector)
     }
+
+    remove(ci: number, pi: number) {
+        super.remove_panel(ci, pi)
+    }
 }
 
 describe('DragLogic', () => {
@@ -89,6 +93,43 @@ describe('DragLogic', () => {
 
         h_container.panels[0].length.should.equal(100)
         h_container.panels[1].length.should.equal(0)
+    })
+
+    it('remover paneles flexibles', () => {
+        const dl = new DragTestWrapper()
+        dl.add_container(500, 500, 'horizontal')
+
+        dl.add_panel(0)
+        dl.add_panel(0)
+        dl.add_panel(0)
+        dl.add_panel(0)
+
+        const h_container = dl.get_container(0)
+
+        // remover los paneles del medio
+        dl.remove(0, 1)
+        dl.remove(0, 1)
+
+        h_container.panels.length.should.equal(2)
+        
+        h_container.panels[0].length.should.equal(50)
+        h_container.panels[1].length.should.equal(50)
+    })
+
+    it('remover paneles no-flexibles', () => {
+        const dl = new DragTestWrapper()
+        dl.add_container(500, 500, 'horizontal')
+
+        dl.add_panel(0, { fixed: true, length: 50 })
+        dl.add_panel(0, { fixed: true, length: 50 })
+
+        const h_container = dl.get_container(0)
+        
+        dl.remove(0, 1)
+
+        h_container.panels.length.should.equal(1)
+
+        h_container.panels[0].length.should.equal(50)
     })
 
     it('modificar paneles horizontales y verticales', () => {
