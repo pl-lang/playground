@@ -236,12 +236,17 @@ export class DragLogic {
         const flex_panels = container.panels.filter(p => p.fixed == false && p.hidden == false).length
 
         if (flex_panels > 0) {
-            const extra_length = (panel.length / flex_panels) * (panel.hidden ? 1 : -1)
+            const extra_length = panel.hidden ? (panel.length / flex_panels) : (-panel.length / flex_panels)
+            const old_length = panel.length
 
             for (let i = 0; i < container.panels.length; i++) {
                 if (!container.panels[i].fixed && !container.panels[i].hidden) {
                     container.panels[i].length += extra_length
                 }
+            }
+
+            if (!panel.hidden) {
+                panel.length = old_length
             }
         }
 
