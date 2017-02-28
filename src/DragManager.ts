@@ -17,6 +17,7 @@ export interface Container {
     height: number
     panels: Panel[]
     mode: 'vertical' | 'horizontal'
+    origin: { x: number, y: number }
 }
 
 export class DragLogic {
@@ -253,8 +254,8 @@ export class DragLogic {
         return panel.hidden
     }
 
-    protected add_container(width: number, height: number, mode: 'vertical' | 'horizontal') {
-        this.containers.push({ width, height, mode, panels: [] })
+    protected add_container(x: number, y: number, width: number, height: number, mode: 'vertical' | 'horizontal') {
+        this.containers.push({ width, height, mode, panels: [], origin: { x, y } })
     }
 
     protected remove_container(container_index: number): Container {
@@ -405,10 +406,10 @@ export class DragLogic {
 
         let { x, y } = vector
 
-        x = x < 0 ? 0 : x
-        x = x > container.width ? container.width : x
-        y = y < 0 ? 0 : y
-        y = y > container.width ? container.height : y
+        x = x < container.origin.x ? container.origin.x : x
+        x = x > (container.width + container.origin.x) ? (container.width + container.origin.x) : x
+        y = y < (container.origin.y) ? container.origin.y : y
+        y = y > (container.height + container.origin.y) ? (container.height + container.origin.y) : y
 
         return { x, y }
     }
@@ -491,7 +492,8 @@ export class DragManager extends DragLogic {
     }
 
     add_ui_container(element: JQuery, mode: 'vertical' | 'horizontal') {
-        super.add_container(element.width(), element.height(), mode)
+        const pos = element.position()
+        super.add_container(pos.left, pos.top, element.width(), element.height(), mode)
         this.ui_panel_containers.push({ element, mode, panels: [], last_handle_index: 0 })
     }
 
@@ -578,5 +580,9 @@ export class DragManager extends DragLogic {
         else {
             return [...arr.slice(0, index + 1), element, ...arr.slice(index + 1)]
         }
+    }
+
+    set_container_dimensions(container_index: number, width: number, height: number) {
+        super.set_container_dimensions(container_index, width, height)
     }
 }

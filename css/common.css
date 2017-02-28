@@ -57,7 +57,7 @@ button {
 .v-button {
   margin-left: 8px;
   margin-right: 9px;
-  margin-top: 10px;
+  margin-top: 8px;
 }
 
 .icon-button {
@@ -66,8 +66,8 @@ button {
 }
 
 .big-icon-button {
-    height: 44px;
-    width: 44px;
+    height: 40px;
+    width: 40px;
 }
 
 pre {

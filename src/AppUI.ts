@@ -60,6 +60,10 @@ export default class AppUI {
 
         this.dm.add_ui_container(this.panel_container, 'horizontal')
 
+        this.panel_container.resize(() => {
+            this.dm.set_container_dimensions(0, this.panel_container.width(), this.panel_container.height())
+        })
+
         // crear los paneles necesarios
         this.editor_panel = new EditorPanel(this.panel_container, d, { debug: this.options.debug, links: !this.options.debug })
 
