@@ -143,6 +143,9 @@ export class Controller {
             case ActionKind.EnableButtons:
                 this.app_ui.enable_buttons()
                 break
+            case ActionKind.RemovePanel:
+                this.app_ui.remove_panel(a.container_index, a.panel_index)
+                break
         }
     }
 

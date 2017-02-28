@@ -1,5 +1,11 @@
 import * as $ from 'jquery'
 
+export interface Resizeable {
+    container_index: number
+    panel_index: number
+    container: JQuery
+}
+
 export interface Panel {
     fixed: boolean
     length: number
@@ -416,11 +422,14 @@ export class DragManager extends DragLogic {
         this.ui_panel_containers.push({ element, mode, panels: [], last_handle_index: 0 })
     }
 
-    add_ui_panel(container_index: number, panel_element: JQuery, options?: { fixed: boolean, length: number }) {
+    add_ui_panel(container_index: number, panel_element: Resizeable, options?: { fixed: boolean, length: number }) {
         if (container_index >= 0 && container_index < this.ui_panel_containers.length) {
             super.add_panel(container_index, options)
 
-            this.ui_panel_containers[container_index].panels.push(panel_element)
+            panel_element.container_index = container_index
+            panel_element.panel_index = this.ui_panel_containers[container_index].panels.length
+
+            this.ui_panel_containers[container_index].panels.push(panel_element.container)
         }
         else {
             throw new Error(`Invalid container_index (${container_index})`)
@@ -443,5 +452,36 @@ export class DragManager extends DragLogic {
                 ui_container.panels[i].attr('style', `height: ${panels[i].length}%;`)
             }
         }
+    }
+
+    remove_ui_panel(container_index: number, panel_index: number): JQuery {
+        super.remove_panel(container_index, panel_index)
+
+        const container = this.ui_panel_containers[container_index]
+
+        const removed_panel = container.panels[panel_index]
+
+        container.panels = container.panels.filter((p, i) => i != panel_index)
+
+        const removed_handle = this.handles[panel_index - 1]
+
+        this.handles = this.handles.filter((h, i) => i != panel_index - 1)
+
+        removed_panel.remove()
+        removed_handle.element.remove()
+
+        const panels = super.get_container(container_index).panels
+
+        // aplicar las nuevas longitudes
+        for (let i = 0; i < container.panels.length; i++) {
+            if (container.mode == 'horizontal') {
+                container.panels[i].attr('style', `width: ${panels[i].length}%;`)
+            }
+            else {
+                container.panels[i].attr('style', `height: ${panels[i].length}%;`)
+            }
+        }
+
+        return removed_panel
     }
 }

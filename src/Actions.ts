@@ -41,7 +41,14 @@ export type Action = Execute
     | StopExecutionUser
     | FocusEditor
     | DisableButtons
-    | EnableButtons;
+    | EnableButtons
+    | RemovePanel;
+
+export interface RemovePanel {
+    kind: ActionKind.RemovePanel
+    container_index: number
+    panel_index: number
+}
 
 export interface EnableButtons {
     kind: ActionKind.EnableButtons

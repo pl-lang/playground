@@ -1,7 +1,7 @@
 import OutputPanel from './components/OutputPanel'
 import EditorPanel from './components/EditorPanel'
 import CodePanel from './components/CodePanel'
-import { DragManager } from './DragManager'
+import { DragManager, Resizeable } from './DragManager'
 import { Dispatcher } from './Controller'
 import { Errors, Value } from 'interprete-pl'
 import * as $ from 'jquery'
@@ -53,26 +53,26 @@ export default class AppUI {
         this.editor_panel = new EditorPanel(this.container, d, { debug: this.options.debug, links: !this.options.debug })
 
         if (this.options.debug) {
-            this.add_panel(this.editor_panel.container, 0, { fixed: true, length: 50})
+            this.add_panel(this.editor_panel, 0, { fixed: true, length: 50})
 
             this.code_panel = new CodePanel(this.container)
 
-            this.add_panel(this.code_panel.container, 0)
+            this.add_panel(this.code_panel, 0)
 
             this.output_panel = new OutputPanel(this.container, this.dispatcher)
 
-            this.add_panel(this.output_panel.container, 0)
+            this.add_panel(this.output_panel, 0)
         }
         else {
             // agregar panel de codigo
-            this.add_panel(this.editor_panel.container, 0, { fixed: true, length: 60})
+            this.add_panel(this.editor_panel, 0, { fixed: true, length: 60})
 
             // cuando debug es falso el panel de codigo compilado no se muestra
             this.code_panel = null
 
             this.output_panel = new OutputPanel(this.container, this.dispatcher)
 
-            this.add_panel(this.output_panel.container, 0)
+            this.add_panel(this.output_panel, 0)
         }
 
         $(document).mouseup(() => {
@@ -93,7 +93,7 @@ export default class AppUI {
         this.editor_panel.refresh()
     }
 
-    add_panel(element: JQuery, container_index: number, options?: { fixed: boolean, length: number }) {
+    add_panel(element: Resizeable, container_index: number, options?: { fixed: boolean, length: number }) {
         if (this.dm.ui_panel_containers[container_index].panels.length >= 1) {
             const handle = $(`<div id="handle${this.handles.length + 1}" class="handle"></div>`)
             this.dm.add_handle(container_index, handle)
@@ -103,7 +103,11 @@ export default class AppUI {
 
         this.dm.add_ui_panel(container_index, element, options)
 
-        this.container.append(element)
+        this.container.append(element.container)
+    }
+
+    remove_panel(container_index: number,  panel_index: number) {
+        this.dm.remove_ui_panel(container_index, panel_index)
     }
 
     clear_messages() {

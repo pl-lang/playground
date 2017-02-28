@@ -4,6 +4,7 @@ import MessagePanel from './MessagePanel'
 import StatusBar from './StatusBar'
 import { Action, ActionKind } from '../Actions'
 import { Dispatcher } from '../Controller'
+import { Resizeable } from '../DragManager'
 import 'codemirror/addon/selection/active-line'
 
 declare module "codemirror" {
@@ -23,7 +24,7 @@ const defaults: EditorOptions = {
     links: true,
 }
 
-export default class EditorPanel {
+export default class EditorPanel implements Resizeable {
     private run_button: JQuery
     private compile_button: JQuery
     private step_button: JQuery
@@ -34,6 +35,8 @@ export default class EditorPanel {
     status_bar: StatusBar
     private options: EditorOptions
     private dispatcher: Dispatcher
+    container_index: number
+    panel_index: number
 
     constructor(container: JQuery, d: Dispatcher, options: EditorOptions) {
         if (options) {
