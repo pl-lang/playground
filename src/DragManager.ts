@@ -362,6 +362,44 @@ export class DragLogic {
         }
     }
 
+    /**
+     * Search for a panel with some specifications (fixed length?, hidden?, length == x?) and, if found, return its index within its container,
+     * otherwise return -1.
+     */
+    protected find(container_index: number, from_index: number, forwards: boolean, options: { hidden?: boolean, length?: number }): number {
+        const defaults = { hidden: false, length: -1 } // -1 means any...
+
+        const spec = { ...defaults, ...options }
+
+        const container = this.containers[container_index]
+
+        if (forwards) {
+            for (let i = from_index + 1; i < container.panels.length; i++) {
+                const panel = container.panels[i]
+                const partial_match = panel.hidden == spec.hidden
+                if (partial_match && spec.length == -1) {
+                    return i
+                }
+                else if (partial_match && panel.length == spec.length) {
+                    return i
+                }
+            }
+        }
+        else {
+            for (let i = from_index - 1; i >= 0; i--) {
+                const panel = container.panels[i]
+                const partial_match = panel.hidden == spec.hidden
+                if (partial_match && spec.length == -1) {
+                    return i
+                }
+                else if (partial_match && panel.length == spec.length) {
+                    return i
+                }
+            }
+        }
+        return -1
+    }
+
     protected clamp(container_index: number, vector: { x: number, y: number }): { x: number, y: number } {
         const container = this.containers[container_index]
 
@@ -479,8 +517,6 @@ export class DragManager extends DragLogic {
 
         const lengths = super.get_container(handle.container_index).panels.map(pan => pan.length)
 
-        console.log(lengths)
-
         this.apply_lengths(container.panels, lengths, container.mode)
     }
 
@@ -498,7 +534,8 @@ export class DragManager extends DragLogic {
 
             panel.hide()
 
-            const handle = this.handles[panel_index]
+            // ocultar la manija a la izquierda del panel, si existe            
+            const handle = this.handles[panel_index - 1]
 
             if (handle) {
                 handle.element.hide()
@@ -509,7 +546,8 @@ export class DragManager extends DragLogic {
 
             panel.show()
 
-            const handle = this.handles[panel_index]
+            // mostrar la manija a la izquierda del panel, si existe
+            const handle = this.handles[panel_index - 1]
 
             if (handle) {
                 handle.element.show()

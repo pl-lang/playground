@@ -42,6 +42,10 @@ class DragTestWrapper extends DragLogic {
     toggle_panel(ci: number, pi: number): boolean {
         return super.toggle_panel(ci, pi)
     }
+
+    find(container_index: number, from_index: number, forwards: boolean, options: { hidden?: boolean, length?: number }): number {
+        return super.find(container_index, from_index, forwards, options)
+    }
 }
 
 describe('DragLogic', () => {
@@ -392,6 +396,76 @@ describe('DragLogic', () => {
         h_container.panels[1].length.should.deepEqual(0)
         h_container.panels[2].length.should.deepEqual(0)
         h_container.panels[3].length.should.deepEqual(0)
-        
+    })
+
+    it('find encuentra el siguiente panel visible hacia adelante', () => {
+        const dl = new DragTestWrapper()
+        dl.add_container(500, 500, 'horizontal')
+
+        dl.add_panel(0)
+        dl.add_panel(0) // se ocultara este panel
+        dl.add_panel(0) // se ocultara este panel
+        dl.add_panel(0)
+
+        dl.toggle_panel(0, 1)
+        dl.toggle_panel(0, 2)
+
+        const h_container = dl.get_container(0)
+
+        const found_index = dl.find(0, 0, true, { hidden: false })
+
+        found_index.should.equal(3)
+        h_container.panels[found_index].hidden.should.equal(false)
+    })
+
+    it('find encuentra el siguiente panel visible hacia atras', () => {
+        const dl = new DragTestWrapper()
+        dl.add_container(500, 500, 'horizontal')
+
+        dl.add_panel(0)
+        dl.add_panel(0) // se ocultara este panel
+        dl.add_panel(0) // se ocultara este panel
+        dl.add_panel(0)
+
+        dl.toggle_panel(0, 1)
+        dl.toggle_panel(0, 2)
+
+        const h_container = dl.get_container(0)
+
+        const found_index = dl.find(0, 3, false, { hidden: false })
+
+        found_index.should.equal(0)
+        h_container.panels[found_index].hidden.should.equal(false)
+    })
+
+    it.skip('agrandar un panel achica el siguiente panel *visible*', () => {
+        const dl = new DragTestWrapper()
+        dl.add_container(1200, 1200, 'horizontal')
+
+        dl.add_panel(0)
+        dl.add_panel(0)
+        dl.add_panel(0)
+        dl.add_panel(0)
+
+        const h_container = dl.get_container(0)
+
+        h_container.panels[0].length.should.deepEqual(25)
+        h_container.panels[1].length.should.deepEqual(25)
+        h_container.panels[2].length.should.deepEqual(25)
+        h_container.panels[3].length.should.deepEqual(25)
+
+        dl.toggle_panel(0, 2)
+
+        // verificar ancho de los paneles restantes
+        h_container.panels[0].length.should.be.approximately(33.3, 0.05)
+        h_container.panels[1].length.should.be.approximately(33.3, 0.05)
+        h_container.panels[3].length.should.be.approximately(33.3, 0.05)
+
+        // desplazar la manija hasta colapsar el panel a su derecha
+        dl.drag(0, 2, { x: 800, y: 0 }, { x: 1200, y: 0 })
+
+        h_container.panels[0].length.should.be.approximately(33.3, 0.05)
+        h_container.panels[1].length.should.be.approximately(66.6, 0.05)
+        h_container.panels[3].length.should.be.approximately(0, 0.05)
     })
 })
