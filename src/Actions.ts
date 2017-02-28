@@ -20,7 +20,8 @@ export enum ActionKind {
     FocusEditor,
     DisableButtons,
     EnableButtons,
-    RemovePanel
+    HidePanel,
+    ShowPanel
 }
 
 export type Action = Execute
@@ -42,10 +43,17 @@ export type Action = Execute
     | FocusEditor
     | DisableButtons
     | EnableButtons
-    | RemovePanel;
+    | HidePanel
+    | ShowPanel;
 
-export interface RemovePanel {
-    kind: ActionKind.RemovePanel
+export interface ShowPanel {
+    kind: ActionKind.ShowPanel
+    container_index: number
+    panel_index: number
+}
+
+export interface HidePanel {
+    kind: ActionKind.HidePanel
     container_index: number
     panel_index: number
 }

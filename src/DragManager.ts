@@ -9,6 +9,7 @@ export interface Resizeable {
 export interface Panel {
     fixed: boolean
     length: number
+    hidden: boolean
 }
 
 export interface Container {
@@ -34,7 +35,10 @@ export class DragLogic {
             if (container.panels.length > 0) {
                 let fixed_length = 0
                 for (let i = 0; i < container.panels.length; i++) {
-                    fixed_length += container.panels[i].fixed ? container.panels[i].length : 0
+                    const panel = container.panels[i]
+                    if (panel.fixed && !panel.hidden) {
+                        fixed_length += panel.length
+                    }
                 }
                 available_length = 100 - fixed_length
             }
@@ -64,11 +68,11 @@ export class DragLogic {
                 // si el panel tiene longitud fija le va a quitar espacio
                 // a los paneles flexibles existentes
 
-                // aplicar nuevas longitudes a los paneles (flexibles) existentes
+                // aplicar nuevas longitudes a los paneles (flexibles) existentes que no esten escondidos
                 const old_lengths = container.panels.map(p => p.length)
                 let remaining_length = new_panel_length
                 for (let i = 0; i < old_lengths.length; i++) {
-                    if (!container.panels[i].fixed) {
+                    if (!container.panels[i].fixed && !container.panels[i].hidden) {
                         const diff = old_lengths[i] - remaining_length
                         container.panels[i].length = diff < 0 ? 0 : diff
                         remaining_length = remaining_length - old_lengths[i]
@@ -76,7 +80,7 @@ export class DragLogic {
                 }
 
                 // agregar panel
-                const new_panel: Panel = { fixed: fixed_length, length: new_panel_length }
+                const new_panel: Panel = { fixed: fixed_length, length: new_panel_length, hidden: false }
 
                 container.panels.push(new_panel)
             }
@@ -87,14 +91,14 @@ export class DragLogic {
 
                 const length = available_length / flex_panels
 
-                // aplicar nuevas longitudes a los paneles (flexibles) existentes
+                // aplicar nuevas longitudes a los paneles (flexibles) existentes que no esten escondidos
                 for (let i = 0; i < container.panels.length; i++) {
-                    if (!container.panels[i].fixed) {
+                    if (!container.panels[i].fixed && !container.panels[i].hidden) {
                         container.panels[i].length = length
                     }
                 }
 
-                const new_panel: Panel = { fixed: fixed_length, length }
+                const new_panel: Panel = { fixed: fixed_length, length, hidden: false }
 
                 container.panels.push(new_panel)
             }
@@ -108,7 +112,7 @@ export class DragLogic {
         const container = this.containers[container_index]
 
         if (previous_panel_index < container.panels.length) {
-            if (previous_panel_index == container.panels.length - 1) {
+            if (previous_panel_index >= container.panels.length - 1) {
                 this.add_panel(container_index, options)
             }
             else {
@@ -117,7 +121,10 @@ export class DragLogic {
                 if (container.panels.length > 0) {
                     let fixed_length = 0
                     for (let i = 0; i < container.panels.length; i++) {
-                        fixed_length += container.panels[i].fixed ? container.panels[i].length : 0
+                        const panel = container.panels[i]
+                        if (panel.fixed && !panel.hidden) {
+                            fixed_length += panel.length
+                        }
                     }
                     available_length = 100 - fixed_length
                 }
@@ -147,21 +154,21 @@ export class DragLogic {
                     // si el panel tiene longitud fija le va a quitar espacio
                     // a los paneles flexibles existentes
 
-                    // aplicar nuevas longitudes a los paneles (flexibles) existentes, si los hay
+                    // aplicar nuevas longitudes a los paneles (flexibles) existentes que no esten escondidos
                     const flex_panels = container.panels.filter(p => p.fixed == false).length
 
                     if (flex_panels > 0) {
                         let length = (available_length - new_panel_length) / flex_panels
 
                         for (let i = 0; i < container.panels.length; i++) {
-                            if (!container.panels[i].fixed) {
+                            if (!container.panels[i].fixed && !container.panels[i].hidden) {
                                 container.panels[i].length = length
                             }
                         }
                     }
 
                     // agregar panel
-                    const new_panel: Panel = { fixed: fixed_length, length: new_panel_length }
+                    const new_panel: Panel = { fixed: fixed_length, length: new_panel_length, hidden: false }
 
                     const new_panels = [...container.panels.slice(0, previous_panel_index + 1), new_panel, ...container.panels.slice(previous_panel_index + 1)]
 
@@ -174,14 +181,14 @@ export class DragLogic {
 
                     const length = available_length / flex_panels
 
-                    // aplicar nuevas longitudes a los paneles (flexibles) existentes
+                    // aplicar nuevas longitudes a los paneles (flexibles) existentes que no esten escondidos
                     for (let i = 0; i < container.panels.length; i++) {
-                        if (!container.panels[i].fixed) {
+                        if (!container.panels[i].fixed && !container.panels[i].hidden) {
                             container.panels[i].length = length
                         }
                     }
 
-                    const new_panel: Panel = { fixed: fixed_length, length }
+                    const new_panel: Panel = { fixed: fixed_length, length, hidden: false }
 
                     const new_panels = [...container.panels.slice(0, previous_panel_index + 1), new_panel, ...container.panels.slice(previous_panel_index + 1)]
 
@@ -202,7 +209,7 @@ export class DragLogic {
         container.panels = container.panels.filter((p, i) => i != panel_index)
 
         if (container.panels.length > 0) {
-            // repartir la longitud del panel removido entre los paneles flexibles
+            // repartir la longitud del panel removido entre los paneles flexibles (no escondidos)
             // de este contenedor
             const flex_panels = container.panels.filter(p => p.fixed == false).length
 
@@ -210,12 +217,35 @@ export class DragLogic {
                 const extra_length = removed_panel.length / flex_panels
 
                 for (let i = 0; i < container.panels.length; i++) {
-                    if (container.panels[i].fixed == false) {
+                    if (!container.panels[i].fixed && !container.panels[i].hidden) {
                         container.panels[i].length += extra_length
                     }
                 }
             }
         }
+    }
+
+    protected toggle_panel(container_index: number, panel_index: number): boolean {
+        const container = this.containers[container_index]
+        const panel = container.panels[panel_index]
+        panel.hidden = !panel.hidden
+
+        // repartir la longitud del panel removido entre los paneles flexibles (no escondidos)
+        // de este contenedor
+
+        const flex_panels = container.panels.filter(p => p.fixed == false && p.hidden == false).length
+
+        if (flex_panels > 0) {
+            const extra_length = (panel.length / flex_panels) * (panel.hidden ? 1 : -1)
+
+            for (let i = 0; i < container.panels.length; i++) {
+                if (!container.panels[i].fixed && !container.panels[i].hidden) {
+                    container.panels[i].length += extra_length
+                }
+            }
+        }
+
+        return panel.hidden
     }
 
     protected add_container(width: number, height: number, mode: 'vertical' | 'horizontal') {
@@ -440,48 +470,70 @@ export class DragManager extends DragLogic {
 
         super.drag(handle.container_index, handle.handle_index, from, to)
 
-        const ui_container = this.ui_panel_containers[handle.container_index]
-        const panels = super.get_container(handle.container_index).panels
+        const container = this.ui_panel_containers[handle.container_index]
 
-        // aplicar las nuevas longitudes
-        for (let i = 0; i < ui_container.panels.length; i++) {
-            if (ui_container.mode == 'horizontal') {
-                ui_container.panels[i].attr('style', `width: ${panels[i].length}%;`)
+        const lengths = super.get_container(handle.container_index).panels.map(pan => pan.length)
+
+        console.log(lengths)
+
+        this.apply_lengths(container.panels, lengths, container.mode)
+    }
+
+    toggle_ui_panel(container_index: number, panel_index: number) {
+        const hidden = super.toggle_panel(container_index, panel_index)
+
+        const container = this.ui_panel_containers[container_index]
+
+        const lengths = super.get_container(container_index).panels.map(pan => pan.length)
+
+        this.apply_lengths(container.panels, lengths, container.mode)
+
+        if (hidden) {
+            const panel = container.panels[panel_index]
+
+            panel.hide()
+
+            const handle = this.handles[panel_index]
+
+            if (handle) {
+                handle.element.hide()
             }
-            else {
-                ui_container.panels[i].attr('style', `height: ${panels[i].length}%;`)
+        }
+        else {
+            const panel = container.panels[panel_index]
+
+            panel.show()
+
+            const handle = this.handles[panel_index]
+
+            if (handle) {
+                handle.element.show()
             }
         }
     }
 
-    remove_ui_panel(container_index: number, panel_index: number): JQuery {
-        super.remove_panel(container_index, panel_index)
-
-        const container = this.ui_panel_containers[container_index]
-
-        const removed_panel = container.panels[panel_index]
-
-        container.panels = container.panels.filter((p, i) => i != panel_index)
-
-        const removed_handle = this.handles[panel_index - 1]
-
-        this.handles = this.handles.filter((h, i) => i != panel_index - 1)
-
-        removed_panel.remove()
-        removed_handle.element.remove()
-
-        const panels = super.get_container(container_index).panels
-
-        // aplicar las nuevas longitudes
-        for (let i = 0; i < container.panels.length; i++) {
-            if (container.mode == 'horizontal') {
-                container.panels[i].attr('style', `width: ${panels[i].length}%;`)
+    apply_lengths(panels: JQuery[], lengths: number[], mode: 'vertical' | 'horizontal') {
+        for (let i = 0; i < panels.length; i++) {
+            const style = panels[i].attr('style')
+            const new_length = `${mode == 'horizontal' ? 'width':'height'}: ${lengths[i]}%;`
+            if (style) {
+                const regexp = new RegExp(`${mode == 'horizontal' ? 'width' : 'height'}:\\s+\\d+(\\.\\d+)?%;`)
+                const new_style = style.replace(regexp, new_length)
+                panels[i].attr('style', new_style)
             }
             else {
-                container.panels[i].attr('style', `height: ${panels[i].length}%;`)
+                panels[i].attr('style', new_length)
             }
         }
+    }
 
-        return removed_panel
+    insert_after<A>(element: A, arr: A[], index: number) {
+        if (index >= arr.length) {
+            arr.push(element)
+            return arr
+        }
+        else {
+            return [...arr.slice(0, index + 1), element, ...arr.slice(index + 1)]
+        }
     }
 }

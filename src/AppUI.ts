@@ -1,6 +1,7 @@
 import OutputPanel from './components/OutputPanel'
 import EditorPanel from './components/EditorPanel'
 import CodePanel from './components/CodePanel'
+import PanelToggler from './components/PanelToggler'
 import { DragManager, Resizeable } from './DragManager'
 import { Dispatcher } from './Controller'
 import { Errors, Value } from 'interprete-pl'
@@ -16,26 +17,18 @@ const default_options: AppOptions = {
 
 export default class AppUI {
     container: JQuery
+    panel_container: JQuery
     parent: JQuery
     private editor_panel: EditorPanel
     private output_panel: OutputPanel
     private dispatcher: Dispatcher
     code_panel: CodePanel
+    private toggler: PanelToggler
     options: AppOptions
     dm: DragManager
     handles: JQuery[]
 
     constructor(parent: JQuery, container: JQuery, d: Dispatcher, options?: AppOptions) {
-        this.parent = parent
-
-        this.dispatcher = d
-
-        this.handles = []
-
-        this.container = $('<div id="app" class="flex-row"></div>')
-
-        this.parent.append(this.container)
-
         // aplicar la configuracion
 
         if (options) {
@@ -45,32 +38,55 @@ export default class AppUI {
             this.options = default_options
         }
 
+        this.parent = parent
+
+        this.dispatcher = d
+
+        this.handles = []
+
+        this.container = $('<div id="app_container" class="flex-col"></div>')
+
+        this.panel_container = $('<div id="panels" class="flex-row"></div>')
+
+        this.toggler = new PanelToggler(this.container, this.dispatcher, this.options.debug)
+
+        this.container.append(this.toggler.container)
+
+        this.container.append(this.panel_container)
+
+        this.parent.append(this.container)
+
         this.dm = new DragManager()
 
-        this.dm.add_ui_container(this.container, 'horizontal')
+        this.dm.add_ui_container(this.panel_container, 'horizontal')
 
         // crear los paneles necesarios
-        this.editor_panel = new EditorPanel(this.container, d, { debug: this.options.debug, links: !this.options.debug })
+        this.editor_panel = new EditorPanel(this.panel_container, d, { debug: this.options.debug, links: !this.options.debug })
 
         if (this.options.debug) {
             this.add_panel(this.editor_panel, 0, { fixed: true, length: 50})
+            this.toggler.add_panel(this.editor_panel, false, 'pencil')
 
-            this.code_panel = new CodePanel(this.container)
+            this.code_panel = new CodePanel(this.panel_container)
 
             this.add_panel(this.code_panel, 0)
+            this.toggler.add_panel(this.code_panel, false, 'gear')
 
-            this.output_panel = new OutputPanel(this.container, this.dispatcher)
+            this.output_panel = new OutputPanel(this.panel_container, this.dispatcher)
 
             this.add_panel(this.output_panel, 0)
+            this.toggler.add_panel(this.output_panel, false, 'terminal')
         }
         else {
             // agregar panel de codigo
             this.add_panel(this.editor_panel, 0, { fixed: true, length: 60})
+            this.toggler.add_panel(this.editor_panel, false, 'pencil')
 
             // cuando debug es falso el panel de codigo compilado no se muestra
             this.code_panel = null
 
-            this.output_panel = new OutputPanel(this.container, this.dispatcher)
+            this.output_panel = new OutputPanel(this.panel_container, this.dispatcher)
+            this.toggler.add_panel(this.output_panel, false, 'terminal')
 
             this.add_panel(this.output_panel, 0)
         }
@@ -98,16 +114,16 @@ export default class AppUI {
             const handle = $(`<div id="handle${this.handles.length + 1}" class="handle"></div>`)
             this.dm.add_handle(container_index, handle)
             this.handles.push(handle)
-            this.container.append(handle)
+            this.panel_container.append(handle)
         }
 
         this.dm.add_ui_panel(container_index, element, options)
 
-        this.container.append(element.container)
+        this.panel_container.append(element.container)
     }
 
-    remove_panel(container_index: number,  panel_index: number) {
-        this.dm.remove_ui_panel(container_index, panel_index)
+    toggle_panel(container_index: number,  panel_index: number) {
+        this.dm.toggle_ui_panel(container_index, panel_index)
     }
 
     clear_messages() {

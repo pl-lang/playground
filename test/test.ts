@@ -38,6 +38,10 @@ class DragTestWrapper extends DragLogic {
     add_panel_after(ci: number, ppi: number, options?: { fixed: boolean, length: number }) {
         super.add_panel_after(ci, ppi, options)
     }
+
+    toggle_panel(ci: number, pi: number): boolean {
+        return super.toggle_panel(ci, pi)
+    }
 }
 
 describe('DragLogic', () => {
@@ -97,6 +101,53 @@ describe('DragLogic', () => {
 
         h_container.panels[0].length.should.equal(100)
         h_container.panels[1].length.should.equal(0)
+    })
+
+    it('se ignoran los paneles ocultos al agregar un nuevo panel', () => {
+        const dl = new DragTestWrapper()
+        dl.add_container(500, 500, 'horizontal')
+
+        dl.add_panel(0, { fixed: true, length: 70})
+        dl.add_panel(0, { fixed: true, length: 30})
+
+        // ocultar el panel 1 (el de length = 30)
+        dl.toggle_panel(0, 1)
+
+        dl.add_panel(0) // agregar un nuevo panel que deberia tomar una longitud == 30
+
+        const h_container = dl.get_container(0)
+
+        h_container.panels[0].length.should.equal(70)
+        h_container.panels[1].length.should.equal(30)
+        h_container.panels[1].hidden.should.equal(true)
+        h_container.panels[2].length.should.equal(30)
+    })
+
+    it('las longitudes se actualizan al ocultar/mostrar un panel', () => {
+        const dl = new DragTestWrapper()
+        dl.add_container(500, 500, 'horizontal')
+
+        dl.add_panel(0)
+        dl.add_panel(0, { fixed: true, length: 70 })
+        dl.add_panel(0)
+
+        // ocultar el panel 1 (el de length = 70)
+        dl.toggle_panel(0, 1)
+
+        const h_container = dl.get_container(0)
+
+        h_container.panels[0].length.should.equal(50)
+        h_container.panels[1].length.should.equal(70)
+        h_container.panels[1].hidden.should.equal(true)
+        h_container.panels[2].length.should.equal(50)
+
+        // mostrar el panel 1 (el de length = 70)
+        dl.toggle_panel(0, 1)
+        
+        h_container.panels[0].length.should.equal(15)
+        h_container.panels[1].length.should.equal(70)
+        h_container.panels[1].hidden.should.equal(false)
+        h_container.panels[2].length.should.equal(15)
     })
 
     it('remover paneles flexibles', () => {
