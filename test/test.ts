@@ -14,8 +14,13 @@ class DragTestWrapper extends DragLogic {
         return super.add_container(width, height, mode)
     }
 
-    add_panel(container_index: number, index: number, new_panel_width: number) {
-        return super.add_panel(container_index, index, new_panel_width)
+    add_panel(container_index: number, options?: { fixed: boolean, length: number }) {
+        if (options) {
+            return super.add_panel(container_index, options)
+        }
+        else {
+            return super.add_panel(container_index)
+        }
     }
 
     get_container(container_index: number): Container {
@@ -37,17 +42,66 @@ describe('DragLogic', () => {
         v.should.deepEqual({ x: 500, y: 500 })
     })
 
+    it('agregar paneles flexibles', () => {
+        const dl = new DragTestWrapper()
+        dl.add_container(500, 500, 'horizontal')
+        dl.add_container(500, 500, 'vertical')
+
+        // agregar dos paneles a cada contenedor
+        dl.add_panel(0) // 50% del tamaño del contenedor
+        dl.add_panel(0)
+
+        dl.add_panel(1)
+        dl.add_panel(1)
+
+        const h_container = dl.get_container(0)
+        const v_container = dl.get_container(1)
+
+        h_container.panels[0].length.should.equal(50)
+        h_container.panels[1].length.should.equal(50)
+        v_container.panels[0].length.should.equal(50)
+        v_container.panels[1].length.should.equal(50)
+    })
+
+    it('agregar 1 panel de longitud fija y 2 flexibles', () => {
+        const dl = new DragTestWrapper()
+        dl.add_container(500, 500, 'horizontal')
+
+        dl.add_panel(0, { fixed: true, length: 50 }) // 50% del tamaño del contenedor
+        dl.add_panel(0)
+        dl.add_panel(0)
+
+        const h_container = dl.get_container(0)
+
+        h_container.panels[0].length.should.equal(50)
+        h_container.panels[1].length.should.equal(25)
+        h_container.panels[2].length.should.equal(25)
+    })
+
+    it('agregar un panel flexible cuando uno fijo ya ocupa todo el ancho', () => {
+        const dl = new DragTestWrapper()
+        dl.add_container(500, 500, 'horizontal')
+
+        dl.add_panel(0, { fixed: true, length: 100 }) // 100% del tamaño del contenedor
+        dl.add_panel(0)
+
+        const h_container = dl.get_container(0)
+
+        h_container.panels[0].length.should.equal(100)
+        h_container.panels[1].length.should.equal(0)
+    })
+
     it('modificar paneles horizontales y verticales', () => {
         const dl = new DragTestWrapper()
         dl.add_container(500, 500, 'horizontal')
         dl.add_container(500, 500, 'vertical')
 
         // agregar dos paneles a cada contenedor
-        dl.add_panel(0, 0, 50) // 50% del tamaño del contenedor
-        dl.add_panel(0, 1, 50)
+        dl.add_panel(0) // 50% del tamaño del contenedor
+        dl.add_panel(0)
 
-        dl.add_panel(1, 0, 50)
-        dl.add_panel(1, 1, 50)
+        dl.add_panel(1)
+        dl.add_panel(1)
 
         // desplazar la manija completamente hacia la derecha
         dl.drag(0, 0, { x: 250, y: 0 }, { x: 500, y: 0 })
@@ -69,8 +123,8 @@ describe('DragLogic', () => {
         dl.add_container(500, 500, 'horizontal')
 
         // agregar dos paneles a cada contenedor
-        dl.add_panel(0, 0, 50) // 50% del tamaño del contenedor
-        dl.add_panel(0, 1, 50)
+        dl.add_panel(0) // 50% del tamaño del contenedor
+        dl.add_panel(0)
 
         // desplazar la manija completamente hacia la derecha
         dl.drag(0, 0, { x: 250, y: 0 }, { x: 500, y: 0 })
@@ -90,8 +144,8 @@ describe('DragLogic', () => {
         dl.add_container(500, 500, 'horizontal')
 
         // agregar dos paneles a cada contenedor
-        dl.add_panel(0, 0, 50) // 50% del tamaño del contenedor
-        dl.add_panel(0, 1, 50)
+        dl.add_panel(0) // 50% del tamaño del contenedor
+        dl.add_panel(0)
 
         // intentar desplazarla mas alla del final de su contenedor
         dl.drag(0, 0, { x: 250, y: 0 }, { x: 750, y: 0 })
@@ -108,11 +162,10 @@ describe('DragLogic', () => {
         const dl = new DragTestWrapper()
         dl.add_container(500, 500, 'horizontal')
 
-        // agregar dos paneles a cada contenedor
-        dl.add_panel(0, 0, 25) // 50% del tamaño del contenedor
-        dl.add_panel(0, 1, 25)
-        dl.add_panel(0, 2, 25) // 50% del tamaño del contenedor
-        dl.add_panel(0, 3, 25)
+        dl.add_panel(0)
+        dl.add_panel(0)
+        dl.add_panel(0)
+        dl.add_panel(0)
 
         const h_container = dl.get_container(0)
 
@@ -142,11 +195,10 @@ describe('DragLogic', () => {
         const dl = new DragTestWrapper()
         dl.add_container(500, 500, 'horizontal')
 
-        // agregar dos paneles a cada contenedor
-        dl.add_panel(0, 0, 25) // 50% del tamaño del contenedor
-        dl.add_panel(0, 1, 25)
-        dl.add_panel(0, 2, 25) // 50% del tamaño del contenedor
-        dl.add_panel(0, 3, 25)
+        dl.add_panel(0)
+        dl.add_panel(0)
+        dl.add_panel(0)
+        dl.add_panel(0)
 
         const h_container = dl.get_container(0)
 

@@ -1,7 +1,7 @@
 import * as $ from 'jquery'
 
 export interface Panel {
-    fixed_length: boolean
+    flexible: boolean
     length: number
 }
 
@@ -19,19 +19,79 @@ export class DragLogic {
         this.containers = []
     }
 
-    protected add_panel(container_index: number, index: number, new_panel_length: number) {
+    protected add_panel(container_index: number, options?: { fixed: boolean, length: number }) {
         if (container_index >= 0 && container_index < this.containers.length) {
-            const new_panels: Panel[] = []
-            const panels = this.containers[container_index].panels
-            for (let i = 0; i <= panels.length; i++) {
-                if (i == index) {
-                    new_panels[i] = { ...panels[i], length: new_panel_length }
+            const container = this.containers[container_index]
+
+            let available_length = 0
+
+            if (container.panels.length > 0) {
+                let fixed_length = 0
+                for (let i = 0; i < container.panels.length; i++) {
+                    fixed_length += container.panels[i].flexible ? container.panels[i].length : 0
+                }
+                available_length = 100 - fixed_length
+            }
+            else {
+                available_length = 100
+            }
+
+            let new_panel_length = 0
+            let fixed_length = false
+
+            if (options) {
+                if (options.fixed) {
+                    new_panel_length = available_length >= options.length ? options.length : available_length
+                    // si hay suficiente espacion como para que el panel tenga la longitud deseada
+                    // entonces puede tener longitud fija, si no tiene longitud flexible
+                    fixed_length = available_length >= options.length
                 }
                 else {
-                    new_panels[i] = panels[i]
+                    new_panel_length = available_length
                 }
             }
-            this.containers[container_index].panels = new_panels
+            else {
+                new_panel_length = available_length
+            }
+
+            if (fixed_length) {
+                // si el panel tiene longitud fija le va a quitar espacio
+                // a los paneles flexibles existentes
+
+                // aplicar nuevas longitudes a los paneles (flexibles) existentes
+                const old_lengths = container.panels.map(p => p.length)
+                let remaining_length = new_panel_length
+                for (let i = 0; i < old_lengths.length; i++) {
+                    if (!container.panels[i].flexible) {
+                        const diff = old_lengths[i] - remaining_length
+                        container.panels[i].length = diff < 0 ? 0 : diff
+                        remaining_length = remaining_length - old_lengths[i]
+                    }
+                }
+
+                // agregar panel
+                const new_panel: Panel = { flexible: fixed_length, length: new_panel_length }
+
+                container.panels.push(new_panel)
+            }
+            else {
+                // si no tiene longitud fija entonces comparte el espacio disponible
+                // con el resto de los paneles flexibles
+                const flex_panels = container.panels.filter(p => p.flexible == false).length + 1
+
+                const length = available_length / flex_panels
+
+                // aplicar nuevas longitudes a los paneles (flexibles) existentes
+                for (let i = 0; i < container.panels.length; i++) {
+                    if (!container.panels[i].flexible) {
+                        container.panels[i].length = length
+                    }
+                }
+
+                const new_panel: Panel = { flexible: fixed_length, length }
+
+                container.panels.push(new_panel)
+            }
         }
         else {
             throw new Error(`Invalid container_index (${container_index})`)
@@ -243,7 +303,7 @@ export class DragManager extends DragLogic {
     }
 
     add_ui_panel(container_index: number, index: number, panel_width: number, panel_element: JQuery) {
-        super.add_panel(container_index, index, panel_width)
+        super.add_panel(container_index, { fixed: true, length: panel_width })
 
         if (container_index >= 0 && container_index < this.ui_panel_containers.length) {
             const new_panels: JQuery[] = []
