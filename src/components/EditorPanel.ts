@@ -105,7 +105,7 @@ export default class EditorPanel {
         this.step_button = step_button
 
         if (this.options.debug) {
-            const compile_button = $('<button id="compilar" class="grey-button"><span class="button-label">Compilar</span><span></button>')
+            const compile_button = $('<button id="compilar" class="blue-button"><span class="button-label">Compilar</span><span></button>')
 
             bar.append(compile_button)
             this.compile_button = compile_button

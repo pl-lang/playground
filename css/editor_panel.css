@@ -32,21 +32,21 @@
   background-color: hsl(120, 61%, 35%);
 }
 
-.grey-button {		
+.blue-button {		
  background-color: hsl(207, 100%, 50%);
  color: white;		
  border: 1px solid hsl(207, 100%, 35%);		
 }		
 		
-.grey-button:hover {		
+.blue-button:hover {		
  background-color: hsl(207, 100%, 55%);
 }		
 		
-.grey-button:active {		
+.blue-button:active {		
  background-color: hsl(207, 100%, 35%);
 }
 
-.grey-button:disabled {		
+.blue-button:disabled {		
  background-color: hsl(207, 100%, 35%);
 }
 
