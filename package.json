@@ -9,7 +9,7 @@
     "buildmap": "webpack --config webpack.map.config.js --display-error-details",
     "prebuildmap": "npm install --save ../interprete-pl",
     "dev": "webpack --config webpack.dev.config.js --display-error-details",
-    "prepush": "git checkout master && git merge dev && npm run build && git add . && git commit -m \"bundle nuevo\"",
+    "prepush": "npm test && git checkout master && git merge dev && npm run build && git add . && git commit -m \"bundle nuevo\"",
     "push": "git push",
     "postpush": "git checkout dev"
   },
