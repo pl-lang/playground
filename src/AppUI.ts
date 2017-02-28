@@ -68,7 +68,7 @@ export default class AppUI {
         this.editor_panel = new EditorPanel(this.panel_container, d, { debug: this.options.debug, links: !this.options.debug })
 
         if (this.options.debug) {
-            this.add_panel(this.editor_panel, 0, { fixed: true, length: 50})
+            this.add_panel(this.editor_panel, 0)
             this.toggler.add_panel(this.editor_panel, false, 'pencil')
 
             this.code_panel = new CodePanel(this.panel_container)
@@ -83,16 +83,15 @@ export default class AppUI {
         }
         else {
             // agregar panel de codigo
-            this.add_panel(this.editor_panel, 0, { fixed: true, length: 60})
+            this.add_panel(this.editor_panel, 0)
             this.toggler.add_panel(this.editor_panel, false, 'pencil')
 
             // cuando debug es falso el panel de codigo compilado no se muestra
             this.code_panel = null
 
             this.output_panel = new OutputPanel(this.panel_container, this.dispatcher)
-            this.toggler.add_panel(this.output_panel, false, 'terminal')
-
             this.add_panel(this.output_panel, 0)
+            this.toggler.add_panel(this.output_panel, false, 'terminal')
         }
 
         $(document).mouseup(() => {

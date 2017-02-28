@@ -518,7 +518,13 @@ export class DragManager extends DragLogic {
             panel_element.container_index = container_index
             panel_element.panel_index = this.ui_panel_containers[container_index].panels.length
 
-            this.ui_panel_containers[container_index].panels.push(panel_element.container)
+            const container = this.ui_panel_containers[container_index]
+
+            container.panels.push(panel_element.container)
+
+            const lengths = super.get_container(container_index).panels.map(p => p.length)
+
+            this.apply_lengths(container.panels, lengths, container.mode)
         }
         else {
             throw new Error(`Invalid container_index (${container_index})`)
