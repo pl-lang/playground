@@ -231,27 +231,60 @@ export class DragLogic {
         const panel = container.panels[panel_index]
         panel.hidden = !panel.hidden
 
-        // repartir la longitud del panel removido entre los paneles flexibles (no escondidos)
-        // de este contenedor
+        if (panel.hidden) {
+            // repartir la longitud del panel removido entre los paneles flexibles (no escondidos)
+            // de este contenedor
 
-        const flex_panels = container.panels.filter(p => p.fixed == false && p.hidden == false).length
+            const flex_panels = container.panels.filter(p => p.fixed == false && p.hidden == false).length
 
-        if (flex_panels > 0) {
-            const extra_length = panel.hidden ? (panel.length / flex_panels) : (-panel.length / flex_panels)
-            const old_length = panel.length
+            if (flex_panels > 0) {
+                const extra_length = panel.length / flex_panels
+                const old_length = panel.length
 
-            for (let i = 0; i < container.panels.length; i++) {
-                if (!container.panels[i].fixed && !container.panels[i].hidden) {
-                    container.panels[i].length += extra_length
+                for (let i = 0; i < container.panels.length; i++) {
+                    if (!container.panels[i].fixed && !container.panels[i].hidden) {
+                        container.panels[i].length += extra_length
+                    }
                 }
             }
+        }
+        else {
+            // repartir la longitud disponible entre los paneles flexibles (no-escondidos)
 
-            if (!panel.hidden) {
-                panel.length = old_length
+            let available_length = 0
+
+            if (container.panels.length > 0) {
+                let fixed_length = 0
+                for (let i = 0; i < container.panels.length; i++) {
+                    const panel = container.panels[i]
+                    if (panel.fixed && !panel.hidden) {
+                        fixed_length += panel.length
+                    }
+                }
+                available_length = 100 - fixed_length
+            }
+            else {
+                available_length = 100
+            }
+
+            const flex_panels = container.panels.filter(p => p.fixed == false && p.hidden == false).length
+
+            if (flex_panels > 0) {
+                const length = available_length / flex_panels
+
+                for (let i = 0; i < container.panels.length; i++) {
+                    if (!container.panels[i].fixed && !container.panels[i].hidden) {
+                        container.panels[i].length = length
+                    }
+                }
             }
         }
 
         return panel.hidden
+    }
+
+    protected get_visible_panels(container_index: number): number {
+        return this.containers[container_index].panels.filter(p => p.hidden == false).length
     }
 
     protected add_container(x: number, y: number, width: number, height: number, mode: 'vertical' | 'horizontal') {
@@ -543,55 +576,63 @@ export class DragManager extends DragLogic {
     }
 
     toggle_ui_panel(container_index: number, panel_index: number) {
-        const hidden = super.toggle_panel(container_index, panel_index)
+        const visible_panels = super.get_visible_panels(container_index)
 
-        const container = this.ui_panel_containers[container_index]
+        const container_model = super.get_container(container_index)
 
-        const lengths = super.get_container(container_index).panels.map(pan => pan.length)
+        const panel_model = container_model.panels[panel_index]
 
-        this.apply_lengths(container.panels, lengths, container.mode)
+        if (visible_panels > 1 || panel_model.hidden) {
+            const hidden = super.toggle_panel(container_index, panel_index)
 
-        if (hidden) {
-            const panel = container.panels[panel_index]
+            const container = this.ui_panel_containers[container_index]
 
-            panel.hide()
+            const lengths = super.get_container(container_index).panels.map(pan => pan.length)
 
-            if (panel_index == 0) {
-                // ocultar la primer manija
-                let handle = this.handles[0]
+            this.apply_lengths(container.panels, lengths, container.mode)
 
-                if (handle) {
-                    handle.element.hide()
+            if (hidden) {
+                const panel = container.panels[panel_index]
+
+                panel.hide()
+
+                if (panel_index == 0) {
+                    // ocultar la primer manija
+                    let handle = this.handles[0]
+
+                    if (handle) {
+                        handle.element.hide()
+                    }
+                }
+                else {
+                    // ocultar la manija a la izquierda de este panel
+                    let handle = this.handles[panel_index - 1]
+
+                    if (handle) {
+                        handle.element.hide()
+                    }
                 }
             }
             else {
-                // ocultar la manija a la izquierda de este panel
-                let handle = this.handles[panel_index - 1]
+                const panel = container.panels[panel_index]
 
-                if (handle) {
-                    handle.element.hide()
+                panel.show()
+
+                if (panel_index == 0) {
+                    // mostrar la primer manija
+                    let handle = this.handles[0]
+
+                    if (handle) {
+                        handle.element.show()
+                    }
                 }
-            }
-        }
-        else {
-            const panel = container.panels[panel_index]
+                else {
+                    // mostrar la manija a la izquierda de este panel
+                    let handle = this.handles[panel_index - 1]
 
-            panel.show()
-
-            if (panel_index == 0) {
-                // mostrar la primer manija
-                let handle = this.handles[0]
-
-                if (handle) {
-                    handle.element.show()
-                }
-            }
-            else {
-                // mostrar la manija a la izquierda de este panel
-                let handle = this.handles[panel_index - 1]
-
-                if (handle) {
-                    handle.element.show()
+                    if (handle) {
+                        handle.element.show()
+                    }
                 }
             }
         }
