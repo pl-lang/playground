@@ -302,21 +302,11 @@ export class DragManager extends DragLogic {
         this.ui_panel_containers.push({ element, mode, panels: [], last_handle_index: 0 })
     }
 
-    add_ui_panel(container_index: number, index: number, panel_width: number, panel_element: JQuery) {
-        super.add_panel(container_index, { fixed: true, length: panel_width })
-
+    add_ui_panel(container_index: number, panel_element: JQuery, options?: { fixed: boolean, length: number }) {
         if (container_index >= 0 && container_index < this.ui_panel_containers.length) {
-            const new_panels: JQuery[] = []
-            const old_panels = this.ui_panel_containers[container_index].panels
-            for (let i = 0; i <= old_panels.length; i++) {
-                if (i == index) {
-                    new_panels[i] = panel_element
-                }
-                else {
-                    new_panels[i] = old_panels[i]
-                }
-            }
-            this.ui_panel_containers[container_index].panels = new_panels
+            super.add_panel(container_index, options)
+
+            this.ui_panel_containers[container_index].panels.push(panel_element)
         }
         else {
             throw new Error(`Invalid container_index (${container_index})`)
@@ -327,15 +317,16 @@ export class DragManager extends DragLogic {
 
         super.drag(handle.container_index, handle.handle_index, from, to)
 
-        const container = this.ui_panel_containers[handle.container_index]
+        const ui_container = this.ui_panel_containers[handle.container_index]
+        const panels = super.get_container(handle.container_index).panels
 
         // aplicar las nuevas longitudes
-        for (let i = 0; i < container.panels.length; i++) {
-            if (container.mode == 'horizontal') {
-                container.panels[i].attr('style', `width: ${container.panels[i].length}%;`)
+        for (let i = 0; i < ui_container.panels.length; i++) {
+            if (ui_container.mode == 'horizontal') {
+                ui_container.panels[i].attr('style', `width: ${panels[i].length}%;`)
             }
             else {
-                container.panels[i].attr('style', `height: ${container.panels[i].length}%;`)
+                ui_container.panels[i].attr('style', `height: ${panels[i].length}%;`)
             }
         }
     }
