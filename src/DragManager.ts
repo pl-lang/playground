@@ -327,9 +327,16 @@ export class DragLogic {
                         }
                     }
 
-                    const growing_panel_width = container.panels[handle_index].length
-
-                    container.panels[handle_index].length = (growing_panel_width + total_delta) > 100 ? 100 : growing_panel_width + total_delta
+                    const growing_panel = container.panels[handle_index]
+                    
+                    if (growing_panel.hidden) {
+                        const growing_panel_width = container.panels[this.find(0, handle_index, false, { hidden: false })].length
+                        container.panels[this.find(0, handle_index, false, { hidden: false })].length = (growing_panel_width + total_delta) > 100 ? 100 : growing_panel_width + total_delta
+                    }
+                    else {
+                        const growing_panel_width = growing_panel.length
+                        growing_panel.length = (growing_panel_width + total_delta) > 100 ? 100 : growing_panel_width + total_delta
+                    }
                 }
                 else {
                     const shrinking_panel_index = handle_index
@@ -349,9 +356,16 @@ export class DragLogic {
                         }
                     }
 
-                    const growing_panel_width = container.panels[handle_index + 1].length
+                    const growing_panel = container.panels[handle_index + 1]
 
-                    container.panels[handle_index + 1].length = (growing_panel_width + total_delta) > 100 ? 100 : growing_panel_width + total_delta
+                    if (growing_panel.hidden) {
+                        const growing_panel_width = container.panels[this.find(0, handle_index, false, { hidden: false })].length
+                        container.panels[this.find(0, handle_index, false, { hidden: false })].length = (growing_panel_width + total_delta) > 100 ? 100 : growing_panel_width + total_delta
+                    }
+                    else {
+                        const growing_panel_width = growing_panel.length
+                        growing_panel.length = (growing_panel_width + total_delta) > 100 ? 100 : growing_panel_width + total_delta
+                    }
                 }
             }
             else {
@@ -536,11 +550,21 @@ export class DragManager extends DragLogic {
 
             panel.hide()
 
-            // ocultar la manija a la izquierda del panel, si existe            
-            const handle = this.handles[panel_index - 1]
+            if (panel_index == 0) {
+                // ocultar la primer manija
+                let handle = this.handles[0]
 
-            if (handle) {
-                handle.element.hide()
+                if (handle) {
+                    handle.element.hide()
+                }
+            }
+            else {
+                // ocultar la manija a la izquierda de este panel
+                let handle = this.handles[panel_index - 1]
+
+                if (handle) {
+                    handle.element.hide()
+                }
             }
         }
         else {
@@ -548,11 +572,21 @@ export class DragManager extends DragLogic {
 
             panel.show()
 
-            // mostrar la manija a la izquierda del panel, si existe
-            const handle = this.handles[panel_index - 1]
+            if (panel_index == 0) {
+                // mostrar la primer manija
+                let handle = this.handles[0]
 
-            if (handle) {
-                handle.element.show()
+                if (handle) {
+                    handle.element.show()
+                }
+            }
+            else {
+                // mostrar la manija a la izquierda de este panel
+                let handle = this.handles[panel_index - 1]
+
+                if (handle) {
+                    handle.element.show()
+                }
             }
         }
     }
