@@ -115,10 +115,10 @@ export default class AppUI {
 
     add_panel(element: Resizeable, container_index: number, options?: { fixed: boolean, length: number }) {
         if (this.dm.ui_panel_containers[container_index].panels.length >= 1) {
-            const handle = $(`<div id="handle${this.handles.length + 1}" class="handle"></div>`)
-            this.dm.add_handle(container_index, handle)
-            this.handles.push(handle)
-            this.panel_container.append(handle)
+            // const handle = $(`<div id="handle${this.handles.length + 1}" class="handle"></div>`)
+            // this.dm.add_handle(container_index, handle)
+            // this.handles.push(handle)
+            // this.panel_container.append(handle)
         }
 
         this.dm.add_ui_panel(container_index, element, options)

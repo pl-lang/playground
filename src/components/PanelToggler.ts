@@ -18,7 +18,7 @@ export default class PanelToggler {
         this.parent = parent
         this.debug = debug
         this.dispatcher = dispatcher
-        this.container = $('<div id="panel-toggler" class="flex-col big-v-bar bar-right-border center-align"></div>')
+        this.container = $('<div id="panel-toggler" class="flex-col big-v-bar center-align"></div>')
         this.panels = []
     }
 
