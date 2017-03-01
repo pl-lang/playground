@@ -19,7 +19,6 @@ export default class Prompt {
 
         if (mode == 'varname') {
             this.textarea.keydown(e => {
-                console.log(e.which, e.keyCode)
                 if (e.which == ENTER) {
                     const name = this.textarea.val()
                     this.close()
