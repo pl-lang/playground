@@ -146,6 +146,8 @@ export class Controller {
             case ActionKind.HidePanel:
             case ActionKind.ShowPanel:
                 this.app_ui.toggle_panel(a.container_index, a.panel_index)
+            case ActionKind.ShowVarPrompt:
+                break
         }
     }
 
