@@ -96,6 +96,11 @@ export default class AppUI {
             // cuando debug es falso el panel de codigo compilado no se muestra
             this.code_panel = null
 
+            this.inspection_panel = new InspectionPanel(this.panel_container, this.dispatcher)
+
+            this.add_panel(this.inspection_panel, 0)
+            this.toggler.add_panel(this.inspection_panel, false, 'search')
+
             this.output_panel = new OutputPanel(this.panel_container, this.dispatcher)
             this.add_panel(this.output_panel, 0)
             this.toggler.add_panel(this.output_panel, false, 'terminal')
