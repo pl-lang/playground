@@ -146,9 +146,15 @@ export class Controller {
             case ActionKind.HidePanel:
             case ActionKind.ShowPanel:
                 this.app_ui.toggle_panel(a.container_index, a.panel_index)
-            case ActionKind.ShowVarPrompt:
+                break
+            case ActionKind.SendVarName:
+                this.add_var(a.name)
                 break
         }
+    }
+
+    add_var(name: string) {
+        this.app_ui.add_var(name)
     }
 
     interpreter_action(a: InterpreterStatementInfo | InterpreterRead | InterpreterWrite) {

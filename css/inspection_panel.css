@@ -7,3 +7,14 @@
   height: 100%;
   background-color: white;
 }
+
+.scalar {
+  margin: 2px 4px 2px 4px;
+  font-family: "Source Code Pro Regular", "Consolas", monospace;
+  font-size: 10pt;
+}
+
+.value {
+  margin-left: 4px;
+  color: #d20606; 
+}

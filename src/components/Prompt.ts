@@ -13,7 +13,7 @@ export default class Prompt {
     constructor (readonly container: JQuery, d: Dispatcher, mode: 'varname' | 'input') {
         this.mode = mode
 
-        this.textarea = $('<textarea id="prompt"></textarea>')
+        this.textarea = $('<textarea class="prompt"></textarea>')
 
         this.distpatcher = d
 

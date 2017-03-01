@@ -195,4 +195,8 @@ export default class AppUI {
     enable_buttons() {
         this.editor_panel.enable_buttons()
     }
+
+    add_var(name: string) {
+        this.inspection_panel.add_var(name)
+    }
 }

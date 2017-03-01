@@ -3,6 +3,7 @@ import { Dispatcher } from '../Controller'
 import { Action, ActionKind } from '../Actions'
 import { Resizeable } from '../DragManager'
 import Prompt from './Prompt'
+import Scalar from './Scalar'
 
 export default class PanelToggler implements Resizeable {
     private dispatcher: Dispatcher
@@ -10,6 +11,7 @@ export default class PanelToggler implements Resizeable {
     private body: JQuery
     private prompt: Prompt
     private add_button: JQuery
+    private var_elements: Scalar[]
     container_index: number
     panel_index: number
     container: JQuery
@@ -52,5 +54,9 @@ export default class PanelToggler implements Resizeable {
 
     show_button() {
         this.add_button.show()
+    }
+
+    add_var(name: string) {
+        const new_var = new Scalar(this.body, name, 'hola')
     }
 }
