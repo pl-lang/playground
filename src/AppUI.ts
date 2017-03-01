@@ -2,6 +2,7 @@ import OutputPanel from './components/OutputPanel'
 import EditorPanel from './components/EditorPanel'
 import CodePanel from './components/CodePanel'
 import PanelToggler from './components/PanelToggler'
+import InspectionPanel from './components/InspectionPanel'
 import { DragManager, Resizeable } from './DragManager'
 import { Dispatcher } from './Controller'
 import { Errors, Value } from 'interprete-pl'
@@ -21,6 +22,7 @@ export default class AppUI {
     parent: JQuery
     private editor_panel: EditorPanel
     private output_panel: OutputPanel
+    private inspection_panel: InspectionPanel
     private dispatcher: Dispatcher
     code_panel: CodePanel
     private toggler: PanelToggler
@@ -75,6 +77,11 @@ export default class AppUI {
 
             this.add_panel(this.code_panel, 0)
             this.toggler.add_panel(this.code_panel, false, 'gear')
+
+            this.inspection_panel = new InspectionPanel(this.panel_container, this.dispatcher)
+
+            this.add_panel(this.inspection_panel, 0)
+            this.toggler.add_panel(this.inspection_panel, false, 'search')
 
             this.output_panel = new OutputPanel(this.panel_container, this.dispatcher)
 

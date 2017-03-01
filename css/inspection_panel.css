@@ -1,0 +1,9 @@
+#inspection-panel {
+  height: 100%;
+  border-left: 1px solid hsl(192, 15%, 70%);
+}
+
+#inspection-panel-body {
+  height: 100%;
+  background-color: white;
+}
