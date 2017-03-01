@@ -25,7 +25,7 @@ export default class PanelToggler implements Resizeable {
         const add_button = $('<button class="blue-button icon-button"><span class="button-icon octicon octicon-plus"></span></button>')
 
         add_button.click(() => {
-            this.prompt = new Prompt(this.body, this.dispatcher)
+            this.prompt = new Prompt(this.body, this.dispatcher, 'varname')
         })
 
         bar.append(icon).append(title).append(add_button)

@@ -19,7 +19,7 @@ export default class Window extends Emitter {
 
     read () {
         // hace falta almacenar Prompt en p?
-        const p = new Prompt(this.container, this.dispatcher)
+        const p = new Prompt(this.container, this.dispatcher, 'input')
     }
 
     clear () {
