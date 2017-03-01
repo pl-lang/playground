@@ -33,7 +33,7 @@
     "source-map-loader": "^0.1.6",
     "ts-loader": "^2.0.0",
     "tslib": "^1.5.0",
-    "typescript": "^2.1.5",
+    "typescript": "^2.2.1",
     "webpack": "^2.2.0"
   },
   "devDependencies": {}
