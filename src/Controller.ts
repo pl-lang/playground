@@ -47,6 +47,7 @@ export class Controller {
                     this.by_steps = false
                     const compiled_program_maybe = this.compile(a.code)
                     if (!compiled_program_maybe.error) {
+                        this.app_ui.clear_vars()
                         this.program_running = true
                         const program = compiled_program_maybe.result
                         this.do({ kind: ActionKind.SetUpInterpreter, program: program })
@@ -99,6 +100,7 @@ export class Controller {
                     this.by_steps = true
                     const compiled_program_maybe = this.compile(a.code)
                     if (!compiled_program_maybe.error) {
+                        this.app_ui.clear_vars()
                         this.app_ui.show_step_controls()
                         this.program_running = true
                         const program = compiled_program_maybe.result

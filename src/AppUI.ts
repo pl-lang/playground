@@ -199,4 +199,8 @@ export default class AppUI {
     add_var(name: string) {
         this.inspection_panel.add_var(name)
     }
+
+    clear_vars() {
+        this.inspection_panel.clear()
+    }
 }

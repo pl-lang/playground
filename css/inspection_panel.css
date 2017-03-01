@@ -18,3 +18,11 @@
   margin-left: 4px;
   color: #d20606; 
 }
+
+.input-border {
+  border-top: 1px solid #a7babe;
+  border-bottom: 1px solid #a7babe;
+  height: 20px;
+  margin-left: 0px;
+  padding-left: 4px;
+}
