@@ -180,10 +180,12 @@ export default class AppUI {
 
     show_step_controls() {
         this.output_panel.show_controls()
+        this.inspection_panel.show_button()
     }
 
     hide_step_controls() {
         this.output_panel.hide_controls()
+        this.inspection_panel.hide_button()
     }
 
     disable_buttons() {

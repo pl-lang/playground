@@ -9,6 +9,7 @@ export default class PanelToggler implements Resizeable {
     private parent: JQuery
     private body: JQuery
     private prompt: Prompt
+    private add_button: JQuery
     container_index: number
     panel_index: number
     container: JQuery
@@ -28,6 +29,10 @@ export default class PanelToggler implements Resizeable {
             this.prompt = new Prompt(this.body, this.dispatcher, 'varname')
         })
 
+        this.add_button = add_button
+
+        add_button.hide()
+
         bar.append(icon).append(title).append(add_button)
 
         this.container.append(bar)
@@ -35,5 +40,17 @@ export default class PanelToggler implements Resizeable {
         this.body = $('<div id="inspection-panel-body" class="flex-col"></div>')
 
         this.container.append(this.body)
+    }
+
+    clear() {
+        this.body.empty()
+    }
+
+    hide_button() {
+        this.add_button.hide()
+    }
+
+    show_button() {
+        this.add_button.show()
     }
 }
