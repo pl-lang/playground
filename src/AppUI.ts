@@ -16,6 +16,8 @@ const default_options: AppOptions = {
     debug: false
 }
 
+type Cell = { index: number, value: number | boolean | string }
+
 export default class AppUI {
     container: JQuery
     panel_container: JQuery
@@ -196,7 +198,7 @@ export default class AppUI {
         this.editor_panel.enable_buttons()
     }
 
-    add_var(name: string, value: number | boolean | string, found: boolean) {
+    add_var(name: string, value: { type: 'scalar', value: number | string | boolean } | { type: 'vector', cells: Cell[] }, found: boolean) {
         this.inspection_panel.add_var(name, value, found)
     }
 
@@ -204,8 +206,8 @@ export default class AppUI {
         return this.inspection_panel.get_var_names()
     }
 
-    update_var(name: string, value: number | boolean | string) {
-        return this.inspection_panel.update_var(name, value)
+    update_var(name: string, values: { type: 'scalar', value: number | string | boolean } | { type: 'vector', cells: Cell[] }) {
+        return this.inspection_panel.update_var(name, values)
     }
 
     clear_vars() {

@@ -4,6 +4,9 @@ import { Action, ActionKind } from '../Actions'
 import { Resizeable } from '../DragManager'
 import Prompt from './Prompt'
 import Scalar from './Scalar'
+import Vector from './Vector'
+
+type Cell = { index: number, value: number | boolean | string }
 
 export default class InspectionPanel implements Resizeable {
     private dispatcher: Dispatcher
@@ -11,7 +14,7 @@ export default class InspectionPanel implements Resizeable {
     private body: JQuery
     private prompt: Prompt
     private add_button: JQuery
-    private var_elements: Scalar[]
+    private var_elements: (Scalar | Vector)[]
     container_index: number
     panel_index: number
     container: JQuery
@@ -59,9 +62,15 @@ export default class InspectionPanel implements Resizeable {
         this.add_button.show()
     }
 
-    add_var(name: string, value: number | boolean | string, found: boolean) {
-        const new_var = new Scalar(this.body, name, value, found)
-        this.var_elements.push(new_var)
+    add_var(name: string, boxed_value: { type: 'scalar', value: number | string | boolean } | { type: 'vector', cells: Cell[] }, found: boolean) {
+        if (boxed_value.type == 'scalar') {
+            const new_var = new Scalar(this.body, name, boxed_value.value, found)
+            this.var_elements.push(new_var)
+        }
+        else {
+            const new_var = new Vector(this.body, name, boxed_value.cells, found)
+            this.var_elements.push(new_var)
+        }
     }
 
     /**
@@ -72,13 +81,18 @@ export default class InspectionPanel implements Resizeable {
         return this.var_elements.map(s => s.name)
     }
 
-    update_var(name: string, value: number | boolean | string) {
+    update_var(name: string, boxed_value: { type: 'scalar', value: number | string | boolean } | { type: 'vector', cells: Cell[] }) {
         const variable = this.find(name)
 
-        variable.set_value(value)
+        if (variable instanceof Scalar) {
+            variable.set_value(boxed_value as { type: 'scalar', value: number | string | boolean })
+        }
+        else {
+            variable.update_values(boxed_value as { type: 'vector', cells: Cell[] })
+        }
     }
 
-    private find(name: string): Scalar {
+    private find(name: string): Scalar | Vector {
         for (let i = 0; i < this.var_elements.length; i++) {
             if (this.var_elements[i].name == name) {
                 return this.var_elements[i]

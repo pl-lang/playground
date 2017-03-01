@@ -42,10 +42,10 @@ export default class Scalar {
         this.parent.append(this.container)
     }
 
-    set_value(v: number |  boolean | string) {
-        if (v != this.value) {
-            this.value_element.text(v)
-            this.value = v
+    set_value(vb: { type: 'scalar', value: number | string | boolean }) {
+        if (vb.value != this.value) {
+            this.value_element.text(vb.value)
+            this.value = vb.value
             this.value_element.removeClass('italic')
         }
     }

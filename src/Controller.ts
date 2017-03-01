@@ -170,12 +170,7 @@ export class Controller {
         const var_maybe = this.interpreter.export_var(name)
         if (var_maybe.error == false) {
             const values = var_maybe.result
-            if (values.type == 'scalar') {
-                this.app_ui.update_var(name, values.value)
-            }
-            else {
-                // this.app_ui.add_vector(...)
-            }
+            this.app_ui.update_var(name, values)
         }
         else {
             this.app_ui.update_var(name, null)
@@ -186,12 +181,7 @@ export class Controller {
         const var_maybe = this.interpreter.export_var(name)
         if (var_maybe.error == false) {
             const values = var_maybe.result
-            if (values.type == 'scalar') {
-                this.app_ui.add_var(name, values.value, true)
-            }
-            else {
-                // this.app_ui.add_vector(...)
-            }
+            this.app_ui.add_var(name, values, true)
         }
         else {
             this.app_ui.add_var(name, null, false)
