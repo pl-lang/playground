@@ -815,9 +815,9 @@ interpret@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/interpret/-/interpret-1.0.1.tgz#d579fb7f693b858004947af39fa0db49f795602c"
 
-interprete-pl@^0.7.0:
-  version "0.7.0"
-  resolved "https://registry.yarnpkg.com/interprete-pl/-/interprete-pl-0.7.0.tgz#448d46606d78fedc3cee72f2f855e2f8367d7d3d"
+interprete-pl@^0.9.1:
+  version "0.9.1"
+  resolved "https://registry.yarnpkg.com/interprete-pl/-/interprete-pl-0.9.1.tgz#25289f379ca99d13f0f2d80c0827be0bab8865d0"
   dependencies:
     tslib "^1.5.0"
     typescript "^2.1.5"

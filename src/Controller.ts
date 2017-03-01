@@ -60,8 +60,8 @@ export class Controller {
                 }
                 break
             case ActionKind.Step:
-                this.do({ kind: ActionKind.ClearMessages })
                 this.step()
+                this.do({ kind: ActionKind.UpdateVars })
                 break
             case ActionKind.FocusEditor:
                 this.app_ui.focus_editor()
@@ -152,11 +152,50 @@ export class Controller {
             case ActionKind.SendVarName:
                 this.add_var(a.name)
                 break
+            case ActionKind.UpdateVars:
+                this.update_vars()
+                break
+        }
+    }
+
+    update_vars() {
+        const var_names = this.app_ui.get_var_names()
+
+        for (let name of var_names) {
+            this.update_var(name)
+        }
+    }
+
+    update_var(name: string) {
+        const var_maybe = this.interpreter.export_var(name)
+        if (var_maybe.error == false) {
+            const values = var_maybe.result
+            if (values.type == 'scalar') {
+                this.app_ui.update_var(name, values.value)
+            }
+            else {
+                // this.app_ui.add_vector(...)
+            }
+        }
+        else {
+            this.app_ui.update_var(name, null)
         }
     }
 
     add_var(name: string) {
-        this.app_ui.add_var(name)
+        const var_maybe = this.interpreter.export_var(name)
+        if (var_maybe.error == false) {
+            const values = var_maybe.result
+            if (values.type == 'scalar') {
+                this.app_ui.add_var(name, values.value, true)
+            }
+            else {
+                // this.app_ui.add_vector(...)
+            }
+        }
+        else {
+            this.app_ui.add_var(name, null, false)
+        }
     }
 
     interpreter_action(a: InterpreterStatementInfo | InterpreterRead | InterpreterWrite) {

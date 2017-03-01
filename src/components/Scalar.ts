@@ -1,14 +1,15 @@
 import * as $ from 'jquery'
 import { Action, ActionKind } from '../Actions'
 
-export default class PanelToggler {
+export default class Scalar {
     private parent: JQuery
     private remove_button: JQuery
     private container: JQuery
     private value_element: JQuery
+    private value: number | boolean | string
     name: string
 
-    constructor(parent: JQuery, name: string, value: number | string) {
+    constructor(parent: JQuery, name: string, value: number | boolean | string, var_found: boolean) {
         this.parent = parent
 
         this.name = name
@@ -17,7 +18,18 @@ export default class PanelToggler {
 
         const name_element = $(`<span class="scalar-name">${name}:</span>`)
 
-        this.value_element = $(`<span class="value">${value}</span>`)
+        if (!var_found) {
+            this.value_element = $(`<span class="value italic">No existe o no esta en ámbito</span>`)
+            this.value = null
+        }
+        else if (value) {
+            this.value_element = $(`<span class="value">${value}</span>`)
+            this.value = value
+        }
+        else {
+            this.value_element = $(`<span class="value italic">Aun no ha sido inicializada</span>`)
+            this.value = null
+        }
 
         this.remove_button = $('<button class="simple-button-icon octicon octicon-x pull-right"></button>')
 
@@ -30,7 +42,11 @@ export default class PanelToggler {
         this.parent.append(this.container)
     }
 
-    set_value(v: number | string) {
-        this.value_element.replaceWith($(`<span class="value">${v}</span>`))
+    set_value(v: number |  boolean | string) {
+        if (v != this.value) {
+            this.value_element.text(v)
+            this.value = v
+            this.value_element.removeClass('italic')
+        }
     }
 }

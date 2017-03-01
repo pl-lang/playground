@@ -196,8 +196,16 @@ export default class AppUI {
         this.editor_panel.enable_buttons()
     }
 
-    add_var(name: string) {
-        this.inspection_panel.add_var(name)
+    add_var(name: string, value: number | boolean | string, found: boolean) {
+        this.inspection_panel.add_var(name, value, found)
+    }
+
+    get_var_names(): string[] {
+        return this.inspection_panel.get_var_names()
+    }
+
+    update_var(name: string, value: number | boolean | string) {
+        return this.inspection_panel.update_var(name, value)
     }
 
     clear_vars() {

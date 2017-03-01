@@ -229,6 +229,10 @@ textarea {
   cursor: col-resize;
 }
 
+.italic {
+  font-style: italic;
+}
+
 .fullh {
   height: 100%;
 }

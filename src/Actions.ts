@@ -23,6 +23,7 @@ export enum ActionKind {
     HidePanel,
     ShowPanel,
     SendVarName,
+    UpdateVars,
 }
 
 export type Action = Execute
@@ -46,7 +47,12 @@ export type Action = Execute
     | EnableButtons
     | HidePanel
     | ShowPanel
-    | SendVarName;
+    | SendVarName
+    | UpdateVars;
+
+export interface UpdateVars {
+    kind: ActionKind.UpdateVars
+}
 
 export interface SendVarName {
     kind: ActionKind.SendVarName

@@ -5,7 +5,7 @@ import { Resizeable } from '../DragManager'
 import Prompt from './Prompt'
 import Scalar from './Scalar'
 
-export default class PanelToggler implements Resizeable {
+export default class InspectionPanel implements Resizeable {
     private dispatcher: Dispatcher
     private parent: JQuery
     private body: JQuery
@@ -19,6 +19,8 @@ export default class PanelToggler implements Resizeable {
     constructor(parent: JQuery, dispatcher: Dispatcher) {
         this.parent = parent
         this.dispatcher = dispatcher
+
+        this.var_elements = []
 
         this.container = $('<div id="inspection-panel" class="flex-col"></div>')
 
@@ -46,6 +48,7 @@ export default class PanelToggler implements Resizeable {
 
     clear() {
         this.body.empty()
+        this.var_elements = []
     }
 
     hide_button() {
@@ -56,7 +59,30 @@ export default class PanelToggler implements Resizeable {
         this.add_button.show()
     }
 
-    add_var(name: string) {
-        const new_var = new Scalar(this.body, name, 'hola')
+    add_var(name: string, value: number | boolean | string, found: boolean) {
+        const new_var = new Scalar(this.body, name, value, found)
+        this.var_elements.push(new_var)
+    }
+
+    /**
+     * get_var_names
+     * retorna una lista de los nombres de las variables que estan siendo inspeccion
+     */
+    get_var_names(): string[] {
+        return this.var_elements.map(s => s.name)
+    }
+
+    update_var(name: string, value: number | boolean | string) {
+        const variable = this.find(name)
+
+        variable.set_value(value)
+    }
+
+    private find(name: string): Scalar {
+        for (let i = 0; i < this.var_elements.length; i++) {
+            if (this.var_elements[i].name == name) {
+                return this.var_elements[i]
+            }
+        }
     }
 }
