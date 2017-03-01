@@ -38,6 +38,7 @@ a {
   font-family: sans-serif;
   font-size: 16px;
   text-decoration: none;
+  color: black;
 }
 
 a:active {
@@ -46,6 +47,20 @@ a:active {
 
 a:visited {
   color: black;
+}
+
+button a {
+  color: white;
+  text-decoration: none;
+  border-bottom: none;
+}
+
+button a:active {
+  color: white
+}
+
+button a:visited {
+  color: white
 }
 
 button {
@@ -68,6 +83,10 @@ button {
 .big-icon-button {
     height: 40px;
     width: 40px;
+}
+
+.big-icon {
+  font-size: 20px;
 }
 
 pre {

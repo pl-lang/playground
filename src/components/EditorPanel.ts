@@ -16,12 +16,10 @@ declare module "codemirror" {
 
 export interface EditorOptions {
     debug?: boolean
-    links?: boolean
 }
 
 const defaults: EditorOptions = {
     debug: false,
-    links: true,
 }
 
 export default class EditorPanel implements Resizeable {
@@ -94,15 +92,6 @@ export default class EditorPanel implements Resizeable {
         const step_button = $('<button class="green-button"><span class="button-label bold">Ejecutar paso a paso</span><span></button>')
 
         bar.append(icon).append(title).append(run_button).append(step_button)
-
-        if (this.options.links) {
-            const help_icon = $('<span style="margin-left:15px;" class="octicon octicon-repo"></span>')
-            const help_link = $('<a style="margin-left: 5px;" href="https://github.com/pl-lang/jsplint/wiki/Sintaxis/">Ayuda sobre el lenguaje</a>')
-            const repo_icon = $('<span style="margin-left:15px;" class="octicon octicon-mark-github"></span>')
-            const repo_link = $('<a style="margin-left:5px" href="https://github.com/pl-lang/playground/">Visita el proyecto en GitHub</a>')
-
-            bar.append(help_icon).append(help_link).append(repo_icon).append(repo_link)
-        }
 
         this.run_button = run_button
         this.step_button = step_button

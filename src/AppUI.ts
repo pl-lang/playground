@@ -67,7 +67,7 @@ export default class AppUI {
         })
 
         // crear los paneles necesarios
-        this.editor_panel = new EditorPanel(this.panel_container, d, { debug: this.options.debug, links: !this.options.debug })
+        this.editor_panel = new EditorPanel(this.panel_container, d, { debug: this.options.debug })
 
         if (this.options.debug) {
             this.add_panel(this.editor_panel, 0)
@@ -105,6 +105,9 @@ export default class AppUI {
             this.add_panel(this.output_panel, 0)
             this.toggler.add_panel(this.output_panel, false, 'terminal')
         }
+
+        this.toggler.add_link(`https://github.com/pl-lang/jsplint/wiki/Sintaxis/`, 'question')
+        this.toggler.add_link(`https://github.com/pl-lang/playground/`, 'mark-github')
 
         $(document).mouseup(() => {
             if (this.dm.is_grabbed) {
