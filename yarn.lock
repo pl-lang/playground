@@ -815,9 +815,9 @@ interpret@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/interpret/-/interpret-1.0.1.tgz#d579fb7f693b858004947af39fa0db49f795602c"
 
-interprete-pl@^0.9.1:
-  version "0.9.1"
-  resolved "https://registry.yarnpkg.com/interprete-pl/-/interprete-pl-0.9.1.tgz#25289f379ca99d13f0f2d80c0827be0bab8865d0"
+interprete-pl@^0.9.2:
+  version "0.9.2"
+  resolved "https://registry.yarnpkg.com/interprete-pl/-/interprete-pl-0.9.2.tgz#844f193cc288a6c954963fd2af04105eb4e7f166"
   dependencies:
     tslib "^1.5.0"
     typescript "^2.1.5"
@@ -1769,11 +1769,7 @@ tweetnacl@^0.14.3, tweetnacl@~0.14.0:
   version "0.14.5"
   resolved "https://registry.yarnpkg.com/tweetnacl/-/tweetnacl-0.14.5.tgz#5ae68177f192d4456269d108afa93ff8743f4f64"
 
-typescript@^2.1.5:
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-2.2.0.tgz#626f2fc70087d2480f21ebb12c1888288c8614e3"
-
-typescript@^2.2.1:
+typescript@^2.1.5, typescript@^2.2.1:
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-2.2.1.tgz#4862b662b988a4c8ff691cc7969622d24db76ae9"
 

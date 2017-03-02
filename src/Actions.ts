@@ -24,6 +24,8 @@ export enum ActionKind {
     ShowPanel,
     SendVarName,
     UpdateVars,
+    RemoveVarFromInspection,
+    RemoveMsgFromInspection,
 }
 
 export type Action = Execute
@@ -48,7 +50,19 @@ export type Action = Execute
     | HidePanel
     | ShowPanel
     | SendVarName
-    | UpdateVars;
+    | UpdateVars
+    | RemoveVarFromInspection
+    | RemoveMsgFromInspection;
+
+export interface RemoveMsgFromInspection {
+    kind: ActionKind.RemoveMsgFromInspection
+    name: string
+}
+
+export interface RemoveVarFromInspection {
+    kind: ActionKind.RemoveVarFromInspection
+    name: string
+}
 
 export interface UpdateVars {
     kind: ActionKind.UpdateVars

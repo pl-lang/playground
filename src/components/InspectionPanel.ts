@@ -5,6 +5,7 @@ import { Resizeable } from '../DragManager'
 import Prompt from './Prompt'
 import Scalar from './Scalar'
 import Vector from './Vector'
+import InspectionMessage from './InspectionMessage'
 
 type Cell = { index: number, value: number | boolean | string }
 
@@ -14,7 +15,7 @@ export default class InspectionPanel implements Resizeable {
     private body: JQuery
     private prompt: Prompt
     private add_button: JQuery
-    private var_elements: (Scalar | Vector)[]
+    private var_elements: (Scalar | Vector | InspectionMessage)[]
     container_index: number
     panel_index: number
     container: JQuery
@@ -63,13 +64,17 @@ export default class InspectionPanel implements Resizeable {
     }
 
     add_var(name: string, boxed_value: { type: 'scalar', value: number | string | boolean } | { type: 'vector', cells: Cell[] }, found: boolean) {
-        if (boxed_value.type == 'scalar') {
-            const new_var = new Scalar(this.body, name, boxed_value.value, found)
-            this.var_elements.push(new_var)
-        }
-        else {
-            const new_var = new Vector(this.body, name, boxed_value.cells, found)
-            this.var_elements.push(new_var)
+        const variable = this.find(name)
+
+        if (!variable) {
+            if (boxed_value.type == 'scalar') {
+                const new_var = new Scalar(this.body, name, boxed_value.value, found, this.dispatcher)
+                this.var_elements.push(new_var)
+            }
+            else {
+                const new_var = new Vector(this.body, name, boxed_value.cells, found, this.dispatcher)
+                this.var_elements.push(new_var)
+            }
         }
     }
 
@@ -87,16 +92,45 @@ export default class InspectionPanel implements Resizeable {
         if (variable instanceof Scalar) {
             variable.set_value(boxed_value as { type: 'scalar', value: number | string | boolean })
         }
-        else {
+        else if (variable instanceof Vector) {
             variable.update_values(boxed_value as { type: 'vector', cells: Cell[] })
         }
     }
 
     private find(name: string): Scalar | Vector {
         for (let i = 0; i < this.var_elements.length; i++) {
-            if (this.var_elements[i].name == name) {
-                return this.var_elements[i]
+            const v_element = this.var_elements[i]
+            if (v_element.name == name && (v_element instanceof Scalar || v_element instanceof Vector)) {
+                return v_element
             }
         }
+    }
+
+    private find_msg(name: string): InspectionMessage {
+        for (let i = 0; i < this.var_elements.length; i++) {
+            const v_element = this.var_elements[i]
+            if (v_element.name == name && v_element instanceof InspectionMessage) {
+                return v_element
+            }
+        }
+    }
+
+    remove_var(name: string) {
+        const removed_var = this.find(name)
+        this.var_elements = this.var_elements.filter(v => v.name != name)
+        removed_var.container.empty()
+        removed_var.container.remove()
+    }
+
+    add_message(name: string) {
+        const msg = new InspectionMessage(this.body, name, this.dispatcher)
+        this.var_elements.push(msg)
+    }
+
+    remove_msg(name: string) {
+        const removed_msg = this.find_msg(name)
+        this.var_elements = this.var_elements.filter(v => v.name != name)
+        removed_msg.container.empty()
+        removed_msg.container.remove()
     }
 }

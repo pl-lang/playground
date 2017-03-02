@@ -213,4 +213,16 @@ export default class AppUI {
     clear_vars() {
         this.inspection_panel.clear()
     }
+
+    remove_var(name: string) {
+        this.inspection_panel.remove_var(name)
+    }
+
+    add_inspection_message(name: string) {
+        this.inspection_panel.add_message(name)
+    }
+
+    remove_msg(name: string) {
+        this.inspection_panel.remove_msg(name)
+    }
 }

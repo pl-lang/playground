@@ -155,7 +155,21 @@ export class Controller {
             case ActionKind.UpdateVars:
                 this.update_vars()
                 break
+            case ActionKind.RemoveVarFromInspection:
+                this.remove_var(a.name)
+                break
+            case ActionKind.RemoveMsgFromInspection:
+                this.remove_msg(a.name)
+                break
         }
+    }
+
+    remove_msg(name: string) {
+        this.app_ui.remove_msg(name)
+    }
+
+    remove_var(name: string) {
+        this.app_ui.remove_var(name)
     }
 
     update_vars() {
@@ -184,7 +198,7 @@ export class Controller {
             this.app_ui.add_var(name, values, true)
         }
         else {
-            this.app_ui.add_var(name, null, false)
+            this.app_ui.add_inspection_message(name)
         }
     }
 

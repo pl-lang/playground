@@ -1,16 +1,20 @@
 import * as $ from 'jquery'
-import { Action, ActionKind } from '../Actions'
+import { ActionKind } from '../Actions'
+import { Dispatcher } from '../Controller'
 
 export default class Scalar {
     private parent: JQuery
     private remove_button: JQuery
-    private container: JQuery
     private value_element: JQuery
     private value: number | boolean | string
+    private dispatcher: Dispatcher
+    container: JQuery
     name: string
 
-    constructor(parent: JQuery, name: string, value: number | boolean | string, var_found: boolean) {
+    constructor(parent: JQuery, name: string, value: number | boolean | string, var_found: boolean, dispatcher: Dispatcher) {
         this.parent = parent
+
+        this.dispatcher = dispatcher
 
         this.name = name
 
@@ -34,7 +38,7 @@ export default class Scalar {
         this.remove_button = $('<button class="simple-button-icon octicon octicon-x pull-right"></button>')
 
         this.remove_button.click(() => {
-            this.container.remove()
+            this.dispatcher.dispatch({ kind: ActionKind.RemoveVarFromInspection, name: this.name })
         })
 
         this.container.append(name_element, this.value_element, this.remove_button)
