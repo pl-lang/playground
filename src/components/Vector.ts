@@ -1,6 +1,7 @@
 import * as $ from 'jquery'
 import { Dispatcher } from "../Controller";
 import { ActionKind } from "../Actions";
+import { VarState } from "interprete-pl";
 
 type Cell = { index: number, value: number | boolean | string }
 
@@ -106,6 +107,32 @@ export default class Vector {
 
     out_of_scope() {
         this.message.text('Esta variable no esta en ámbito')
+        this.message.show()
+        this.cells = []
+        this.cells_container.empty()
+        this.cell_elements = []
+    }
+
+    not_defined() {
+        this.message.text('Esta variable no existe')
+        this.message.show()
+        this.cells = []
+        this.cells_container.empty()
+        this.cell_elements = []
+    }
+
+    change_state(state: VarState.DoesntExist | VarState.ExistsNotInit | VarState.ExistsOutOfScope) {
+        switch (state) {
+            case VarState.DoesntExist:
+                this.message.text('Esta variable no existe')
+                break
+            case VarState.ExistsNotInit:
+                this.message.text('Aun no ha sido inicializada')
+                break
+            case VarState.ExistsOutOfScope:
+                this.message.text('Esta variable no esta en ámbito')
+                break
+        }
         this.message.show()
         this.cells = []
         this.cells_container.empty()

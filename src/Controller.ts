@@ -100,7 +100,6 @@ export class Controller {
                     this.by_steps = true
                     const compiled_program_maybe = this.compile(a.code)
                     if (!compiled_program_maybe.error) {
-                        this.app_ui.clear_vars()
                         this.app_ui.show_step_controls()
                         this.program_running = true
                         const program = compiled_program_maybe.result
@@ -187,8 +186,8 @@ export class Controller {
             const bv = this.interpreter.export_var(name)
             this.app_ui.update_var(name, bv)
         }
-        else if (var_info.state == VarState.ExistsOutOfScope) {
-            this.app_ui.out_of_scope(name)
+        else {
+            this.app_ui.change_var_state(name, var_info.state)
         }
     }
 

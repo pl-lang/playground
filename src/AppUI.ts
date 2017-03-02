@@ -5,7 +5,7 @@ import PanelToggler from './components/PanelToggler'
 import InspectionPanel from './components/InspectionPanel'
 import { DragManager, Resizeable } from './DragManager'
 import { Dispatcher } from './Controller'
-import { Errors, Value, VarInfo, BoxedValue } from 'interprete-pl'
+import { Errors, Value, VarInfo, BoxedValue, VarState } from 'interprete-pl'
 import * as $ from 'jquery'
 
 export interface AppOptions {
@@ -210,8 +210,8 @@ export default class AppUI {
         return this.inspection_panel.update_var(name, values)
     }
 
-    out_of_scope(name: string) {
-        this.inspection_panel.out_of_scope(name)
+    change_var_state(name: string, state: VarState.DoesntExist | VarState.ExistsNotInit | VarState.ExistsOutOfScope) {
+        this.inspection_panel.change_var_state(name, state)
     }
 
     clear_vars() {

@@ -7,6 +7,7 @@ import Scalar from './Scalar'
 import Vector from './Vector'
 import InspectionMessage from './InspectionMessage'
 import { VarInfo, BoxedValue, BoxedVector, BoxedScalar } from 'interprete-pl'
+import { VarState } from 'interprete-pl'
 
 type Cell = { index: number, value: number | boolean | string }
 
@@ -106,9 +107,9 @@ export default class InspectionPanel implements Resizeable {
         }
     }
 
-    out_of_scope(name: string) {
+    change_var_state(name: string, state: VarState.DoesntExist | VarState.ExistsNotInit | VarState.ExistsOutOfScope) {
         const variable = this.find(name)
-        variable.out_of_scope()
+        variable.change_state(state)
     }
 
     private find(name: string): Scalar | Vector {

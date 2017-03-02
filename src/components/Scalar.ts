@@ -1,6 +1,7 @@
 import * as $ from 'jquery'
 import { ActionKind } from '../Actions'
 import { Dispatcher } from '../Controller'
+import { VarState } from 'interprete-pl'
 
 export default class Scalar {
     private parent: JQuery
@@ -51,9 +52,21 @@ export default class Scalar {
         }
     }
 
-    out_of_scope() {
+    change_state(state: VarState.DoesntExist | VarState.ExistsNotInit | VarState.ExistsOutOfScope) {
         this.value_element.addClass('italic')
-        this.value_element.text('Esta variable no esta en ámbito')
         this.value = null
+        switch (state) {
+            case VarState.DoesntExist:
+                this.value_element.text('Esta variable no existe')
+            break
+            case VarState.ExistsNotInit:
+                this.value_element.addClass('italic')
+                this.value_element.text('Aun no ha sido inicializada')
+            break
+            case VarState.ExistsOutOfScope:
+                this.value_element.addClass('italic')
+                this.value_element.text('Esta variable no esta en ámbito')
+            break
+        }
     }
 }
