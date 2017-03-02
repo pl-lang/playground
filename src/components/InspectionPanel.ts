@@ -109,7 +109,10 @@ export default class InspectionPanel implements Resizeable {
 
     change_var_state(name: string, state: VarState.DoesntExist | VarState.ExistsNotInit | VarState.ExistsOutOfScope) {
         const variable = this.find(name)
-        variable.change_state(state)
+        // actualizar solo variables existentes
+        if (variable) {
+            variable.change_state(state)
+        }
     }
 
     private find(name: string): Scalar | Vector {
