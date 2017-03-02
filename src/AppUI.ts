@@ -198,8 +198,8 @@ export default class AppUI {
         this.editor_panel.enable_buttons()
     }
 
-    add_var(name: string, value: { type: 'scalar', value: number | string | boolean } | { type: 'vector', cells: Cell[] }, found: boolean) {
-        this.inspection_panel.add_var(name, value, found)
+    add_var(name: string, in_scope: boolean, init: boolean, value: { type: 'scalar', value: number | string | boolean } | { type: 'vector', cells: Cell[] }) {
+        this.inspection_panel.add_var(name, in_scope, init, value)
     }
 
     get_var_names(): string[] {

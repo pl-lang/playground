@@ -14,7 +14,7 @@ export default class Vector {
     container: JQuery
     name: string
 
-    constructor(parent: JQuery, name: string, cells: Cell[], init: boolean, dispatcher: Dispatcher) {
+    constructor(parent: JQuery, name: string, in_scope: boolean, init: boolean, dispatcher: Dispatcher) {
         this.parent = parent
 
         this.dispatcher = dispatcher
@@ -48,33 +48,21 @@ export default class Vector {
         this.cell_elements = []
         this.cells = []
 
-        if (!init) {
-            this.message = $(`<span class="value italic">Aun no ha sido inicializada</span>`)
-            name_row.append(this.message, remove_button)
-            this.container.append(name_row)
+        if (in_scope) {
+            if (!init) {
+                this.message = $(`<span class="value italic">Aun no ha sido inicializada</span>`)
+                name_row.append(this.message, remove_button)
+                this.container.append(name_row)
+            }
         }
         else {
-            name_row.append(remove_button)
+            this.message = $(`<span class="value italic">Esta variable no esta en ámbito</span>`)
+            name_row.append(this.message, remove_button)
             this.container.append(name_row)
-            this.init_cells(cells)
         }
 
         this.container.append(this.cells_container)
         this.parent.append(this.container)
-    }
-
-    init_cells(cells: Cell[]) {
-        for (let cell of cells) {
-            const { container, index_element, value_element } = this.create_cell_element(cell.index + 1, cell.value)
-
-            this.cell_elements.push({ index_element, value_element })
-
-            this.cells_container.append(container)
-        }
-
-        this.cells = cells
-
-        this.container.append(this.cells_container)
     }
 
     update_values(bv: { type: 'vector', cells: Cell[]}) {
@@ -83,6 +71,7 @@ export default class Vector {
             this.message.remove()
             this.message = null
         }
+        
         if (bv.cells.length > this.cells.length) {
             const diff = bv.cells.length - this.cells.length
 

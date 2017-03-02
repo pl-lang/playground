@@ -181,8 +181,12 @@ export class Controller {
     }
 
     update_var(name: string) {
-        const bv = this.interpreter.export_var(name)
-        this.app_ui.update_var(name, bv)
+        const var_state = this.interpreter.search_var(name)
+
+        if (var_state == VarState.ExistsInit) {
+            const bv = this.interpreter.export_var(name)
+            this.app_ui.update_var(name, bv)
+        }
     }
 
     add_var(name: string) {
@@ -191,18 +195,18 @@ export class Controller {
             const bv = this.interpreter.export_var(name)
             if (var_state == VarState.ExistsInit) {
                 if (bv.type == 'scalar') {
-                    this.app_ui.add_var(name, bv, true)
+                    this.app_ui.add_var(name, true, true, bv)
                 }
                 else {
-                    this.app_ui.add_var(name, bv, true)
+                    this.app_ui.add_var(name, true, true, bv)
                 }
             }
             else {
                 if (bv.type == 'scalar') {
-                    this.app_ui.add_var(name, bv, false)
+                    this.app_ui.add_var(name, true, false, bv)
                 }
                 else {
-                    this.app_ui.add_var(name, bv, false)
+                    this.app_ui.add_var(name, true, false, bv)
                 }
             }
         }

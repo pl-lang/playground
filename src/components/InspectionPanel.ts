@@ -63,16 +63,24 @@ export default class InspectionPanel implements Resizeable {
         this.add_button.show()
     }
 
-    add_var(name: string, boxed_value: { type: 'scalar', value: number | string | boolean } | { type: 'vector', cells: Cell[] }, found: boolean) {
+    add_var(name: string, in_scope: boolean, init: boolean, boxed_value: { type: 'scalar', value: number | string | boolean } | { type: 'vector', cells: Cell[] }) {
+        // solo agregar la variable si no existe
+
         const variable = this.find(name)
 
         if (!variable) {
             if (boxed_value.type == 'scalar') {
-                const new_var = new Scalar(this.body, name, boxed_value.value, found, this.dispatcher)
+                const new_var = new Scalar(this.body, name, in_scope, init, this.dispatcher)
+                if (in_scope && init) {
+                    new_var.set_value(boxed_value)
+                }
                 this.var_elements.push(new_var)
             }
             else {
-                const new_var = new Vector(this.body, name, boxed_value.cells, found, this.dispatcher)
+                const new_var = new Vector(this.body, name, in_scope, init, this.dispatcher)
+                if (in_scope && init) {
+                    new_var.update_values(boxed_value)
+                }
                 this.var_elements.push(new_var)
             }
         }

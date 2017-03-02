@@ -11,7 +11,7 @@ export default class Scalar {
     container: JQuery
     name: string
 
-    constructor(parent: JQuery, name: string, value: number | boolean | string, init: boolean, dispatcher: Dispatcher) {
+    constructor(parent: JQuery, name: string, in_scope: boolean, init: boolean, dispatcher: Dispatcher) {
         this.parent = parent
 
         this.dispatcher = dispatcher
@@ -22,13 +22,14 @@ export default class Scalar {
 
         const name_element = $(`<span class="scalar-name">${name}:</span>`)
 
-        if (!init) {
-            this.value_element = $(`<span class="value italic">Aun no ha sido inicializada</span>`)
-            this.value = null
+        if (in_scope) {
+            if (!init) {
+                this.value = null
+                this.value_element = $(`<span class="value italic">Aun no ha sido inicializada</span>`)
+            }
         }
         else {
-            this.value_element = $(`<span class="value">${value}</span>`)
-            this.value = value
+            this.value_element = $(`<span class="value italic">Esta variable no esta en ámbito</span>`)
         }
 
         this.remove_button = $('<button class="simple-button-icon octicon octicon-x pull-right"></button>')
