@@ -187,6 +187,9 @@ export class Controller {
             const bv = this.interpreter.export_var(name)
             this.app_ui.update_var(name, bv)
         }
+        else if (var_info.state == VarState.ExistsOutOfScope) {
+            this.app_ui.out_of_scope(name)
+        }
     }
 
     add_var(name: string) {

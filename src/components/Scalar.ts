@@ -29,7 +29,7 @@ export default class Scalar {
             }
         }
         else {
-            this.value_element = $(`<span class="value italic">Esta variable no esta en ámbito</span>`)
+            this.value_element = $(`<span class="value italic">Esta variable no está en ámbito</span>`)
         }
 
         this.remove_button = $('<button class="simple-button-icon octicon octicon-x pull-right"></button>')
@@ -49,5 +49,10 @@ export default class Scalar {
             this.value = vb.value
             this.value_element.removeClass('italic')
         }
+    }
+
+    out_of_scope() {
+        this.value_element.text('Esta variable no esta en ámbito')
+        this.value = null
     }
 }

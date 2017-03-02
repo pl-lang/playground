@@ -106,6 +106,11 @@ export default class InspectionPanel implements Resizeable {
         }
     }
 
+    out_of_scope(name: string) {
+        const variable = this.find(name)
+        variable.out_of_scope()
+    }
+
     private find(name: string): Scalar | Vector {
         for (let i = 0; i < this.var_elements.length; i++) {
             const v_element = this.var_elements[i]

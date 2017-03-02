@@ -210,6 +210,10 @@ export default class AppUI {
         return this.inspection_panel.update_var(name, values)
     }
 
+    out_of_scope(name: string) {
+        this.inspection_panel.out_of_scope(name)
+    }
+
     clear_vars() {
         this.inspection_panel.clear()
     }

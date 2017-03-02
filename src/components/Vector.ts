@@ -56,7 +56,7 @@ export default class Vector {
             }
         }
         else {
-            this.message = $(`<span class="value italic">Esta variable no esta en ámbito</span>`)
+            this.message = $(`<span class="value italic">Esta variable no está en ámbito</span>`)
             name_row.append(this.message, remove_button)
             this.container.append(name_row)
         }
@@ -66,11 +66,7 @@ export default class Vector {
     }
 
     update_values(bv: { type: 'vector', cells: Cell[]}) {
-        if (this.message) {
-            this.message.empty()
-            this.message.remove()
-            this.message = null
-        }
+        this.message.hide()
         
         if (bv.cells.length > this.cells.length) {
             const diff = bv.cells.length - this.cells.length
@@ -106,5 +102,13 @@ export default class Vector {
         element_container.append(index_element, value_element)
 
         return { container: element_container, index_element, value_element }
+    }
+
+    out_of_scope() {
+        this.message.text('Esta variable no esta en ámbito')
+        this.message.show()
+        this.cells = []
+        this.cells_container.empty()
+        this.cell_elements = []
     }
 }
