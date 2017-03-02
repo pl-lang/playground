@@ -1,0 +1,48 @@
+#inspection-panel {
+  height: 100%;
+  border-left: 1px solid hsl(192, 15%, 70%);
+}
+
+#inspection-panel-body {
+  height: 100%;
+  background-color: white;
+}
+
+.scalar {
+  margin: 2px 8px 2px 4px;
+  font-family: "Source Code Pro Regular", "Consolas", monospace;
+  font-size: 10pt;
+}
+
+.vector {
+  margin: 2px 4px 2px 0px;
+  font-family: "Source Code Pro Regular", "Consolas", monospace;
+  font-size: 10pt;
+}
+
+.vector-cell {
+  margin: 1px 4px 2px 4px;
+  font-family: "Source Code Pro Regular", "Consolas", monospace;
+  font-size: 10pt;
+}
+
+.value {
+  margin-left: 4px;
+  color: #d20606; 
+}
+
+.input-border {
+  border-top: 1px solid #a7babe;
+  border-bottom: 1px solid #a7babe;
+  height: 20px;
+  margin-left: 0px;
+  padding-left: 4px;
+}
+
+.toggle-button {
+  font-size: 11px;
+  margin-right: 4px;
+  margin-left: 0px;
+  width: 18px;
+  height: 18px;
+}

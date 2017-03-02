@@ -1,9 +1,12 @@
 import * as $ from 'jquery'
+import { Resizeable } from '../DragManager'
 
-export default class CodePanel {
+export default class CodePanel implements Resizeable {
     parent: JQuery
     container: JQuery
     private code: JQuery
+    container_index: number
+    panel_index: number
 
     constructor(parent: JQuery) {
         this.parent = parent

@@ -20,7 +20,12 @@ export enum ActionKind {
     FocusEditor,
     DisableButtons,
     EnableButtons,
-    RemovePanel
+    HidePanel,
+    ShowPanel,
+    SendVarName,
+    UpdateVars,
+    RemoveVarFromInspection,
+    RemoveMsgFromInspection,
 }
 
 export type Action = Execute
@@ -41,7 +46,44 @@ export type Action = Execute
     | StopExecutionUser
     | FocusEditor
     | DisableButtons
-    | EnableButtons;
+    | EnableButtons
+    | HidePanel
+    | ShowPanel
+    | SendVarName
+    | UpdateVars
+    | RemoveVarFromInspection
+    | RemoveMsgFromInspection;
+
+export interface RemoveMsgFromInspection {
+    kind: ActionKind.RemoveMsgFromInspection
+    name: string
+}
+
+export interface RemoveVarFromInspection {
+    kind: ActionKind.RemoveVarFromInspection
+    name: string
+}
+
+export interface UpdateVars {
+    kind: ActionKind.UpdateVars
+}
+
+export interface SendVarName {
+    kind: ActionKind.SendVarName
+    name: string
+}
+
+export interface ShowPanel {
+    kind: ActionKind.ShowPanel
+    container_index: number
+    panel_index: number
+}
+
+export interface HidePanel {
+    kind: ActionKind.HidePanel
+    container_index: number
+    panel_index: number
+}
 
 export interface EnableButtons {
     kind: ActionKind.EnableButtons

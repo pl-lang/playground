@@ -1,9 +1,11 @@
 #fr-panel {
   height: 100%;
-  width: 25%;
+  border-left: 1px solid hsl(192, 15%, 70%);
 }		
 		
 #fr-pre {		
   margin-top: 4px;		
-  margin-left: 4px;		
+  margin-left: 4px;
+  font-family: "Source Code Pro Regular", "Consolas", monospace;
+  font-size: 10pt;
 }

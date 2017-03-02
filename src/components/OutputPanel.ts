@@ -3,8 +3,9 @@ import Window from './Window'
 import { Dispatcher } from '../Controller'
 import { Action, ActionKind } from '../Actions'
 import { Value } from 'interprete-pl'
+import { Resizeable } from '../DragManager'
 
-export default class {
+export default class OutputPanel implements Resizeable {
     parent: JQuery
     container: JQuery
     private output: Window
@@ -12,6 +13,8 @@ export default class {
     private bar: JQuery
     private step_button: JQuery
     private stop_button: JQuery
+    container_index: number
+    panel_index: number
 
     constructor(container: JQuery, d: Dispatcher) {
         this.parent = container

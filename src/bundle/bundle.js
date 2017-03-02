@@ -63,489 +63,11 @@
 /******/ 	__webpack_require__.p = "";
 
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 38);
+/******/ 	return __webpack_require__(__webpack_require__.s = 43);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var tslib_1 = __webpack_require__(11);
-/**
- * Interfaces para elementos sintacticos
- */
-var ValueKind;
-(function (ValueKind) {
-    ValueKind[ValueKind["Integer"] = 0] = "Integer";
-    ValueKind[ValueKind["Real"] = 1] = "Real";
-    ValueKind[ValueKind["String"] = 2] = "String";
-})(ValueKind = exports.ValueKind || (exports.ValueKind = {}));
-var SymbolKind;
-(function (SymbolKind) {
-    SymbolKind[SymbolKind["Plus"] = 3] = "Plus";
-    SymbolKind[SymbolKind["Minus"] = 4] = "Minus";
-    SymbolKind[SymbolKind["Times"] = 5] = "Times";
-    SymbolKind[SymbolKind["Slash"] = 6] = "Slash";
-    SymbolKind[SymbolKind["Power"] = 7] = "Power";
-    SymbolKind[SymbolKind["Assignment"] = 8] = "Assignment";
-    SymbolKind[SymbolKind["Minor"] = 9] = "Minor";
-    SymbolKind[SymbolKind["MinorEq"] = 10] = "MinorEq";
-    SymbolKind[SymbolKind["Different"] = 11] = "Different";
-    SymbolKind[SymbolKind["Equal"] = 12] = "Equal";
-    SymbolKind[SymbolKind["Major"] = 13] = "Major";
-    SymbolKind[SymbolKind["MajorEq"] = 14] = "MajorEq";
-    SymbolKind[SymbolKind["LeftPar"] = 15] = "LeftPar";
-    SymbolKind[SymbolKind["RightPar"] = 16] = "RightPar";
-    SymbolKind[SymbolKind["LeftBracket"] = 17] = "LeftBracket";
-    SymbolKind[SymbolKind["RightBracket"] = 18] = "RightBracket";
-    SymbolKind[SymbolKind["Comma"] = 19] = "Comma";
-    SymbolKind[SymbolKind["EOF"] = 20] = "EOF";
-    SymbolKind[SymbolKind["EOL"] = 21] = "EOL";
-})(SymbolKind = exports.SymbolKind || (exports.SymbolKind = {}));
-var ReservedKind;
-(function (ReservedKind) {
-    ReservedKind[ReservedKind["Si"] = 22] = "Si";
-    ReservedKind[ReservedKind["Or"] = 23] = "Or";
-    ReservedKind[ReservedKind["Fin"] = 24] = "Fin";
-    ReservedKind[ReservedKind["Que"] = 25] = "Que";
-    ReservedKind[ReservedKind["Div"] = 26] = "Div";
-    ReservedKind[ReservedKind["And"] = 27] = "And";
-    ReservedKind[ReservedKind["Not"] = 28] = "Not";
-    ReservedKind[ReservedKind["Mod"] = 29] = "Mod";
-    ReservedKind[ReservedKind["Ref"] = 30] = "Ref";
-    ReservedKind[ReservedKind["Sino"] = 31] = "Sino";
-    ReservedKind[ReservedKind["Para"] = 32] = "Para";
-    ReservedKind[ReservedKind["Real"] = 33] = "Real";
-    ReservedKind[ReservedKind["FinSi"] = 34] = "FinSi";
-    ReservedKind[ReservedKind["Hasta"] = 35] = "Hasta";
-    ReservedKind[ReservedKind["Falso"] = 36] = "Falso";
-    ReservedKind[ReservedKind["Inicio"] = 37] = "Inicio";
-    ReservedKind[ReservedKind["Entero"] = 38] = "Entero";
-    ReservedKind[ReservedKind["Logico"] = 39] = "Logico";
-    ReservedKind[ReservedKind["FinPara"] = 40] = "FinPara";
-    ReservedKind[ReservedKind["Repetir"] = 41] = "Repetir";
-    ReservedKind[ReservedKind["Funcion"] = 42] = "Funcion";
-    ReservedKind[ReservedKind["Entonces"] = 43] = "Entonces";
-    ReservedKind[ReservedKind["Mientras"] = 44] = "Mientras";
-    ReservedKind[ReservedKind["Caracter"] = 45] = "Caracter";
-    ReservedKind[ReservedKind["Retornar"] = 46] = "Retornar";
-    ReservedKind[ReservedKind["Variables"] = 47] = "Variables";
-    ReservedKind[ReservedKind["Verdadero"] = 48] = "Verdadero";
-    ReservedKind[ReservedKind["FinFuncion"] = 49] = "FinFuncion";
-    ReservedKind[ReservedKind["FinMientras"] = 50] = "FinMientras";
-    ReservedKind[ReservedKind["Procedimiento"] = 51] = "Procedimiento";
-    ReservedKind[ReservedKind["FinProcedimiento"] = 52] = "FinProcedimiento";
-    ReservedKind[ReservedKind["Neg"] = 53] = "Neg";
-})(ReservedKind = exports.ReservedKind || (exports.ReservedKind = {}));
-var OtherKind;
-(function (OtherKind) {
-    OtherKind[OtherKind["Word"] = 54] = "Word";
-    OtherKind[OtherKind["Unknown"] = 55] = "Unknown";
-})(OtherKind = exports.OtherKind || (exports.OtherKind = {}));
-/**
- * Stage 3: transforms a program into another that's equivalent
- * and can be executed by the interpreter
- */
-var S3;
-(function (S3) {
-    function get_last(s) {
-        var current = s;
-        while (current.exit_point !== null) {
-            current = current.exit_point;
-        }
-        return current;
-    }
-    S3.get_last = get_last;
-    var StatementKinds;
-    (function (StatementKinds) {
-        StatementKinds[StatementKinds["Plus"] = 0] = "Plus";
-        StatementKinds[StatementKinds["Minus"] = 1] = "Minus";
-        StatementKinds[StatementKinds["Times"] = 2] = "Times";
-        StatementKinds[StatementKinds["Slash"] = 3] = "Slash";
-        StatementKinds[StatementKinds["Div"] = 4] = "Div";
-        StatementKinds[StatementKinds["Mod"] = 5] = "Mod";
-        StatementKinds[StatementKinds["Power"] = 6] = "Power";
-        StatementKinds[StatementKinds["Assign"] = 7] = "Assign";
-        StatementKinds[StatementKinds["Get"] = 8] = "Get";
-        StatementKinds[StatementKinds["AssignV"] = 9] = "AssignV";
-        StatementKinds[StatementKinds["GetV"] = 10] = "GetV";
-        StatementKinds[StatementKinds["Push"] = 11] = "Push";
-        StatementKinds[StatementKinds["Pop"] = 12] = "Pop";
-        StatementKinds[StatementKinds["Minor"] = 13] = "Minor";
-        StatementKinds[StatementKinds["MinorEq"] = 14] = "MinorEq";
-        StatementKinds[StatementKinds["Different"] = 15] = "Different";
-        StatementKinds[StatementKinds["Equal"] = 16] = "Equal";
-        StatementKinds[StatementKinds["Major"] = 17] = "Major";
-        StatementKinds[StatementKinds["MajorEq"] = 18] = "MajorEq";
-        StatementKinds[StatementKinds["Not"] = 19] = "Not";
-        StatementKinds[StatementKinds["And"] = 20] = "And";
-        StatementKinds[StatementKinds["Or"] = 21] = "Or";
-        StatementKinds[StatementKinds["If"] = 22] = "If";
-        StatementKinds[StatementKinds["While"] = 23] = "While";
-        StatementKinds[StatementKinds["Until"] = 24] = "Until";
-        StatementKinds[StatementKinds["UserModuleCall"] = 25] = "UserModuleCall";
-        StatementKinds[StatementKinds["ReadCall"] = 26] = "ReadCall";
-        StatementKinds[StatementKinds["WriteCall"] = 27] = "WriteCall";
-        StatementKinds[StatementKinds["Return"] = 28] = "Return";
-        StatementKinds[StatementKinds["Concat"] = 29] = "Concat";
-        StatementKinds[StatementKinds["AssignString"] = 30] = "AssignString";
-        StatementKinds[StatementKinds["Alias"] = 31] = "Alias";
-        StatementKinds[StatementKinds["CopyVec"] = 32] = "CopyVec";
-        StatementKinds[StatementKinds["Neg"] = 33] = "Neg";
-        StatementKinds[StatementKinds["MakeFrame"] = 34] = "MakeFrame";
-        StatementKinds[StatementKinds["InitV"] = 35] = "InitV";
-    })(StatementKinds = S3.StatementKinds || (S3.StatementKinds = {}));
-    var BaseStatement = (function () {
-        function BaseStatement(owner) {
-            this.owner = owner;
-            this._exit_point = null;
-            this.exit_set = false;
-        }
-        Object.defineProperty(BaseStatement.prototype, "exit_point", {
-            get: function () {
-                return this._exit_point;
-            },
-            set: function (s) {
-                if (this.exit_set == true) {
-                    throw new Error('No se puede establecer el punto de salida de un Statement mas de una vez.');
-                }
-                else {
-                    this._exit_point = s;
-                    this.exit_set = true;
-                }
-            },
-            enumerable: true,
-            configurable: true
-        });
-        return BaseStatement;
-    }());
-    S3.BaseStatement = BaseStatement;
-    var MakeFrame = (function (_super) {
-        tslib_1.__extends(MakeFrame, _super);
-        function MakeFrame(owner, name) {
-            var _this = _super.call(this, owner) || this;
-            _this.kind = StatementKinds.MakeFrame;
-            _this.name = name;
-            _this.is_user_stmnt = false;
-            return _this;
-        }
-        return MakeFrame;
-    }(BaseStatement));
-    S3.MakeFrame = MakeFrame;
-    // Los contenidos de esta clase son parecidos a los de CopyVec al proposito
-    var InitV = (function (_super) {
-        tslib_1.__extends(InitV, _super);
-        function InitV(owner, source, target_name) {
-            var _this = _super.call(this, owner) || this;
-            _this.kind = StatementKinds.InitV;
-            _this.source = source;
-            _this.target_name = target_name;
-            _this.is_user_stmnt = false;
-            return _this;
-        }
-        return InitV;
-    }(BaseStatement));
-    S3.InitV = InitV;
-    var CopyVec = (function (_super) {
-        tslib_1.__extends(CopyVec, _super);
-        /**
-         * target datos del vector que recibe los datos;
-         * source datos del vector del cual se copian los datos;
-         */
-        function CopyVec(owner, target, source, pos) {
-            var _this = _super.call(this, owner) || this;
-            _this.kind = StatementKinds.CopyVec;
-            _this.target = target;
-            _this.source = source;
-            _this.is_user_stmnt = true;
-            _this.pos = pos;
-            return _this;
-        }
-        return CopyVec;
-    }(BaseStatement));
-    S3.CopyVec = CopyVec;
-    var Alias = (function (_super) {
-        tslib_1.__extends(Alias, _super);
-        function Alias(owner, varname, indexes, dimensions, alias, module_name) {
-            var _this = _super.call(this, owner) || this;
-            _this.kind = StatementKinds.Alias;
-            _this.varname = varname;
-            _this.var_indexes = indexes;
-            _this.local_alias = alias;
-            _this.dimensions = dimensions;
-            _this.module_name = module_name;
-            _this.is_user_stmnt = false;
-            return _this;
-        }
-        return Alias;
-    }(BaseStatement));
-    S3.Alias = Alias;
-    var AssignString = (function (_super) {
-        tslib_1.__extends(AssignString, _super);
-        function AssignString(owner, varname, length, indexes, user, pos) {
-            var _this = _super.call(this, owner) || this;
-            _this.kind = StatementKinds.AssignString;
-            _this.varname = varname;
-            _this.length = length;
-            _this.indexes = indexes;
-            _this.is_user_stmnt = user;
-            _this.pos = pos;
-            return _this;
-        }
-        return AssignString;
-    }(BaseStatement));
-    S3.AssignString = AssignString;
-    var Concat = (function (_super) {
-        tslib_1.__extends(Concat, _super);
-        function Concat(owner, length) {
-            var _this = _super.call(this, owner) || this;
-            _this.kind = StatementKinds.Concat;
-            _this.length = length;
-            _this.is_user_stmnt = false;
-            return _this;
-        }
-        return Concat;
-    }(BaseStatement));
-    S3.Concat = Concat;
-    var Return = (function (_super) {
-        tslib_1.__extends(Return, _super);
-        function Return(owner, pos) {
-            var _this = _super.call(this, owner) || this;
-            _this.kind = StatementKinds.Return;
-            _this.is_user_stmnt = true;
-            _this.pos = pos;
-            return _this;
-        }
-        return Return;
-    }(BaseStatement));
-    S3.Return = Return;
-    var UserModuleCall = (function (_super) {
-        tslib_1.__extends(UserModuleCall, _super);
-        function UserModuleCall(owner, name, total_args, pos) {
-            var _this = _super.call(this, owner) || this;
-            _this.name = name;
-            _this.total_args = total_args;
-            _this.kind = StatementKinds.UserModuleCall;
-            _this.is_user_stmnt = true;
-            _this.pos = pos;
-            return _this;
-        }
-        return UserModuleCall;
-    }(BaseStatement));
-    S3.UserModuleCall = UserModuleCall;
-    var ReadCall = (function (_super) {
-        tslib_1.__extends(ReadCall, _super);
-        function ReadCall(owner, varname, type, pos) {
-            var _this = _super.call(this, owner) || this;
-            _this.varname = varname;
-            _this.kind = StatementKinds.ReadCall;
-            _this.name = 'leer';
-            _this.type = type;
-            _this.is_user_stmnt = true;
-            _this.pos = pos;
-            return _this;
-        }
-        return ReadCall;
-    }(BaseStatement));
-    S3.ReadCall = ReadCall;
-    var WriteCall = (function (_super) {
-        tslib_1.__extends(WriteCall, _super);
-        function WriteCall(owner, pos) {
-            var _this = _super.call(this, owner) || this;
-            _this.kind = StatementKinds.WriteCall;
-            _this.name = 'escribir';
-            _this.is_user_stmnt = true;
-            _this.pos = pos;
-            return _this;
-        }
-        return WriteCall;
-    }(BaseStatement));
-    S3.WriteCall = WriteCall;
-    var Assign = (function (_super) {
-        tslib_1.__extends(Assign, _super);
-        function Assign(owner, varname, user, pos) {
-            var _this = _super.call(this, owner) || this;
-            _this.varname = varname;
-            _this.kind = StatementKinds.Assign;
-            _this.is_user_stmnt = user;
-            _this.pos = pos;
-            return _this;
-        }
-        return Assign;
-    }(BaseStatement));
-    S3.Assign = Assign;
-    var AssignV = (function (_super) {
-        tslib_1.__extends(AssignV, _super);
-        function AssignV(owner, total_indexes, dimensions, varname, user, pos) {
-            var _this = _super.call(this, owner) || this;
-            _this.total_indexes = total_indexes;
-            _this.dimensions = dimensions;
-            _this.varname = varname;
-            _this.kind = StatementKinds.AssignV;
-            _this.is_user_stmnt = user;
-            _this.pos = pos;
-            return _this;
-        }
-        return AssignV;
-    }(BaseStatement));
-    S3.AssignV = AssignV;
-    var Get = (function (_super) {
-        tslib_1.__extends(Get, _super);
-        function Get(owner, varname) {
-            var _this = _super.call(this, owner) || this;
-            _this.varname = varname;
-            _this.kind = StatementKinds.Get;
-            return _this;
-        }
-        return Get;
-    }(BaseStatement));
-    S3.Get = Get;
-    var GetV = (function (_super) {
-        tslib_1.__extends(GetV, _super);
-        function GetV(owner, total_indexes, dimensions, varname) {
-            var _this = _super.call(this, owner) || this;
-            _this.total_indexes = total_indexes;
-            _this.dimensions = dimensions;
-            _this.varname = varname;
-            _this.kind = StatementKinds.GetV;
-            return _this;
-        }
-        return GetV;
-    }(BaseStatement));
-    S3.GetV = GetV;
-    var Push = (function (_super) {
-        tslib_1.__extends(Push, _super);
-        function Push(owner, value) {
-            var _this = _super.call(this, owner) || this;
-            _this.value = value;
-            _this.kind = StatementKinds.Push;
-            return _this;
-        }
-        return Push;
-    }(BaseStatement));
-    S3.Push = Push;
-    var Pop = (function (_super) {
-        tslib_1.__extends(Pop, _super);
-        function Pop(owner) {
-            var _this = _super.call(this, owner) || this;
-            _this.kind = StatementKinds.Pop;
-            return _this;
-        }
-        return Pop;
-    }(BaseStatement));
-    S3.Pop = Pop;
-    var Operation = (function (_super) {
-        tslib_1.__extends(Operation, _super);
-        function Operation(owner, kind) {
-            var _this = _super.call(this, owner) || this;
-            _this.kind = kind;
-            return _this;
-        }
-        return Operation;
-    }(BaseStatement));
-    S3.Operation = Operation;
-    var While = (function (_super) {
-        tslib_1.__extends(While, _super);
-        function While(owner, entry_point, pos) {
-            var _this = _super.call(this, owner) || this;
-            _this.entry_point = entry_point;
-            _this.kind = StatementKinds.While;
-            _this.is_user_stmnt = true;
-            _this.pos = pos;
-            return _this;
-        }
-        return While;
-    }(BaseStatement));
-    S3.While = While;
-    var Until = (function (_super) {
-        tslib_1.__extends(Until, _super);
-        function Until(owner, entry_point, pos) {
-            var _this = _super.call(this, owner) || this;
-            _this.entry_point = entry_point;
-            _this.kind = StatementKinds.Until;
-            _this.is_user_stmnt = true;
-            _this.pos = pos;
-            return _this;
-        }
-        return Until;
-    }(BaseStatement));
-    S3.Until = Until;
-    var If = (function (_super) {
-        tslib_1.__extends(If, _super);
-        function If(owner, true_branch_entry, false_branch_entry, pos) {
-            var _this = _super.call(this, owner) || this;
-            _this.true_branch_entry = true_branch_entry;
-            _this.false_branch_entry = false_branch_entry;
-            _this.kind = StatementKinds.If;
-            _this.is_user_stmnt = true;
-            _this.pos = pos;
-            return _this;
-        }
-        Object.defineProperty(If.prototype, "exit_point", {
-            get: function () {
-                return this._exit_point;
-            },
-            set: function (s) {
-                if (this.exit_set == true) {
-                    throw new Error('No se puede establecer el punto de salida de un Statement mas de una vez.');
-                }
-                else {
-                    this._exit_point = s;
-                    var last_true_s = get_last(this.true_branch_entry);
-                    last_true_s.exit_point = s;
-                    var last_false_s = get_last(this.false_branch_entry);
-                    last_false_s.exit_point = s;
-                    this.exit_set = true;
-                }
-            },
-            enumerable: true,
-            configurable: true
-        });
-        return If;
-    }(BaseStatement));
-    S3.If = If;
-})(S3 = exports.S3 || (exports.S3 = {}));
-/**
- * Stage 4:
- */
-var Typed;
-(function (Typed) {
-    var ArrayType = (function () {
-        function ArrayType(represents, element_type, length) {
-            this.kind = 'array';
-            this.type = 'type';
-            this.length = length;
-            this.cell_type = element_type;
-            this.represents = represents;
-        }
-        return ArrayType;
-    }());
-    Typed.ArrayType = ArrayType;
-    var AtomicType = (function () {
-        function AtomicType(represents, tn) {
-            this.kind = 'atomic';
-            this.type = 'type';
-            this.typename = tn;
-            this.represents = represents;
-        }
-        return AtomicType;
-    }());
-    Typed.AtomicType = AtomicType;
-    var StringType = (function (_super) {
-        tslib_1.__extends(StringType, _super);
-        function StringType(length, represents) {
-            return _super.call(this, represents, new AtomicType(represents, 'caracter'), length) || this;
-        }
-        return StringType;
-    }(ArrayType));
-    Typed.StringType = StringType;
-})(Typed = exports.Typed || (exports.Typed = {}));
-
-
-/***/ }),
-/* 1 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -10772,12 +10294,537 @@ return jQuery;
 
 
 /***/ }),
+/* 1 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var tslib_1 = __webpack_require__(12);
+/**
+ * Interfaces para elementos sintacticos
+ */
+var ValueKind;
+(function (ValueKind) {
+    ValueKind[ValueKind["Integer"] = 0] = "Integer";
+    ValueKind[ValueKind["Real"] = 1] = "Real";
+    ValueKind[ValueKind["String"] = 2] = "String";
+})(ValueKind = exports.ValueKind || (exports.ValueKind = {}));
+var SymbolKind;
+(function (SymbolKind) {
+    SymbolKind[SymbolKind["Plus"] = 3] = "Plus";
+    SymbolKind[SymbolKind["Minus"] = 4] = "Minus";
+    SymbolKind[SymbolKind["Times"] = 5] = "Times";
+    SymbolKind[SymbolKind["Slash"] = 6] = "Slash";
+    SymbolKind[SymbolKind["Power"] = 7] = "Power";
+    SymbolKind[SymbolKind["Assignment"] = 8] = "Assignment";
+    SymbolKind[SymbolKind["Minor"] = 9] = "Minor";
+    SymbolKind[SymbolKind["MinorEq"] = 10] = "MinorEq";
+    SymbolKind[SymbolKind["Different"] = 11] = "Different";
+    SymbolKind[SymbolKind["Equal"] = 12] = "Equal";
+    SymbolKind[SymbolKind["Major"] = 13] = "Major";
+    SymbolKind[SymbolKind["MajorEq"] = 14] = "MajorEq";
+    SymbolKind[SymbolKind["LeftPar"] = 15] = "LeftPar";
+    SymbolKind[SymbolKind["RightPar"] = 16] = "RightPar";
+    SymbolKind[SymbolKind["LeftBracket"] = 17] = "LeftBracket";
+    SymbolKind[SymbolKind["RightBracket"] = 18] = "RightBracket";
+    SymbolKind[SymbolKind["Comma"] = 19] = "Comma";
+    SymbolKind[SymbolKind["EOF"] = 20] = "EOF";
+    SymbolKind[SymbolKind["EOL"] = 21] = "EOL";
+})(SymbolKind = exports.SymbolKind || (exports.SymbolKind = {}));
+var ReservedKind;
+(function (ReservedKind) {
+    ReservedKind[ReservedKind["Si"] = 22] = "Si";
+    ReservedKind[ReservedKind["Or"] = 23] = "Or";
+    ReservedKind[ReservedKind["Fin"] = 24] = "Fin";
+    ReservedKind[ReservedKind["Que"] = 25] = "Que";
+    ReservedKind[ReservedKind["Div"] = 26] = "Div";
+    ReservedKind[ReservedKind["And"] = 27] = "And";
+    ReservedKind[ReservedKind["Not"] = 28] = "Not";
+    ReservedKind[ReservedKind["Mod"] = 29] = "Mod";
+    ReservedKind[ReservedKind["Ref"] = 30] = "Ref";
+    ReservedKind[ReservedKind["Sino"] = 31] = "Sino";
+    ReservedKind[ReservedKind["Para"] = 32] = "Para";
+    ReservedKind[ReservedKind["Real"] = 33] = "Real";
+    ReservedKind[ReservedKind["FinSi"] = 34] = "FinSi";
+    ReservedKind[ReservedKind["Hasta"] = 35] = "Hasta";
+    ReservedKind[ReservedKind["Falso"] = 36] = "Falso";
+    ReservedKind[ReservedKind["Inicio"] = 37] = "Inicio";
+    ReservedKind[ReservedKind["Entero"] = 38] = "Entero";
+    ReservedKind[ReservedKind["Logico"] = 39] = "Logico";
+    ReservedKind[ReservedKind["FinPara"] = 40] = "FinPara";
+    ReservedKind[ReservedKind["Repetir"] = 41] = "Repetir";
+    ReservedKind[ReservedKind["Funcion"] = 42] = "Funcion";
+    ReservedKind[ReservedKind["Entonces"] = 43] = "Entonces";
+    ReservedKind[ReservedKind["Mientras"] = 44] = "Mientras";
+    ReservedKind[ReservedKind["Caracter"] = 45] = "Caracter";
+    ReservedKind[ReservedKind["Retornar"] = 46] = "Retornar";
+    ReservedKind[ReservedKind["Variables"] = 47] = "Variables";
+    ReservedKind[ReservedKind["Verdadero"] = 48] = "Verdadero";
+    ReservedKind[ReservedKind["FinFuncion"] = 49] = "FinFuncion";
+    ReservedKind[ReservedKind["FinMientras"] = 50] = "FinMientras";
+    ReservedKind[ReservedKind["Procedimiento"] = 51] = "Procedimiento";
+    ReservedKind[ReservedKind["FinProcedimiento"] = 52] = "FinProcedimiento";
+    ReservedKind[ReservedKind["Neg"] = 53] = "Neg";
+})(ReservedKind = exports.ReservedKind || (exports.ReservedKind = {}));
+var OtherKind;
+(function (OtherKind) {
+    OtherKind[OtherKind["Word"] = 54] = "Word";
+    OtherKind[OtherKind["Unknown"] = 55] = "Unknown";
+})(OtherKind = exports.OtherKind || (exports.OtherKind = {}));
+/**
+ * Stage 3: transforms a program into another that's equivalent
+ * and can be executed by the interpreter
+ */
+var S3;
+(function (S3) {
+    function get_last(s) {
+        var current = s;
+        while (current.exit_point !== null) {
+            current = current.exit_point;
+        }
+        return current;
+    }
+    S3.get_last = get_last;
+    var StatementKinds;
+    (function (StatementKinds) {
+        StatementKinds[StatementKinds["Plus"] = 0] = "Plus";
+        StatementKinds[StatementKinds["Minus"] = 1] = "Minus";
+        StatementKinds[StatementKinds["Times"] = 2] = "Times";
+        StatementKinds[StatementKinds["Slash"] = 3] = "Slash";
+        StatementKinds[StatementKinds["Div"] = 4] = "Div";
+        StatementKinds[StatementKinds["Mod"] = 5] = "Mod";
+        StatementKinds[StatementKinds["Power"] = 6] = "Power";
+        StatementKinds[StatementKinds["Assign"] = 7] = "Assign";
+        StatementKinds[StatementKinds["Get"] = 8] = "Get";
+        StatementKinds[StatementKinds["AssignV"] = 9] = "AssignV";
+        StatementKinds[StatementKinds["GetV"] = 10] = "GetV";
+        StatementKinds[StatementKinds["Push"] = 11] = "Push";
+        StatementKinds[StatementKinds["Pop"] = 12] = "Pop";
+        StatementKinds[StatementKinds["Minor"] = 13] = "Minor";
+        StatementKinds[StatementKinds["MinorEq"] = 14] = "MinorEq";
+        StatementKinds[StatementKinds["Different"] = 15] = "Different";
+        StatementKinds[StatementKinds["Equal"] = 16] = "Equal";
+        StatementKinds[StatementKinds["Major"] = 17] = "Major";
+        StatementKinds[StatementKinds["MajorEq"] = 18] = "MajorEq";
+        StatementKinds[StatementKinds["Not"] = 19] = "Not";
+        StatementKinds[StatementKinds["And"] = 20] = "And";
+        StatementKinds[StatementKinds["Or"] = 21] = "Or";
+        StatementKinds[StatementKinds["If"] = 22] = "If";
+        StatementKinds[StatementKinds["While"] = 23] = "While";
+        StatementKinds[StatementKinds["Until"] = 24] = "Until";
+        StatementKinds[StatementKinds["UserModuleCall"] = 25] = "UserModuleCall";
+        StatementKinds[StatementKinds["ReadCall"] = 26] = "ReadCall";
+        StatementKinds[StatementKinds["WriteCall"] = 27] = "WriteCall";
+        StatementKinds[StatementKinds["Return"] = 28] = "Return";
+        StatementKinds[StatementKinds["Concat"] = 29] = "Concat";
+        StatementKinds[StatementKinds["AssignString"] = 30] = "AssignString";
+        StatementKinds[StatementKinds["Alias"] = 31] = "Alias";
+        StatementKinds[StatementKinds["CopyVec"] = 32] = "CopyVec";
+        StatementKinds[StatementKinds["Neg"] = 33] = "Neg";
+        StatementKinds[StatementKinds["MakeFrame"] = 34] = "MakeFrame";
+        StatementKinds[StatementKinds["InitV"] = 35] = "InitV";
+    })(StatementKinds = S3.StatementKinds || (S3.StatementKinds = {}));
+    var BaseStatement = (function () {
+        function BaseStatement(owner) {
+            this.owner = owner;
+            this._exit_point = null;
+            this.exit_set = false;
+        }
+        Object.defineProperty(BaseStatement.prototype, "exit_point", {
+            get: function () {
+                return this._exit_point;
+            },
+            set: function (s) {
+                if (this.exit_set == true) {
+                    throw new Error('No se puede establecer el punto de salida de un Statement mas de una vez.');
+                }
+                else {
+                    this._exit_point = s;
+                    this.exit_set = true;
+                }
+            },
+            enumerable: true,
+            configurable: true
+        });
+        return BaseStatement;
+    }());
+    S3.BaseStatement = BaseStatement;
+    var MakeFrame = (function (_super) {
+        tslib_1.__extends(MakeFrame, _super);
+        function MakeFrame(owner, name) {
+            var _this = _super.call(this, owner) || this;
+            _this.kind = StatementKinds.MakeFrame;
+            _this.name = name;
+            _this.is_user_stmnt = false;
+            return _this;
+        }
+        return MakeFrame;
+    }(BaseStatement));
+    S3.MakeFrame = MakeFrame;
+    // Los contenidos de esta clase son parecidos a los de CopyVec al proposito
+    var InitV = (function (_super) {
+        tslib_1.__extends(InitV, _super);
+        function InitV(owner, source, target_name) {
+            var _this = _super.call(this, owner) || this;
+            _this.kind = StatementKinds.InitV;
+            _this.source = source;
+            _this.target_name = target_name;
+            _this.is_user_stmnt = false;
+            return _this;
+        }
+        return InitV;
+    }(BaseStatement));
+    S3.InitV = InitV;
+    var CopyVec = (function (_super) {
+        tslib_1.__extends(CopyVec, _super);
+        /**
+         * target datos del vector que recibe los datos;
+         * source datos del vector del cual se copian los datos;
+         */
+        function CopyVec(owner, target, source, pos) {
+            var _this = _super.call(this, owner) || this;
+            _this.kind = StatementKinds.CopyVec;
+            _this.target = target;
+            _this.source = source;
+            _this.is_user_stmnt = true;
+            _this.pos = pos;
+            return _this;
+        }
+        return CopyVec;
+    }(BaseStatement));
+    S3.CopyVec = CopyVec;
+    var Alias = (function (_super) {
+        tslib_1.__extends(Alias, _super);
+        function Alias(owner, varname, indexes, dimensions, alias, module_name, varkind) {
+            var _this = _super.call(this, owner) || this;
+            _this.kind = StatementKinds.Alias;
+            _this.varname = varname;
+            _this.var_indexes = indexes;
+            _this.local_alias = alias;
+            _this.dimensions = dimensions;
+            _this.module_name = module_name;
+            _this.is_user_stmnt = false;
+            _this.varkind = varkind;
+            return _this;
+        }
+        return Alias;
+    }(BaseStatement));
+    S3.Alias = Alias;
+    var AssignString = (function (_super) {
+        tslib_1.__extends(AssignString, _super);
+        function AssignString(owner, varname, length, indexes, user, pos) {
+            var _this = _super.call(this, owner) || this;
+            _this.kind = StatementKinds.AssignString;
+            _this.varname = varname;
+            _this.length = length;
+            _this.indexes = indexes;
+            _this.is_user_stmnt = user;
+            _this.pos = pos;
+            return _this;
+        }
+        return AssignString;
+    }(BaseStatement));
+    S3.AssignString = AssignString;
+    var Concat = (function (_super) {
+        tslib_1.__extends(Concat, _super);
+        function Concat(owner, length) {
+            var _this = _super.call(this, owner) || this;
+            _this.kind = StatementKinds.Concat;
+            _this.length = length;
+            _this.is_user_stmnt = false;
+            return _this;
+        }
+        return Concat;
+    }(BaseStatement));
+    S3.Concat = Concat;
+    var Return = (function (_super) {
+        tslib_1.__extends(Return, _super);
+        function Return(owner, pos) {
+            var _this = _super.call(this, owner) || this;
+            _this.kind = StatementKinds.Return;
+            _this.is_user_stmnt = true;
+            _this.pos = pos;
+            return _this;
+        }
+        return Return;
+    }(BaseStatement));
+    S3.Return = Return;
+    var UserModuleCall = (function (_super) {
+        tslib_1.__extends(UserModuleCall, _super);
+        function UserModuleCall(owner, name, total_args, pos) {
+            var _this = _super.call(this, owner) || this;
+            _this.name = name;
+            _this.total_args = total_args;
+            _this.kind = StatementKinds.UserModuleCall;
+            _this.is_user_stmnt = true;
+            _this.pos = pos;
+            return _this;
+        }
+        return UserModuleCall;
+    }(BaseStatement));
+    S3.UserModuleCall = UserModuleCall;
+    var ReadCall = (function (_super) {
+        tslib_1.__extends(ReadCall, _super);
+        function ReadCall(owner, varname, type, pos) {
+            var _this = _super.call(this, owner) || this;
+            _this.varname = varname;
+            _this.kind = StatementKinds.ReadCall;
+            _this.name = 'leer';
+            _this.type = type;
+            _this.is_user_stmnt = true;
+            _this.pos = pos;
+            return _this;
+        }
+        return ReadCall;
+    }(BaseStatement));
+    S3.ReadCall = ReadCall;
+    var WriteCall = (function (_super) {
+        tslib_1.__extends(WriteCall, _super);
+        function WriteCall(owner, pos) {
+            var _this = _super.call(this, owner) || this;
+            _this.kind = StatementKinds.WriteCall;
+            _this.name = 'escribir';
+            _this.is_user_stmnt = true;
+            _this.pos = pos;
+            return _this;
+        }
+        return WriteCall;
+    }(BaseStatement));
+    S3.WriteCall = WriteCall;
+    var Assign = (function (_super) {
+        tslib_1.__extends(Assign, _super);
+        function Assign(owner, varname, user, pos) {
+            var _this = _super.call(this, owner) || this;
+            _this.varname = varname;
+            _this.kind = StatementKinds.Assign;
+            _this.is_user_stmnt = user;
+            _this.pos = pos;
+            return _this;
+        }
+        return Assign;
+    }(BaseStatement));
+    S3.Assign = Assign;
+    var AssignV = (function (_super) {
+        tslib_1.__extends(AssignV, _super);
+        function AssignV(owner, total_indexes, dimensions, varname, user, pos) {
+            var _this = _super.call(this, owner) || this;
+            _this.total_indexes = total_indexes;
+            _this.dimensions = dimensions;
+            _this.varname = varname;
+            _this.kind = StatementKinds.AssignV;
+            _this.is_user_stmnt = user;
+            _this.pos = pos;
+            return _this;
+        }
+        return AssignV;
+    }(BaseStatement));
+    S3.AssignV = AssignV;
+    var Get = (function (_super) {
+        tslib_1.__extends(Get, _super);
+        function Get(owner, varname) {
+            var _this = _super.call(this, owner) || this;
+            _this.varname = varname;
+            _this.kind = StatementKinds.Get;
+            return _this;
+        }
+        return Get;
+    }(BaseStatement));
+    S3.Get = Get;
+    var GetV = (function (_super) {
+        tslib_1.__extends(GetV, _super);
+        function GetV(owner, total_indexes, dimensions, varname) {
+            var _this = _super.call(this, owner) || this;
+            _this.total_indexes = total_indexes;
+            _this.dimensions = dimensions;
+            _this.varname = varname;
+            _this.kind = StatementKinds.GetV;
+            return _this;
+        }
+        return GetV;
+    }(BaseStatement));
+    S3.GetV = GetV;
+    var Push = (function (_super) {
+        tslib_1.__extends(Push, _super);
+        function Push(owner, value) {
+            var _this = _super.call(this, owner) || this;
+            _this.value = value;
+            _this.kind = StatementKinds.Push;
+            return _this;
+        }
+        return Push;
+    }(BaseStatement));
+    S3.Push = Push;
+    var Pop = (function (_super) {
+        tslib_1.__extends(Pop, _super);
+        function Pop(owner) {
+            var _this = _super.call(this, owner) || this;
+            _this.kind = StatementKinds.Pop;
+            return _this;
+        }
+        return Pop;
+    }(BaseStatement));
+    S3.Pop = Pop;
+    var Operation = (function (_super) {
+        tslib_1.__extends(Operation, _super);
+        function Operation(owner, kind) {
+            var _this = _super.call(this, owner) || this;
+            _this.kind = kind;
+            return _this;
+        }
+        return Operation;
+    }(BaseStatement));
+    S3.Operation = Operation;
+    var While = (function (_super) {
+        tslib_1.__extends(While, _super);
+        function While(owner, entry_point, pos) {
+            var _this = _super.call(this, owner) || this;
+            _this.entry_point = entry_point;
+            _this.kind = StatementKinds.While;
+            _this.is_user_stmnt = true;
+            _this.pos = pos;
+            return _this;
+        }
+        return While;
+    }(BaseStatement));
+    S3.While = While;
+    var Until = (function (_super) {
+        tslib_1.__extends(Until, _super);
+        function Until(owner, entry_point, pos) {
+            var _this = _super.call(this, owner) || this;
+            _this.entry_point = entry_point;
+            _this.kind = StatementKinds.Until;
+            _this.is_user_stmnt = true;
+            _this.pos = pos;
+            return _this;
+        }
+        return Until;
+    }(BaseStatement));
+    S3.Until = Until;
+    var If = (function (_super) {
+        tslib_1.__extends(If, _super);
+        function If(owner, true_branch_entry, false_branch_entry, pos) {
+            var _this = _super.call(this, owner) || this;
+            _this.true_branch_entry = true_branch_entry;
+            _this.false_branch_entry = false_branch_entry;
+            _this.kind = StatementKinds.If;
+            _this.is_user_stmnt = true;
+            _this.pos = pos;
+            return _this;
+        }
+        Object.defineProperty(If.prototype, "exit_point", {
+            get: function () {
+                return this._exit_point;
+            },
+            set: function (s) {
+                if (this.exit_set == true) {
+                    throw new Error('No se puede establecer el punto de salida de un Statement mas de una vez.');
+                }
+                else {
+                    this._exit_point = s;
+                    var last_true_s = get_last(this.true_branch_entry);
+                    last_true_s.exit_point = s;
+                    var last_false_s = get_last(this.false_branch_entry);
+                    last_false_s.exit_point = s;
+                    this.exit_set = true;
+                }
+            },
+            enumerable: true,
+            configurable: true
+        });
+        return If;
+    }(BaseStatement));
+    S3.If = If;
+})(S3 = exports.S3 || (exports.S3 = {}));
+/**
+ * Stage 4:
+ */
+var Typed;
+(function (Typed) {
+    var ArrayType = (function () {
+        function ArrayType(represents, element_type, length) {
+            this.kind = 'array';
+            this.type = 'type';
+            this.length = length;
+            this.cell_type = element_type;
+            this.represents = represents;
+        }
+        return ArrayType;
+    }());
+    Typed.ArrayType = ArrayType;
+    var AtomicType = (function () {
+        function AtomicType(represents, tn) {
+            this.kind = 'atomic';
+            this.type = 'type';
+            this.typename = tn;
+            this.represents = represents;
+        }
+        return AtomicType;
+    }());
+    Typed.AtomicType = AtomicType;
+    var StringType = (function (_super) {
+        tslib_1.__extends(StringType, _super);
+        function StringType(length, represents) {
+            return _super.call(this, represents, new AtomicType(represents, 'caracter'), length) || this;
+        }
+        return StringType;
+    }(ArrayType));
+    Typed.StringType = StringType;
+})(Typed = exports.Typed || (exports.Typed = {}));
+var VarState;
+(function (VarState) {
+    VarState[VarState["ExistsInit"] = 0] = "ExistsInit";
+    VarState[VarState["ExistsNotInit"] = 1] = "ExistsNotInit";
+    VarState[VarState["ExistsOutOfScope"] = 2] = "ExistsOutOfScope";
+    VarState[VarState["DoesntExist"] = 3] = "DoesntExist";
+})(VarState = exports.VarState || (exports.VarState = {}));
+
+
+/***/ }),
 /* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var interfaces_1 = __webpack_require__(0);
+Object.defineProperty(exports, "__esModule", { value: true });
+var ActionKind;
+(function (ActionKind) {
+    ActionKind[ActionKind["Execute"] = 0] = "Execute";
+    ActionKind[ActionKind["Step"] = 1] = "Step";
+    ActionKind[ActionKind["MoveCursor"] = 2] = "MoveCursor";
+    ActionKind[ActionKind["DragHandle"] = 3] = "DragHandle";
+    ActionKind[ActionKind["ShowMessage"] = 4] = "ShowMessage";
+    ActionKind[ActionKind["ClearMessages"] = 5] = "ClearMessages";
+    ActionKind[ActionKind["SendInput"] = 6] = "SendInput";
+    ActionKind[ActionKind["Write"] = 7] = "Write";
+    ActionKind[ActionKind["ClearOutput"] = 8] = "ClearOutput";
+    ActionKind[ActionKind["ShowCompiledCode"] = 9] = "ShowCompiledCode";
+    ActionKind[ActionKind["SetUpInterpreter"] = 10] = "SetUpInterpreter";
+    ActionKind[ActionKind["ExecuteBySteps"] = 11] = "ExecuteBySteps";
+    ActionKind[ActionKind["StopExecution"] = 12] = "StopExecution";
+    ActionKind[ActionKind["CompileAndShow"] = 13] = "CompileAndShow";
+    ActionKind[ActionKind["StopExecutionWithError"] = 14] = "StopExecutionWithError";
+    ActionKind[ActionKind["StopExecutionUser"] = 15] = "StopExecutionUser";
+    ActionKind[ActionKind["FocusEditor"] = 16] = "FocusEditor";
+    ActionKind[ActionKind["DisableButtons"] = 17] = "DisableButtons";
+    ActionKind[ActionKind["EnableButtons"] = 18] = "EnableButtons";
+    ActionKind[ActionKind["HidePanel"] = 19] = "HidePanel";
+    ActionKind[ActionKind["ShowPanel"] = 20] = "ShowPanel";
+    ActionKind[ActionKind["SendVarName"] = 21] = "SendVarName";
+    ActionKind[ActionKind["UpdateVars"] = 22] = "UpdateVars";
+    ActionKind[ActionKind["RemoveVarFromInspection"] = 23] = "RemoveVarFromInspection";
+    ActionKind[ActionKind["RemoveMsgFromInspection"] = 24] = "RemoveMsgFromInspection";
+})(ActionKind = exports.ActionKind || (exports.ActionKind = {}));
+
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var interfaces_1 = __webpack_require__(1);
 // flatten :: [any] -> [[any]] -> [any]
 function flatten(accumulator, arr) {
     for (var _i = 0, arr_1 = arr; _i < arr_1.length; _i++) {
@@ -11020,37 +11067,6 @@ exports.type_literal = type_literal;
 
 
 /***/ }),
-/* 3 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var ActionKind;
-(function (ActionKind) {
-    ActionKind[ActionKind["Execute"] = 0] = "Execute";
-    ActionKind[ActionKind["Step"] = 1] = "Step";
-    ActionKind[ActionKind["MoveCursor"] = 2] = "MoveCursor";
-    ActionKind[ActionKind["DragHandle"] = 3] = "DragHandle";
-    ActionKind[ActionKind["ShowMessage"] = 4] = "ShowMessage";
-    ActionKind[ActionKind["ClearMessages"] = 5] = "ClearMessages";
-    ActionKind[ActionKind["SendInput"] = 6] = "SendInput";
-    ActionKind[ActionKind["Write"] = 7] = "Write";
-    ActionKind[ActionKind["ClearOutput"] = 8] = "ClearOutput";
-    ActionKind[ActionKind["ShowCompiledCode"] = 9] = "ShowCompiledCode";
-    ActionKind[ActionKind["SetUpInterpreter"] = 10] = "SetUpInterpreter";
-    ActionKind[ActionKind["ExecuteBySteps"] = 11] = "ExecuteBySteps";
-    ActionKind[ActionKind["StopExecution"] = 12] = "StopExecution";
-    ActionKind[ActionKind["CompileAndShow"] = 13] = "CompileAndShow";
-    ActionKind[ActionKind["StopExecutionWithError"] = 14] = "StopExecutionWithError";
-    ActionKind[ActionKind["StopExecutionUser"] = 15] = "StopExecutionUser";
-    ActionKind[ActionKind["FocusEditor"] = 16] = "FocusEditor";
-    ActionKind[ActionKind["DisableButtons"] = 17] = "DisableButtons";
-    ActionKind[ActionKind["EnableButtons"] = 18] = "EnableButtons";
-    ActionKind[ActionKind["RemovePanel"] = 19] = "RemovePanel";
-})(ActionKind = exports.ActionKind || (exports.ActionKind = {}));
-
-
-/***/ }),
 /* 4 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -11166,13 +11182,35 @@ function __generator(thisArg, body) {
 
 "use strict";
 
-var tslib_1 = __webpack_require__(11);
-var Emitter_1 = __webpack_require__(24);
-var SourceWrapper_1 = __webpack_require__(18);
-var Lexer_1 = __webpack_require__(17);
-var TokenQueue_1 = __webpack_require__(7);
-var Patterns_1 = __webpack_require__(6);
-var Patterns_2 = __webpack_require__(6);
+Object.defineProperty(exports, "__esModule", { value: true });
+var Parser_1 = __webpack_require__(6);
+exports.Parser = Parser_1.default;
+var Interpreter_1 = __webpack_require__(17);
+exports.Interpreter = Interpreter_1.default;
+var transform_1 = __webpack_require__(24);
+exports.transform = transform_1.default;
+var TSChecker_1 = __webpack_require__(10);
+exports.typecheck = TSChecker_1.default;
+var fr_writer_1 = __webpack_require__(26);
+exports.fr_writer = fr_writer_1.default;
+var interfaces_1 = __webpack_require__(1);
+exports.VarState = interfaces_1.VarState;
+
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var tslib_1 = __webpack_require__(12);
+var Emitter_1 = __webpack_require__(25);
+var SourceWrapper_1 = __webpack_require__(19);
+var Lexer_1 = __webpack_require__(18);
+var TokenQueue_1 = __webpack_require__(8);
+var Patterns_1 = __webpack_require__(7);
+var Patterns_2 = __webpack_require__(7);
 var Parser = (function (_super) {
     tslib_1.__extends(Parser, _super);
     function Parser() {
@@ -11224,18 +11262,18 @@ var Parser = (function (_super) {
     };
     return Parser;
 }(Emitter_1.default));
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = Parser;
 
 
 /***/ }),
-/* 6 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var interfaces_1 = __webpack_require__(0);
-var TokenQueue_js_1 = __webpack_require__(7);
+Object.defineProperty(exports, "__esModule", { value: true });
+var interfaces_1 = __webpack_require__(1);
+var TokenQueue_js_1 = __webpack_require__(8);
 /**
  * Funcion que intenta capturar un token numerico
  * @param {TokenQueue} source Fuente en la que hay que buscar el numero
@@ -12368,6 +12406,10 @@ function FunctionModule(source) {
          * Meter los datos de la variable en el arreglo del enunciado de declaracion.
          */
         par_declaration.variables.push({ name: name_1, is_array: is_array, dimensions: dimensions, datatype: type, by_ref: by_ref });
+        /**
+         * Luego, cuando el programa sea transformado por Declarator.ts, las variables de los
+         * parametros seran declaradas.
+         */
     }
     if (source.current().kind != interfaces_1.SymbolKind.RightPar)
         return UnexpectedTokenReport(source.current(), [')'], 'missing-right-par');
@@ -12448,6 +12490,10 @@ function ProcedureModule(source) {
          * Meter los datos de la variable en el arreglo del enunciado de declaracion.
          */
         par_declaration.variables.push({ name: name_2, is_array: is_array, dimensions: dimensions, datatype: type, by_ref: by_ref });
+        /**
+         * Luego, cuando el programa sea transformado por Declarator.ts, las variables de los
+         * parametros seran declaradas.
+         */
     }
     if (source.current().kind != interfaces_1.SymbolKind.RightPar)
         return UnexpectedTokenReport(source.current(), [')'], 'missing-right-par');
@@ -12586,12 +12632,13 @@ function UnexpectedTokenReport(current_token, expected, reason) {
 
 
 /***/ }),
-/* 7 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var TokenTypes_1 = __webpack_require__(8);
+Object.defineProperty(exports, "__esModule", { value: true });
+var TokenTypes_1 = __webpack_require__(9);
 var TokenQueue = (function () {
     function TokenQueue(array) {
         this.tokens = array;
@@ -12639,18 +12686,18 @@ var TokenQueue = (function () {
     };
     return TokenQueue;
 }());
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = TokenQueue;
 
 
 /***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var StringMethods_1 = __webpack_require__(10);
-var interfaces_1 = __webpack_require__(0);
+Object.defineProperty(exports, "__esModule", { value: true });
+var StringMethods_1 = __webpack_require__(11);
+var interfaces_1 = __webpack_require__(1);
 var EoFToken = (function () {
     function EoFToken(source) {
         this.name = 'eof';
@@ -13137,13 +13184,14 @@ function wtk(word) {
 
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var interfaces_1 = __webpack_require__(0);
-var helpers_1 = __webpack_require__(2);
+Object.defineProperty(exports, "__esModule", { value: true });
+var interfaces_1 = __webpack_require__(1);
+var helpers_1 = __webpack_require__(3);
 function check(p) {
     var errors = [];
     for (var mn in p.modules) {
@@ -13158,7 +13206,6 @@ function check(p) {
     }
     return errors;
 }
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = check;
 function check_statement(s) {
     switch (s.type) {
@@ -13509,18 +13556,19 @@ function check_invocation(i) {
 
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.isDigit = function (char) { return /\d/.test(char); };
 exports.isLetter = function (char) { return /[a-zA-Z]/.test(char); };
 exports.isWhiteSpace = function (char) { return /\s/.test(char) && (char !== '\n'); };
 
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -13701,7 +13749,7 @@ function __asyncValues(o) {
 };
 
 /***/ }),
-/* 12 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -22819,15 +22867,73 @@ return CodeMirror;
 })));
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var interprete_pl_1 = __webpack_require__(14);
-var Actions_1 = __webpack_require__(3);
-var AppUI_1 = __webpack_require__(27);
-var $ = __webpack_require__(1);
+Object.defineProperty(exports, "__esModule", { value: true });
+var $ = __webpack_require__(0);
+var Actions_1 = __webpack_require__(2);
+var ENTER = 13;
+var ESC = 27;
+var Prompt = (function () {
+    function Prompt(container, d, mode) {
+        var _this = this;
+        this.container = container;
+        this.mode = mode;
+        this.textarea = $("<textarea class=\"prompt" + (mode == 'varname' ? ' input-border' : '') + "\"></textarea>");
+        this.distpatcher = d;
+        if (mode == 'varname') {
+            this.textarea.keydown(function (e) {
+                if (e.which == ENTER) {
+                    var name_1 = _this.textarea.val();
+                    _this.close();
+                    _this.distpatcher.dispatch({ kind: Actions_1.ActionKind.SendVarName, name: name_1 });
+                }
+                else if (e.which == ESC) {
+                    _this.close();
+                }
+            });
+        }
+        else {
+            this.textarea.keydown(function (e) {
+                if (e.which == ENTER) {
+                    var input = _this.textarea.val();
+                    _this.close();
+                    _this.distpatcher.dispatch({ kind: Actions_1.ActionKind.SendInput, input: input });
+                }
+            });
+        }
+        this.container.append(this.textarea);
+        this.textarea.focus();
+    }
+    Prompt.prototype.close = function () {
+        if (this.mode == 'varname') {
+            this.textarea.remove();
+        }
+        else {
+            var new_line = $("<div class=\"line\"><span>&gt;" + this.textarea.val() + "</span></div>");
+            this.textarea.replaceWith(new_line);
+            this.textarea = null;
+        }
+    };
+    return Prompt;
+}());
+exports.default = Prompt;
+
+
+/***/ }),
+/* 15 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var interprete_pl_1 = __webpack_require__(5);
+var Actions_1 = __webpack_require__(2);
+var AppUI_1 = __webpack_require__(28);
+var $ = __webpack_require__(0);
 var Dispatcher = (function () {
     function Dispatcher(c) {
         this.controller = c;
@@ -22857,6 +22963,7 @@ var Controller = (function () {
                     this.by_steps = false;
                     var compiled_program_maybe = this.compile(a.code);
                     if (!compiled_program_maybe.error) {
+                        this.app_ui.clear_vars();
                         this.program_running = true;
                         var program = compiled_program_maybe.result;
                         this.do({ kind: Actions_1.ActionKind.SetUpInterpreter, program: program });
@@ -22869,8 +22976,8 @@ var Controller = (function () {
                 }
                 break;
             case Actions_1.ActionKind.Step:
-                this.do({ kind: Actions_1.ActionKind.ClearMessages });
                 this.step();
+                this.do({ kind: Actions_1.ActionKind.UpdateVars });
                 break;
             case Actions_1.ActionKind.FocusEditor:
                 this.app_ui.focus_editor();
@@ -22953,6 +23060,63 @@ var Controller = (function () {
             case Actions_1.ActionKind.EnableButtons:
                 this.app_ui.enable_buttons();
                 break;
+            case Actions_1.ActionKind.HidePanel:
+            case Actions_1.ActionKind.ShowPanel:
+                this.app_ui.toggle_panel(a.container_index, a.panel_index);
+                break;
+            case Actions_1.ActionKind.SendVarName:
+                this.add_var(a.name);
+                break;
+            case Actions_1.ActionKind.UpdateVars:
+                this.update_vars();
+                break;
+            case Actions_1.ActionKind.RemoveVarFromInspection:
+                this.remove_var(a.name);
+                break;
+            case Actions_1.ActionKind.RemoveMsgFromInspection:
+                this.remove_msg(a.name);
+                break;
+        }
+    };
+    Controller.prototype.remove_msg = function (name) {
+        this.app_ui.remove_msg(name);
+    };
+    Controller.prototype.remove_var = function (name) {
+        this.app_ui.remove_var(name);
+    };
+    Controller.prototype.update_vars = function () {
+        var var_names = this.app_ui.get_var_names();
+        for (var _i = 0, var_names_1 = var_names; _i < var_names_1.length; _i++) {
+            var name_1 = var_names_1[_i];
+            this.update_var(name_1);
+        }
+    };
+    Controller.prototype.update_var = function (name) {
+        var var_info = this.interpreter.search_var(name);
+        if (var_info.state == interprete_pl_1.VarState.ExistsInit) {
+            var bv = this.interpreter.export_var(name);
+            this.app_ui.update_var(name, bv);
+        }
+        else {
+            this.app_ui.change_var_state(name, var_info.state);
+        }
+    };
+    Controller.prototype.add_var = function (name) {
+        var var_info = this.interpreter.search_var(name);
+        if (var_info.state == interprete_pl_1.VarState.ExistsInit || var_info.state == interprete_pl_1.VarState.ExistsNotInit) {
+            var bv = this.interpreter.export_var(name);
+            if (var_info.state == interprete_pl_1.VarState.ExistsInit) {
+                this.app_ui.add_var(name, true, true, var_info, bv);
+            }
+            else {
+                this.app_ui.add_var(name, true, false, var_info, bv);
+            }
+        }
+        else if (var_info.state == interprete_pl_1.VarState.ExistsOutOfScope) {
+            this.app_ui.add_var(name, false, false, var_info, null);
+        }
+        else {
+            this.app_ui.add_inspection_message(name);
         }
     };
     Controller.prototype.interpreter_action = function (a) {
@@ -23086,31 +23250,15 @@ exports.Controller = Controller;
 
 
 /***/ }),
-/* 14 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var Parser_1 = __webpack_require__(5);
-exports.Parser = Parser_1.default;
-var Interpreter_1 = __webpack_require__(16);
-exports.Interpreter = Interpreter_1.default;
-var transform_1 = __webpack_require__(23);
-exports.transform = transform_1.default;
-var TSChecker_1 = __webpack_require__(9);
-exports.typecheck = TSChecker_1.default;
-var fr_writer_1 = __webpack_require__(25);
-exports.fr_writer = fr_writer_1.default;
-
-
-/***/ }),
-/* 15 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var interfaces_1 = __webpack_require__(0);
-var helpers_1 = __webpack_require__(2);
+Object.defineProperty(exports, "__esModule", { value: true });
+var interfaces_1 = __webpack_require__(1);
+var interfaces_2 = __webpack_require__(1);
+var helpers_1 = __webpack_require__(3);
 var Evaluator = (function () {
     function Evaluator(program) {
         this.entry_point = program.entry_point;
@@ -23136,6 +23284,78 @@ var Evaluator = (function () {
      */
     Evaluator.prototype.get_value_stack = function () {
         return this.state.value_stack;
+    };
+    /**
+     * Busca una variable y devuelve su estado
+     * @param {name} nombre de la variable buscada
+     */
+    Evaluator.prototype.search_var = function (name) {
+        var locals = this.get_locals();
+        var globals = this.get_globals();
+        if (name in locals) {
+            // la variable existe, hay que ver si esta inicializada
+            var var_maybe = this.get_var(name);
+            if (var_maybe.type == 'alias') {
+                var variable = this.resolve_alias(var_maybe).variable;
+                return { type: variable.type == 'vector' ? 'vector' : 'scalar', state: variable.init ? interfaces_2.VarState.ExistsInit : interfaces_2.VarState.ExistsNotInit };
+            }
+            else {
+                return { type: var_maybe.type == 'vector' ? 'vector' : 'scalar', state: var_maybe.init ? interfaces_2.VarState.ExistsInit : interfaces_2.VarState.ExistsNotInit };
+            }
+        }
+        else {
+            if (name in globals) {
+                // la variable existe, hay que ver si esta inicializada
+                var var_maybe = this.get_var(name);
+                if (var_maybe.type == 'alias') {
+                    var variable = this.resolve_alias(var_maybe).variable;
+                    return { type: variable.type == 'vector' ? 'vector' : 'scalar', state: variable.init ? interfaces_2.VarState.ExistsInit : interfaces_2.VarState.ExistsNotInit };
+                }
+                else {
+                    return { type: var_maybe.type == 'vector' ? 'vector' : 'scalar', state: var_maybe.init ? interfaces_2.VarState.ExistsInit : interfaces_2.VarState.ExistsNotInit };
+                }
+            }
+            else {
+                // buscar en los otros ambitos
+                var other_scopes = this.frame_stack.slice(1, this.frame_stack.length - 2);
+                for (var scope_name in this.frame_templates) {
+                    var scope = this.frame_templates[scope_name];
+                    if (name in scope) {
+                        var variable = scope[name];
+                        var type = variable.type == 'array' ? 'vector' : 'scalar';
+                        return { type: type, state: interfaces_2.VarState.ExistsOutOfScope };
+                    }
+                }
+                return { type: 'scalar', state: interfaces_2.VarState.DoesntExist };
+            }
+        }
+    };
+    /**
+     * export_var
+     * busca una variable y devuelve su valor/un arreglo de sus valores.
+     */
+    Evaluator.prototype.export_var = function (name) {
+        var var_found = this.get_var(name);
+        if (var_found.type == 'alias') {
+            var _a = this.resolve_alias(var_found), variable = _a.variable, pre_indexes = _a.pre_indexes;
+            // Por ahora se ignoran los pre_indexes porque se devuelven todos los valores de los arreglos.
+            // No hay manera (todavia) de devolver solo un "segmento" de un arreglo
+            if (variable.type == 'variable') {
+                return { type: 'scalar', value: variable.value };
+            }
+            else {
+                return { type: 'vector', cells: variable.values.map(function (value, index) { return { index: index, value: value }; }).filter(function (v) { return typeof v.value != 'undefined'; }) };
+            }
+        }
+        else {
+            var variable = var_found;
+            if (variable.type == 'variable') {
+                return { type: 'scalar', value: variable.value };
+            }
+            else {
+                return { type: 'vector', cells: variable.values.map(function (value, index) { return { index: index, value: value }; }).filter(function (v) { return typeof v.value != 'undefined'; }) };
+            }
+        }
     };
     /**
      * get_locals
@@ -23367,15 +23587,15 @@ var Evaluator = (function () {
             var template = templates[name];
             var type = template.type, datatype = template.datatype, by_ref = template.by_ref;
             if (by_ref) {
-                frame[name] = { type: 'alias', name: '', indexes: [] };
+                frame[name] = { type: 'alias', name: '', indexes: [], varkind: type == 'array' ? 'vector' : 'scalar' };
             }
             else {
                 if (type == 'array') {
                     var values = new Array(template.dimensions.reduce(function (a, b) { return a * b; }));
-                    frame[name] = { type: 'vector', dimensions: template.dimensions, values: values };
+                    frame[name] = { init: false, type: 'vector', dimensions: template.dimensions, values: values };
                 }
                 else {
-                    frame[name] = { type: 'variable', value: null };
+                    frame[name] = { init: false, type: 'variable', value: null };
                 }
             }
         }
@@ -23476,6 +23696,7 @@ var Evaluator = (function () {
                 v.values[start_index + i] = string[i];
                 i++;
             }
+            v.init = true;
             return { error: false, result: { done: false, kind: 'action', action: 'none' } };
         }
         else {
@@ -23516,6 +23737,7 @@ var Evaluator = (function () {
         if (var_found.type != 'alias') {
             var variable = var_found;
             variable.value = this.state.value_stack.pop();
+            variable.init = true;
             return { error: false, result: { kind: 'action', action: 'none', done: this.state.done } };
         }
         else {
@@ -23524,9 +23746,11 @@ var Evaluator = (function () {
                 var v = variable;
                 var index = this.calculate_index(pre_indexes.map(function (i) { return i - 1; }), v.dimensions);
                 v.values[index] = this.state.value_stack.pop();
+                v.init = true;
                 return { error: false, result: { kind: 'action', action: 'none', done: this.state.done } };
             }
             else {
+                variable.init;
                 variable.value = this.state.value_stack.pop();
                 return { error: false, result: { kind: 'action', action: 'none', done: this.state.done } };
             }
@@ -23568,6 +23792,7 @@ var Evaluator = (function () {
                 var value = this.state.value_stack.pop();
                 var variable = this.get_var(s.varname);
                 variable.values[index] = value;
+                variable.init = true;
                 return { error: false, result: { kind: 'action', action: 'none', done: false } };
             }
             else {
@@ -23595,6 +23820,7 @@ var Evaluator = (function () {
                 var index = this.calculate_index(indexes.map(function (i) { return i - 1; }), dimensions);
                 var v = variable;
                 v.values[index] = this.state.value_stack.pop();
+                v.init = true;
                 return { error: false, result: { kind: 'action', action: 'none', done: false } };
             }
             else {
@@ -23876,19 +24102,19 @@ var Evaluator = (function () {
     };
     return Evaluator;
 }());
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = Evaluator;
 
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var Evaluator_1 = __webpack_require__(15);
-var interfaces_1 = __webpack_require__(0);
-var helpers_1 = __webpack_require__(2);
+Object.defineProperty(exports, "__esModule", { value: true });
+var Evaluator_1 = __webpack_require__(16);
+var interfaces_1 = __webpack_require__(1);
+var helpers_1 = __webpack_require__(3);
 var Interpreter = (function () {
     function Interpreter() {
         this.paused = false;
@@ -23897,6 +24123,7 @@ var Interpreter = (function () {
         this.error_ocurred = false;
         this.program_set = false;
         this.statement_visited = false;
+        // this.breakpoints = []
     }
     Object.defineProperty(Interpreter.prototype, "program", {
         get: function () {
@@ -23910,6 +24137,7 @@ var Interpreter = (function () {
             this.read_stack = [];
             this.error_ocurred = false;
             this.program_set = true;
+            // this.breakpoints = []
         },
         enumerable: true,
         configurable: true
@@ -24080,21 +24308,39 @@ var Interpreter = (function () {
         }
         return { type: 'literal', value: v };
     };
+    // add_breakpoint(line: number) {
+    //   const index = this.breakpoints.indexOf(line)
+    //   if (index == -1) {
+    //     this.breakpoints.push(line)
+    //   }
+    // }
+    // remove_breakpoint(line: number) {
+    //   const index = this.breakpoints.indexOf(line)
+    //   if (index != -1) {
+    //     this.breakpoints = [...this.breakpoints.slice(0, index), ...this.breakpoints.slice(index + 1)]
+    //   }
+    // }
+    Interpreter.prototype.export_var = function (name) {
+        return this.evaluator.export_var(name);
+    };
+    Interpreter.prototype.search_var = function (name) {
+        return this.evaluator.search_var(name);
+    };
     return Interpreter;
 }());
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = Interpreter;
 
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var interfaces_1 = __webpack_require__(0);
-var TokenTypes_1 = __webpack_require__(8);
-var StringMethods_1 = __webpack_require__(10);
+Object.defineProperty(exports, "__esModule", { value: true });
+var interfaces_1 = __webpack_require__(1);
+var TokenTypes_1 = __webpack_require__(9);
+var StringMethods_1 = __webpack_require__(11);
 var isSpecialSymbolChar = TokenTypes_1.SpecialSymbolToken.isSpecialSymbolChar;
 /**
  * Clase para convertir una cadena en fichas.
@@ -24191,16 +24437,16 @@ var Lexer = (function () {
     };
     return Lexer;
 }());
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = Lexer;
 
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var EOF_REACHED = -2;
 var EOL_REACHED = -1;
 var READING = 0;
@@ -24255,12 +24501,11 @@ var SourceWrapper = (function () {
     };
     return SourceWrapper;
 }());
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = SourceWrapper;
 
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -24273,6 +24518,7 @@ exports.default = SourceWrapper;
 // Si la funcion no existe entonces devuelve un error.
 // import * as S0 from '../interfaces/ParsingInterfaces'
 
+Object.defineProperty(exports, "__esModule", { value: true });
 function transform(ast) {
     var new_ast = {
         modules: {
@@ -24307,7 +24553,6 @@ function transform(ast) {
         return { error: false, result: new_ast };
     }
 }
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = transform;
 function transform_main(old_module, ast, module_name) {
     var new_body = transform_body(old_module.body, ast, module_name);
@@ -24742,11 +24987,12 @@ function is_builtin(name) {
 
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 function transform(ast) {
     var errors_found = [];
     var new_main = transform_main(ast.main);
@@ -24783,7 +25029,6 @@ function transform(ast) {
     }
     return { error: true, result: errors_found };
 }
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = transform;
 function transform_module(old_module) {
     switch (old_module.module_type) {
@@ -24880,13 +25125,14 @@ function declare_variables(declarations) {
 
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var interfaces_1 = __webpack_require__(0);
-var helpers_1 = __webpack_require__(2);
+Object.defineProperty(exports, "__esModule", { value: true });
+var interfaces_1 = __webpack_require__(1);
+var helpers_1 = __webpack_require__(3);
 function transform(p) {
     var result = {
         entry_point: null,
@@ -24903,7 +25149,6 @@ function transform(p) {
     }
     return { error: false, result: result };
 }
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = transform;
 function transform_main(old_module) {
     return transform_body(old_module.body, 'main');
@@ -25136,7 +25381,8 @@ function transform_call(call, module_name) {
                     last_index_st = next_index;
                 }
             }
-            var make_alias = new interfaces_1.S3.Alias(module_name, invocation.name, invocation.indexes.length, invocation.dimensions, call.parameters[i].name, call.name);
+            var varkind = call.parameters[i].is_array ? 'vector' : 'scalar';
+            var make_alias = new interfaces_1.S3.Alias(module_name, invocation.name, invocation.indexes.length, invocation.dimensions, call.parameters[i].name, call.name, varkind);
             if (index_initd) {
                 last_index_st.exit_point = make_alias;
                 next_arg = first_index;
@@ -25623,13 +25869,14 @@ function transform_exp_element(element, module_name) {
 
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var interfaces_1 = __webpack_require__(0);
-var helpers_1 = __webpack_require__(2);
+Object.defineProperty(exports, "__esModule", { value: true });
+var interfaces_1 = __webpack_require__(1);
+var helpers_1 = __webpack_require__(3);
 function transform(ast) {
     var errors = [];
     var typed_program = {
@@ -25661,7 +25908,6 @@ function transform(ast) {
         return { error: false, result: typed_program };
     }
 }
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = transform;
 function transfor_module(m, p) {
     var errors = [];
@@ -26484,16 +26730,17 @@ function neg(s) {
 
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var Declarator_1 = __webpack_require__(20);
-var CallDecorator_1 = __webpack_require__(19);
-var Interpretable_1 = __webpack_require__(21);
-var TSChecker_1 = __webpack_require__(9);
-var TSTyper_1 = __webpack_require__(22);
+Object.defineProperty(exports, "__esModule", { value: true });
+var Declarator_1 = __webpack_require__(21);
+var CallDecorator_1 = __webpack_require__(20);
+var Interpretable_1 = __webpack_require__(22);
+var TSChecker_1 = __webpack_require__(10);
+var TSTyper_1 = __webpack_require__(23);
 function transform(p) {
     var s1 = Declarator_1.default(p);
     if (s1.error) {
@@ -26522,16 +26769,16 @@ function transform(p) {
         }
     }
 }
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = transform;
 
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var Emitter = (function () {
     function Emitter(public_event_list) {
         this.public_events = public_event_list;
@@ -26595,18 +26842,18 @@ var Emitter = (function () {
     };
     return Emitter;
 }());
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = Emitter;
 
 
 /***/ }),
-/* 25 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var interfaces_1 = __webpack_require__(0);
-var Parser_1 = __webpack_require__(5);
+Object.defineProperty(exports, "__esModule", { value: true });
+var interfaces_1 = __webpack_require__(1);
+var Parser_1 = __webpack_require__(6);
 function parse(s) {
     var p = new Parser_1.default();
     p.on('lexical-error', console.log);
@@ -26661,7 +26908,6 @@ function fr_writer(p) {
     }
     return s;
 }
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = fr_writer;
 function procesar_parametros(ps) {
     var s = '';
@@ -26797,7 +27043,7 @@ function repetir(c, n) {
 
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -26805,7 +27051,7 @@ function repetir(c, n) {
 
 (function(mod) {
   if (true) // CommonJS
-    mod(__webpack_require__(12));
+    mod(__webpack_require__(13));
   else if (typeof define == "function" && define.amd) // AMD
     define(["../../lib/codemirror"], mod);
   else // Plain browser env
@@ -26875,54 +27121,77 @@ function repetir(c, n) {
 
 
 /***/ }),
-/* 27 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(4);
-var OutputPanel_1 = __webpack_require__(33);
-var EditorPanel_1 = __webpack_require__(30);
-var CodePanel_1 = __webpack_require__(29);
-var DragManager_1 = __webpack_require__(28);
-var $ = __webpack_require__(1);
+var OutputPanel_1 = __webpack_require__(36);
+var EditorPanel_1 = __webpack_require__(31);
+var CodePanel_1 = __webpack_require__(30);
+var PanelToggler_1 = __webpack_require__(37);
+var InspectionPanel_1 = __webpack_require__(34);
+var DragManager_1 = __webpack_require__(29);
+var $ = __webpack_require__(0);
 var default_options = {
     debug: false
 };
 var AppUI = (function () {
     function AppUI(parent, container, d, options) {
-        var _this = this;
-        this.parent = parent;
-        this.dispatcher = d;
-        this.handles = [];
-        this.container = $('<div id="app" class="flex-row"></div>');
-        this.parent.append(this.container);
         // aplicar la configuracion
+        var _this = this;
         if (options) {
             this.options = tslib_1.__assign({}, default_options, options);
         }
         else {
             this.options = default_options;
         }
+        this.parent = parent;
+        this.dispatcher = d;
+        this.handles = [];
+        this.container = $('<div id="app_container" class="flex-col"></div>');
+        this.panel_container = $('<div id="panels" class="flex-row"></div>');
+        this.toggler = new PanelToggler_1.default(this.container, this.dispatcher, this.options.debug);
+        this.container.append(this.toggler.container);
+        this.container.append(this.panel_container);
+        this.parent.append(this.container);
         this.dm = new DragManager_1.DragManager();
-        this.dm.add_ui_container(this.container, 'horizontal');
+        this.dm.add_ui_container(this.panel_container, 'horizontal');
+        this.panel_container.resize(function () {
+            _this.dm.set_container_dimensions(0, _this.panel_container.width(), _this.panel_container.height());
+        });
         // crear los paneles necesarios
-        this.editor_panel = new EditorPanel_1.default(this.container, d, { debug: this.options.debug, links: !this.options.debug });
+        this.editor_panel = new EditorPanel_1.default(this.panel_container, d, { debug: this.options.debug });
         if (this.options.debug) {
-            this.add_panel(this.editor_panel.container, 0, { fixed: true, length: 50 });
-            this.code_panel = new CodePanel_1.default(this.container);
-            this.add_panel(this.code_panel.container, 0);
-            this.output_panel = new OutputPanel_1.default(this.container, this.dispatcher);
-            this.add_panel(this.output_panel.container, 0);
+            this.add_panel(this.editor_panel, 0);
+            this.toggler.add_panel(this.editor_panel, false, 'pencil');
+            this.code_panel = new CodePanel_1.default(this.panel_container);
+            this.add_panel(this.code_panel, 0);
+            this.toggler.add_panel(this.code_panel, false, 'gear');
+            this.inspection_panel = new InspectionPanel_1.default(this.panel_container, this.dispatcher);
+            this.add_panel(this.inspection_panel, 0);
+            this.toggler.add_panel(this.inspection_panel, false, 'search');
+            this.output_panel = new OutputPanel_1.default(this.panel_container, this.dispatcher);
+            this.add_panel(this.output_panel, 0);
+            this.toggler.add_panel(this.output_panel, false, 'terminal');
         }
         else {
             // agregar panel de codigo
-            this.add_panel(this.editor_panel.container, 0, { fixed: true, length: 60 });
+            this.add_panel(this.editor_panel, 0);
+            this.toggler.add_panel(this.editor_panel, false, 'pencil');
             // cuando debug es falso el panel de codigo compilado no se muestra
             this.code_panel = null;
-            this.output_panel = new OutputPanel_1.default(this.container, this.dispatcher);
-            this.add_panel(this.output_panel.container, 0);
+            this.inspection_panel = new InspectionPanel_1.default(this.panel_container, this.dispatcher);
+            this.add_panel(this.inspection_panel, 0);
+            this.toggler.add_panel(this.inspection_panel, false, 'search');
+            this.output_panel = new OutputPanel_1.default(this.panel_container, this.dispatcher);
+            this.add_panel(this.output_panel, 0);
+            this.toggler.add_panel(this.output_panel, false, 'terminal');
         }
+        this.toggler.add_link("https://github.com/pl-lang/jsplint/wiki/Sintaxis/", 'question');
+        this.toggler.add_link("https://github.com/pl-lang/playground/", 'mark-github');
         $(document).mouseup(function () {
             if (_this.dm.is_grabbed) {
                 _this.dm.is_grabbed = false;
@@ -26939,13 +27208,16 @@ var AppUI = (function () {
     }
     AppUI.prototype.add_panel = function (element, container_index, options) {
         if (this.dm.ui_panel_containers[container_index].panels.length >= 1) {
-            var handle = $("<div id=\"handle" + (this.handles.length + 1) + "\" class=\"handle\"></div>");
-            this.dm.add_handle(container_index, handle);
-            this.handles.push(handle);
-            this.container.append(handle);
+            // const handle = $(`<div id="handle${this.handles.length + 1}" class="handle"></div>`)
+            // this.dm.add_handle(container_index, handle)
+            // this.handles.push(handle)
+            // this.panel_container.append(handle)
         }
         this.dm.add_ui_panel(container_index, element, options);
-        this.container.append(element);
+        this.panel_container.append(element.container);
+    };
+    AppUI.prototype.toggle_panel = function (container_index, panel_index) {
+        this.dm.toggle_ui_panel(container_index, panel_index);
     };
     AppUI.prototype.clear_messages = function () {
         this.editor_panel.message_panel.clear();
@@ -26975,9 +27247,11 @@ var AppUI = (function () {
     };
     AppUI.prototype.show_step_controls = function () {
         this.output_panel.show_controls();
+        this.inspection_panel.show_button();
     };
     AppUI.prototype.hide_step_controls = function () {
         this.output_panel.hide_controls();
+        this.inspection_panel.hide_button();
     };
     AppUI.prototype.disable_buttons = function () {
         this.editor_panel.disable_buttons();
@@ -26985,18 +27259,42 @@ var AppUI = (function () {
     AppUI.prototype.enable_buttons = function () {
         this.editor_panel.enable_buttons();
     };
+    AppUI.prototype.add_var = function (name, in_scope, init, var_info, value) {
+        this.inspection_panel.add_var(name, in_scope, init, var_info, value);
+    };
+    AppUI.prototype.get_var_names = function () {
+        return this.inspection_panel.get_var_names();
+    };
+    AppUI.prototype.update_var = function (name, values) {
+        return this.inspection_panel.update_var(name, values);
+    };
+    AppUI.prototype.change_var_state = function (name, state) {
+        this.inspection_panel.change_var_state(name, state);
+    };
+    AppUI.prototype.clear_vars = function () {
+        this.inspection_panel.clear();
+    };
+    AppUI.prototype.remove_var = function (name) {
+        this.inspection_panel.remove_var(name);
+    };
+    AppUI.prototype.add_inspection_message = function (name) {
+        this.inspection_panel.add_message(name);
+    };
+    AppUI.prototype.remove_msg = function (name) {
+        this.inspection_panel.remove_msg(name);
+    };
     return AppUI;
 }());
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = AppUI;
 
 
 /***/ }),
-/* 28 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(4);
 var DragLogic = (function () {
     function DragLogic() {
@@ -27009,7 +27307,10 @@ var DragLogic = (function () {
             if (container.panels.length > 0) {
                 var fixed_length_1 = 0;
                 for (var i = 0; i < container.panels.length; i++) {
-                    fixed_length_1 += container.panels[i].flexible ? container.panels[i].length : 0;
+                    var panel = container.panels[i];
+                    if (panel.fixed && !panel.hidden) {
+                        fixed_length_1 += panel.length;
+                    }
                 }
                 available_length = 100 - fixed_length_1;
             }
@@ -27021,7 +27322,7 @@ var DragLogic = (function () {
             if (options) {
                 if (options.fixed) {
                     new_panel_length = available_length >= options.length ? options.length : available_length;
-                    // si hay suficiente espacion como para que el panel tenga la longitud deseada
+                    // si hay suficiente espacio como para que el panel tenga la longitud deseada
                     // entonces puede tener longitud fija, si no tiene longitud flexible
                     fixed_length = available_length >= options.length;
                 }
@@ -27035,32 +27336,32 @@ var DragLogic = (function () {
             if (fixed_length) {
                 // si el panel tiene longitud fija le va a quitar espacio
                 // a los paneles flexibles existentes
-                // aplicar nuevas longitudes a los paneles (flexibles) existentes
+                // aplicar nuevas longitudes a los paneles (flexibles) existentes que no esten escondidos
                 var old_lengths = container.panels.map(function (p) { return p.length; });
                 var remaining_length = new_panel_length;
                 for (var i = 0; i < old_lengths.length; i++) {
-                    if (!container.panels[i].flexible) {
+                    if (!container.panels[i].fixed && !container.panels[i].hidden) {
                         var diff = old_lengths[i] - remaining_length;
                         container.panels[i].length = diff < 0 ? 0 : diff;
                         remaining_length = remaining_length - old_lengths[i];
                     }
                 }
                 // agregar panel
-                var new_panel = { flexible: fixed_length, length: new_panel_length };
+                var new_panel = { fixed: fixed_length, length: new_panel_length, hidden: false };
                 container.panels.push(new_panel);
             }
             else {
                 // si no tiene longitud fija entonces comparte el espacio disponible
                 // con el resto de los paneles flexibles
-                var flex_panels = container.panels.filter(function (p) { return p.flexible == false; }).length + 1;
+                var flex_panels = container.panels.filter(function (p) { return p.fixed == false; }).length + 1;
                 var length_1 = available_length / flex_panels;
-                // aplicar nuevas longitudes a los paneles (flexibles) existentes
+                // aplicar nuevas longitudes a los paneles (flexibles) existentes que no esten escondidos
                 for (var i = 0; i < container.panels.length; i++) {
-                    if (!container.panels[i].flexible) {
+                    if (!container.panels[i].fixed && !container.panels[i].hidden) {
                         container.panels[i].length = length_1;
                     }
                 }
-                var new_panel = { flexible: fixed_length, length: length_1 };
+                var new_panel = { fixed: fixed_length, length: length_1, hidden: false };
                 container.panels.push(new_panel);
             }
         }
@@ -27068,8 +27369,152 @@ var DragLogic = (function () {
             throw new Error("Invalid container_index (" + container_index + ")");
         }
     };
-    DragLogic.prototype.add_container = function (width, height, mode) {
-        this.containers.push({ width: width, height: height, mode: mode, panels: [] });
+    DragLogic.prototype.add_panel_after = function (container_index, previous_panel_index, options) {
+        var container = this.containers[container_index];
+        if (previous_panel_index < container.panels.length) {
+            if (previous_panel_index >= container.panels.length - 1) {
+                this.add_panel(container_index, options);
+            }
+            else {
+                var available_length = 0;
+                if (container.panels.length > 0) {
+                    var fixed_length_2 = 0;
+                    for (var i = 0; i < container.panels.length; i++) {
+                        var panel = container.panels[i];
+                        if (panel.fixed && !panel.hidden) {
+                            fixed_length_2 += panel.length;
+                        }
+                    }
+                    available_length = 100 - fixed_length_2;
+                }
+                else {
+                    available_length = 100;
+                }
+                var new_panel_length = 0;
+                var fixed_length = false;
+                if (options) {
+                    if (options.fixed) {
+                        new_panel_length = available_length >= options.length ? options.length : available_length;
+                        // si hay suficiente espacio como para que el panel tenga la longitud deseada
+                        // entonces puede tener longitud fija, si no tiene longitud flexible
+                        fixed_length = available_length >= options.length;
+                    }
+                    else {
+                        new_panel_length = available_length;
+                    }
+                }
+                else {
+                    new_panel_length = available_length;
+                }
+                if (fixed_length) {
+                    // si el panel tiene longitud fija le va a quitar espacio
+                    // a los paneles flexibles existentes
+                    // aplicar nuevas longitudes a los paneles (flexibles) existentes que no esten escondidos
+                    var flex_panels = container.panels.filter(function (p) { return p.fixed == false; }).length;
+                    if (flex_panels > 0) {
+                        var length_2 = (available_length - new_panel_length) / flex_panels;
+                        for (var i = 0; i < container.panels.length; i++) {
+                            if (!container.panels[i].fixed && !container.panels[i].hidden) {
+                                container.panels[i].length = length_2;
+                            }
+                        }
+                    }
+                    // agregar panel
+                    var new_panel = { fixed: fixed_length, length: new_panel_length, hidden: false };
+                    var new_panels = container.panels.slice(0, previous_panel_index + 1).concat([new_panel], container.panels.slice(previous_panel_index + 1));
+                    container.panels = new_panels;
+                }
+                else {
+                    // si no tiene longitud fija entonces comparte el espacio disponible
+                    // con el resto de los paneles flexibles
+                    var flex_panels = container.panels.filter(function (p) { return p.fixed == false; }).length + 1;
+                    var length_3 = available_length / flex_panels;
+                    // aplicar nuevas longitudes a los paneles (flexibles) existentes que no esten escondidos
+                    for (var i = 0; i < container.panels.length; i++) {
+                        if (!container.panels[i].fixed && !container.panels[i].hidden) {
+                            container.panels[i].length = length_3;
+                        }
+                    }
+                    var new_panel = { fixed: fixed_length, length: length_3, hidden: false };
+                    var new_panels = container.panels.slice(0, previous_panel_index + 1).concat([new_panel], container.panels.slice(previous_panel_index + 1));
+                    container.panels = new_panels;
+                }
+            }
+        }
+        else {
+            throw new Error("Tried to add a panel after container.panels[" + previous_panel_index + "] but this container only has " + container.panels.length + " panels");
+        }
+    };
+    DragLogic.prototype.remove_panel = function (container_index, panel_index) {
+        var container = this.containers[container_index];
+        var removed_panel = container.panels[panel_index];
+        // remover panel
+        container.panels = container.panels.filter(function (p, i) { return i != panel_index; });
+        if (container.panels.length > 0) {
+            // repartir la longitud del panel removido entre los paneles flexibles (no escondidos)
+            // de este contenedor
+            var flex_panels = container.panels.filter(function (p) { return p.fixed == false; }).length;
+            if (flex_panels > 0) {
+                var extra_length = removed_panel.length / flex_panels;
+                for (var i = 0; i < container.panels.length; i++) {
+                    if (!container.panels[i].fixed && !container.panels[i].hidden) {
+                        container.panels[i].length += extra_length;
+                    }
+                }
+            }
+        }
+    };
+    DragLogic.prototype.toggle_panel = function (container_index, panel_index) {
+        var container = this.containers[container_index];
+        var panel = container.panels[panel_index];
+        panel.hidden = !panel.hidden;
+        if (panel.hidden) {
+            // repartir la longitud del panel removido entre los paneles flexibles (no escondidos)
+            // de este contenedor
+            var flex_panels = container.panels.filter(function (p) { return p.fixed == false && p.hidden == false; }).length;
+            if (flex_panels > 0) {
+                var extra_length = panel.length / flex_panels;
+                var old_length = panel.length;
+                for (var i = 0; i < container.panels.length; i++) {
+                    if (!container.panels[i].fixed && !container.panels[i].hidden) {
+                        container.panels[i].length += extra_length;
+                    }
+                }
+            }
+        }
+        else {
+            // repartir la longitud disponible entre los paneles flexibles (no-escondidos)
+            var available_length = 0;
+            if (container.panels.length > 0) {
+                var fixed_length = 0;
+                for (var i = 0; i < container.panels.length; i++) {
+                    var panel_1 = container.panels[i];
+                    if (panel_1.fixed && !panel_1.hidden) {
+                        fixed_length += panel_1.length;
+                    }
+                }
+                available_length = 100 - fixed_length;
+            }
+            else {
+                available_length = 100;
+            }
+            var flex_panels = container.panels.filter(function (p) { return p.fixed == false && p.hidden == false; }).length;
+            if (flex_panels > 0) {
+                var length_4 = available_length / flex_panels;
+                for (var i = 0; i < container.panels.length; i++) {
+                    if (!container.panels[i].fixed && !container.panels[i].hidden) {
+                        container.panels[i].length = length_4;
+                    }
+                }
+            }
+        }
+        return panel.hidden;
+    };
+    DragLogic.prototype.get_visible_panels = function (container_index) {
+        return this.containers[container_index].panels.filter(function (p) { return p.hidden == false; }).length;
+    };
+    DragLogic.prototype.add_container = function (x, y, width, height, mode) {
+        this.containers.push({ width: width, height: height, mode: mode, panels: [], origin: { x: x, y: y } });
     };
     DragLogic.prototype.remove_container = function (container_index) {
         if (container_index < 0 || container_index >= this.containers.length) {
@@ -27124,8 +27569,15 @@ var DragLogic = (function () {
                             container.panels[i].length = acc - total_delta;
                         }
                     }
-                    var growing_panel_width = container.panels[handle_index].length;
-                    container.panels[handle_index].length = (growing_panel_width + total_delta) > 100 ? 100 : growing_panel_width + total_delta;
+                    var growing_panel = container.panels[handle_index];
+                    if (growing_panel.hidden) {
+                        var growing_panel_width = container.panels[this.find(0, handle_index, false, { hidden: false })].length;
+                        container.panels[this.find(0, handle_index, false, { hidden: false })].length = (growing_panel_width + total_delta) > 100 ? 100 : growing_panel_width + total_delta;
+                    }
+                    else {
+                        var growing_panel_width = growing_panel.length;
+                        growing_panel.length = (growing_panel_width + total_delta) > 100 ? 100 : growing_panel_width + total_delta;
+                    }
                 }
                 else {
                     var shrinking_panel_index = handle_index;
@@ -27140,8 +27592,15 @@ var DragLogic = (function () {
                             container.panels[i].length = acc - total_delta;
                         }
                     }
-                    var growing_panel_width = container.panels[handle_index + 1].length;
-                    container.panels[handle_index + 1].length = (growing_panel_width + total_delta) > 100 ? 100 : growing_panel_width + total_delta;
+                    var growing_panel = container.panels[handle_index + 1];
+                    if (growing_panel.hidden) {
+                        var growing_panel_width = container.panels[this.find(0, handle_index, false, { hidden: false })].length;
+                        container.panels[this.find(0, handle_index, false, { hidden: false })].length = (growing_panel_width + total_delta) > 100 ? 100 : growing_panel_width + total_delta;
+                    }
+                    else {
+                        var growing_panel_width = growing_panel.length;
+                        growing_panel.length = (growing_panel_width + total_delta) > 100 ? 100 : growing_panel_width + total_delta;
+                    }
                 }
             }
             else {
@@ -27152,13 +27611,47 @@ var DragLogic = (function () {
             throw new Error("Invalid container_index (" + container_index + ")");
         }
     };
+    /**
+     * Search for a panel with some specifications (fixed length?, hidden?, length == x?) and, if found, return its index within its container,
+     * otherwise return -1.
+     */
+    DragLogic.prototype.find = function (container_index, from_index, forwards, options) {
+        var defaults = { hidden: false, length: -1 }; // -1 means any...
+        var spec = tslib_1.__assign({}, defaults, options);
+        var container = this.containers[container_index];
+        if (forwards) {
+            for (var i = from_index + 1; i < container.panels.length; i++) {
+                var panel = container.panels[i];
+                var partial_match = panel.hidden == spec.hidden;
+                if (partial_match && spec.length == -1) {
+                    return i;
+                }
+                else if (partial_match && panel.length == spec.length) {
+                    return i;
+                }
+            }
+        }
+        else {
+            for (var i = from_index - 1; i >= 0; i--) {
+                var panel = container.panels[i];
+                var partial_match = panel.hidden == spec.hidden;
+                if (partial_match && spec.length == -1) {
+                    return i;
+                }
+                else if (partial_match && panel.length == spec.length) {
+                    return i;
+                }
+            }
+        }
+        return -1;
+    };
     DragLogic.prototype.clamp = function (container_index, vector) {
         var container = this.containers[container_index];
         var x = vector.x, y = vector.y;
-        x = x < 0 ? 0 : x;
-        x = x > container.width ? container.width : x;
-        y = y < 0 ? 0 : y;
-        y = y > container.width ? container.height : y;
+        x = x < container.origin.x ? container.origin.x : x;
+        x = x > (container.width + container.origin.x) ? (container.width + container.origin.x) : x;
+        y = y < (container.origin.y) ? container.origin.y : y;
+        y = y > (container.height + container.origin.y) ? (container.height + container.origin.y) : y;
         return { x: x, y: y };
     };
     DragLogic.prototype.substract = function (a, b) {
@@ -27205,13 +27698,19 @@ var DragManager = (function (_super) {
         });
     };
     DragManager.prototype.add_ui_container = function (element, mode) {
-        _super.prototype.add_container.call(this, element.width(), element.height(), mode);
+        var pos = element.position();
+        _super.prototype.add_container.call(this, pos.left, pos.top, element.width(), element.height(), mode);
         this.ui_panel_containers.push({ element: element, mode: mode, panels: [], last_handle_index: 0 });
     };
     DragManager.prototype.add_ui_panel = function (container_index, panel_element, options) {
         if (container_index >= 0 && container_index < this.ui_panel_containers.length) {
             _super.prototype.add_panel.call(this, container_index, options);
-            this.ui_panel_containers[container_index].panels.push(panel_element);
+            panel_element.container_index = container_index;
+            panel_element.panel_index = this.ui_panel_containers[container_index].panels.length;
+            var container = this.ui_panel_containers[container_index];
+            container.panels.push(panel_element.container);
+            var lengths = _super.prototype.get_container.call(this, container_index).panels.map(function (p) { return p.length; });
+            this.apply_lengths(container.panels, lengths, container.mode);
         }
         else {
             throw new Error("Invalid container_index (" + container_index + ")");
@@ -27219,17 +27718,82 @@ var DragManager = (function (_super) {
     };
     DragManager.prototype.drag_handle = function (handle, from, to) {
         _super.prototype.drag.call(this, handle.container_index, handle.handle_index, from, to);
-        var ui_container = this.ui_panel_containers[handle.container_index];
-        var panels = _super.prototype.get_container.call(this, handle.container_index).panels;
-        // aplicar las nuevas longitudes
-        for (var i = 0; i < ui_container.panels.length; i++) {
-            if (ui_container.mode == 'horizontal') {
-                ui_container.panels[i].attr('style', "width: " + panels[i].length + "%;");
+        var container = this.ui_panel_containers[handle.container_index];
+        var lengths = _super.prototype.get_container.call(this, handle.container_index).panels.map(function (pan) { return pan.length; });
+        this.apply_lengths(container.panels, lengths, container.mode);
+    };
+    DragManager.prototype.toggle_ui_panel = function (container_index, panel_index) {
+        var visible_panels = _super.prototype.get_visible_panels.call(this, container_index);
+        var container_model = _super.prototype.get_container.call(this, container_index);
+        var panel_model = container_model.panels[panel_index];
+        if (visible_panels > 1 || panel_model.hidden) {
+            var hidden = _super.prototype.toggle_panel.call(this, container_index, panel_index);
+            var container = this.ui_panel_containers[container_index];
+            var lengths = _super.prototype.get_container.call(this, container_index).panels.map(function (pan) { return pan.length; });
+            this.apply_lengths(container.panels, lengths, container.mode);
+            if (hidden) {
+                var panel = container.panels[panel_index];
+                panel.hide();
+                if (panel_index == 0) {
+                    // ocultar la primer manija
+                    var handle = this.handles[0];
+                    if (handle) {
+                        handle.element.hide();
+                    }
+                }
+                else {
+                    // ocultar la manija a la izquierda de este panel
+                    var handle = this.handles[panel_index - 1];
+                    if (handle) {
+                        handle.element.hide();
+                    }
+                }
             }
             else {
-                ui_container.panels[i].attr('style', "height: " + panels[i].length + "%;");
+                var panel = container.panels[panel_index];
+                panel.show();
+                if (panel_index == 0) {
+                    // mostrar la primer manija
+                    var handle = this.handles[0];
+                    if (handle) {
+                        handle.element.show();
+                    }
+                }
+                else {
+                    // mostrar la manija a la izquierda de este panel
+                    var handle = this.handles[panel_index - 1];
+                    if (handle) {
+                        handle.element.show();
+                    }
+                }
             }
         }
+    };
+    DragManager.prototype.apply_lengths = function (panels, lengths, mode) {
+        for (var i = 0; i < panels.length; i++) {
+            var style = panels[i].attr('style');
+            var new_length = (mode == 'horizontal' ? 'width' : 'height') + ": " + lengths[i] + "%;";
+            if (style) {
+                var regexp = new RegExp((mode == 'horizontal' ? 'width' : 'height') + ":\\s+\\d+(\\.\\d+)?%;");
+                var new_style = style.replace(regexp, new_length);
+                panels[i].attr('style', new_style);
+            }
+            else {
+                panels[i].attr('style', new_length);
+            }
+        }
+    };
+    DragManager.prototype.insert_after = function (element, arr, index) {
+        if (index >= arr.length) {
+            arr.push(element);
+            return arr;
+        }
+        else {
+            return arr.slice(0, index + 1).concat([element], arr.slice(index + 1));
+        }
+    };
+    DragManager.prototype.set_container_dimensions = function (container_index, width, height) {
+        _super.prototype.set_container_dimensions.call(this, container_index, width, height);
     };
     return DragManager;
 }(DragLogic));
@@ -27237,12 +27801,13 @@ exports.DragManager = DragManager;
 
 
 /***/ }),
-/* 29 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var $ = __webpack_require__(1);
+Object.defineProperty(exports, "__esModule", { value: true });
+var $ = __webpack_require__(0);
 var CodePanel = (function () {
     function CodePanel(parent) {
         this.parent = parent;
@@ -27269,26 +27834,25 @@ var CodePanel = (function () {
     });
     return CodePanel;
 }());
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = CodePanel;
 
 
 /***/ }),
-/* 30 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(4);
-var $ = __webpack_require__(1);
-var CodeMirror = __webpack_require__(12);
-var MessagePanel_1 = __webpack_require__(32);
-var StatusBar_1 = __webpack_require__(35);
-var Actions_1 = __webpack_require__(3);
-__webpack_require__(26);
+var $ = __webpack_require__(0);
+var CodeMirror = __webpack_require__(13);
+var MessagePanel_1 = __webpack_require__(35);
+var StatusBar_1 = __webpack_require__(39);
+var Actions_1 = __webpack_require__(2);
+__webpack_require__(27);
 var defaults = {
     debug: false,
-    links: true,
 };
 var EditorPanel = (function () {
     function EditorPanel(container, d, options) {
@@ -27331,13 +27895,6 @@ var EditorPanel = (function () {
         var run_button = $('<button class="green-button"><span class="button-label bold">Ejecutar</span><span></button>');
         var step_button = $('<button class="green-button"><span class="button-label bold">Ejecutar paso a paso</span><span></button>');
         bar.append(icon).append(title).append(run_button).append(step_button);
-        if (this.options.links) {
-            var help_icon = $('<span style="margin-left:15px;" class="octicon octicon-repo"></span>');
-            var help_link = $('<a style="margin-left: 5px;" href="https://github.com/pl-lang/jsplint/wiki/Sintaxis/">Ayuda sobre el lenguaje</a>');
-            var repo_icon = $('<span style="margin-left:15px;" class="octicon octicon-mark-github"></span>');
-            var repo_link = $('<a style="margin-left:5px" href="https://github.com/pl-lang/playground/">Visita el proyecto en GitHub</a>');
-            bar.append(help_icon).append(help_link).append(repo_icon).append(repo_link);
-        }
         this.run_button = run_button;
         this.step_button = step_button;
         if (this.options.debug) {
@@ -27385,16 +27942,16 @@ var EditorPanel = (function () {
     };
     return EditorPanel;
 }());
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = EditorPanel;
 
 
 /***/ }),
-/* 31 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var Emitter = (function () {
     function Emitter(public_event_list) {
         this.public_events = public_event_list;
@@ -27458,19 +28015,171 @@ var Emitter = (function () {
     };
     return Emitter;
 }());
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = Emitter;
 
 
 /***/ }),
-/* 32 */
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var $ = __webpack_require__(1);
-var Templates_1 = __webpack_require__(36);
-var Actions_1 = __webpack_require__(3);
+Object.defineProperty(exports, "__esModule", { value: true });
+var $ = __webpack_require__(0);
+var Actions_1 = __webpack_require__(2);
+var InspectionMessage = (function () {
+    function InspectionMessage(parent, name, dispatcher) {
+        var _this = this;
+        this.parent = parent;
+        this.dispatcher = dispatcher;
+        this.name = name;
+        this.container = $('<pre class="scalar flex-row"></pre>');
+        var name_element = $("<span class=\"scalar-name\">" + name + ":<span class=\"value italic\">Esta variable no existe</span></span>");
+        this.remove_button = $('<button class="simple-button-icon octicon octicon-x pull-right"></button>');
+        this.remove_button.click(function () {
+            _this.dispatcher.dispatch({ kind: Actions_1.ActionKind.RemoveMsgFromInspection, name: _this.name });
+        });
+        this.container.append(name_element, this.remove_button);
+        this.parent.append(this.container);
+    }
+    return InspectionMessage;
+}());
+exports.default = InspectionMessage;
+
+
+/***/ }),
+/* 34 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var $ = __webpack_require__(0);
+var Prompt_1 = __webpack_require__(14);
+var Scalar_1 = __webpack_require__(38);
+var Vector_1 = __webpack_require__(41);
+var InspectionMessage_1 = __webpack_require__(33);
+var InspectionPanel = (function () {
+    function InspectionPanel(parent, dispatcher) {
+        var _this = this;
+        this.parent = parent;
+        this.dispatcher = dispatcher;
+        this.var_elements = [];
+        this.container = $('<div id="inspection-panel" class="flex-col"></div>');
+        var bar = $('<div class="bar bar-bottom-border flex-row center-align"></div>');
+        var icon = $('<span style="margin-left:10px" class="octicon octicon-search">');
+        var title = $('<span class="title">VARIABLES</span>');
+        var add_button = $('<button class="blue-button icon-button"><span class="button-icon octicon octicon-plus"></span></button>');
+        add_button.click(function () {
+            _this.prompt = new Prompt_1.default(_this.body, _this.dispatcher, 'varname');
+        });
+        this.add_button = add_button;
+        add_button.hide();
+        bar.append(icon).append(title).append(add_button);
+        this.container.append(bar);
+        this.body = $('<div id="inspection-panel-body" class="flex-col"></div>');
+        this.container.append(this.body);
+    }
+    InspectionPanel.prototype.clear = function () {
+        this.body.empty();
+        this.var_elements = [];
+    };
+    InspectionPanel.prototype.hide_button = function () {
+        this.add_button.hide();
+    };
+    InspectionPanel.prototype.show_button = function () {
+        this.add_button.show();
+    };
+    InspectionPanel.prototype.add_var = function (name, in_scope, init, var_info, boxed_value) {
+        var variable = this.find(name);
+        // solo agregar la variable si no existe
+        if (!variable) {
+            if (var_info.type == 'scalar') {
+                var new_var = new Scalar_1.default(this.body, name, in_scope, init, this.dispatcher);
+                if (in_scope && init) {
+                    new_var.set_value(boxed_value);
+                }
+                this.var_elements.push(new_var);
+            }
+            else {
+                var new_var = new Vector_1.default(this.body, name, in_scope, init, this.dispatcher);
+                if (in_scope && init) {
+                    new_var.update_values(boxed_value);
+                }
+                this.var_elements.push(new_var);
+            }
+        }
+    };
+    /**
+     * get_var_names
+     * retorna una lista de los nombres de las variables que estan siendo inspeccion
+     */
+    InspectionPanel.prototype.get_var_names = function () {
+        return this.var_elements.map(function (s) { return s.name; });
+    };
+    InspectionPanel.prototype.update_var = function (name, boxed_value) {
+        var variable = this.find(name);
+        if (variable instanceof Scalar_1.default) {
+            variable.set_value(boxed_value);
+        }
+        else if (variable instanceof Vector_1.default) {
+            variable.update_values(boxed_value);
+        }
+    };
+    InspectionPanel.prototype.change_var_state = function (name, state) {
+        var variable = this.find(name);
+        // actualizar solo variables existentes
+        if (variable) {
+            variable.change_state(state);
+        }
+    };
+    InspectionPanel.prototype.find = function (name) {
+        for (var i = 0; i < this.var_elements.length; i++) {
+            var v_element = this.var_elements[i];
+            if (v_element.name == name && (v_element instanceof Scalar_1.default || v_element instanceof Vector_1.default)) {
+                return v_element;
+            }
+        }
+    };
+    InspectionPanel.prototype.find_msg = function (name) {
+        for (var i = 0; i < this.var_elements.length; i++) {
+            var v_element = this.var_elements[i];
+            if (v_element.name == name && v_element instanceof InspectionMessage_1.default) {
+                return v_element;
+            }
+        }
+    };
+    InspectionPanel.prototype.remove_var = function (name) {
+        var removed_var = this.find(name);
+        this.var_elements = this.var_elements.filter(function (v) { return v.name != name; });
+        removed_var.container.empty();
+        removed_var.container.remove();
+    };
+    InspectionPanel.prototype.add_message = function (name) {
+        var msg = new InspectionMessage_1.default(this.body, name, this.dispatcher);
+        this.var_elements.push(msg);
+    };
+    InspectionPanel.prototype.remove_msg = function (name) {
+        var removed_msg = this.find_msg(name);
+        this.var_elements = this.var_elements.filter(function (v) { return v.name != name; });
+        removed_msg.container.empty();
+        removed_msg.container.remove();
+    };
+    return InspectionPanel;
+}());
+exports.default = InspectionPanel;
+
+
+/***/ }),
+/* 35 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var $ = __webpack_require__(0);
+var Templates_1 = __webpack_require__(40);
+var Actions_1 = __webpack_require__(2);
 var MessagePanel = (function () {
     function MessagePanel(container, d) {
         this.container = container;
@@ -27543,21 +28252,21 @@ var MessagePanel = (function () {
     };
     return MessagePanel;
 }());
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = MessagePanel;
 
 
 /***/ }),
-/* 33 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var $ = __webpack_require__(1);
-var Window_1 = __webpack_require__(37);
-var Actions_1 = __webpack_require__(3);
-var default_1 = (function () {
-    function default_1(container, d) {
+Object.defineProperty(exports, "__esModule", { value: true });
+var $ = __webpack_require__(0);
+var Window_1 = __webpack_require__(42);
+var Actions_1 = __webpack_require__(2);
+var OutputPanel = (function () {
+    function OutputPanel(container, d) {
         var _this = this;
         this.parent = container;
         this.dispatcher = d;
@@ -27570,7 +28279,7 @@ var default_1 = (function () {
         this.output = new Window_1.default(output_container, this.dispatcher);
         this.container.append(bar).append(output_container);
     }
-    default_1.prototype.create_title_bar = function () {
+    OutputPanel.prototype.create_title_bar = function () {
         var bar = $('<div class="bar bar-bottom-border flex-row center-align"></div>');
         var icon = $('<span style="margin-left:10px" class="octicon octicon-terminal"></span>');
         var title = $('<span class="title">SALIDA</span>');
@@ -27580,70 +28289,163 @@ var default_1 = (function () {
         this.hide_controls();
         return bar;
     };
-    default_1.prototype.show_controls = function () {
+    OutputPanel.prototype.show_controls = function () {
         this.step_button.show();
         this.stop_button.show();
     };
-    default_1.prototype.hide_controls = function () {
+    OutputPanel.prototype.hide_controls = function () {
         this.step_button.hide();
         this.stop_button.hide();
     };
-    default_1.prototype.write = function (v) {
+    OutputPanel.prototype.write = function (v) {
         this.output.write(v);
     };
-    default_1.prototype.read = function () {
+    OutputPanel.prototype.read = function () {
         this.output.read();
     };
-    default_1.prototype.clear = function () {
+    OutputPanel.prototype.clear = function () {
         this.output.clear();
     };
-    return default_1;
+    return OutputPanel;
 }());
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = default_1;
+exports.default = OutputPanel;
 
 
 /***/ }),
-/* 34 */
+/* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var $ = __webpack_require__(1);
-var Actions_1 = __webpack_require__(3);
-var Prompt = (function () {
-    function Prompt(container, d) {
-        var _this = this;
-        this.container = container;
-        this.textarea = $('<textarea id="prompt"></textarea>');
-        this.distpatcher = d;
-        this.textarea.keydown(function (e) {
-            if (e.keyCode == 13) {
-                var input = _this.textarea.val();
-                _this.close();
-                _this.distpatcher.dispatch({ kind: Actions_1.ActionKind.SendInput, input: input });
-            }
-        });
-        this.container.append(this.textarea);
-        this.textarea.focus();
+Object.defineProperty(exports, "__esModule", { value: true });
+var $ = __webpack_require__(0);
+var Actions_1 = __webpack_require__(2);
+var PanelToggler = (function () {
+    function PanelToggler(parent, dispatcher, debug) {
+        this.parent = parent;
+        this.debug = debug;
+        this.dispatcher = dispatcher;
+        this.container = $('<div id="panel-toggler" class="flex-col big-v-bar center-align"></div>');
+        this.panels = [];
     }
-    Prompt.prototype.close = function () {
-        var new_line = $("<div class=\"line\"><span>&gt;" + this.textarea.val() + "</span></div>");
-        this.textarea.replaceWith(new_line);
-        this.textarea = null;
+    PanelToggler.prototype.add_panel = function (panel, hidden, icon_class_name) {
+        var _this = this;
+        var new_panel = { hidden: hidden, container: panel.container, container_index: panel.container_index, panel_index: panel.panel_index };
+        this.panels.push(new_panel);
+        var button = $("<button class=\"blue-button big-icon-button v-button\"><span class=\"big-icon octicon octicon-" + icon_class_name + "\"></span></button>");
+        button.click(function () {
+            _this.toggle_panel(panel.container_index, panel.panel_index);
+        });
+        this.container.append(button);
     };
-    return Prompt;
+    PanelToggler.prototype.toggle_panel = function (container_index, panel_index) {
+        var index = this.find_panel(container_index, panel_index);
+        if (index != -1) {
+            if (this.panels[index].hidden) {
+                this.dispatcher.dispatch({ kind: Actions_1.ActionKind.ShowPanel, container_index: container_index, panel_index: panel_index });
+                this.panels[index].hidden = false;
+            }
+            else {
+                this.dispatcher.dispatch({ kind: Actions_1.ActionKind.HidePanel, container_index: container_index, panel_index: panel_index });
+                this.panels[index].hidden = true;
+            }
+        }
+        else {
+            throw new Error("No panel found. The panel you were looking for had indexes: { container_index: " + container_index + ", panel_index: " + panel_index + " }");
+        }
+    };
+    PanelToggler.prototype.find_panel = function (container_index, panel_index) {
+        for (var index = 0; index < this.panels.length; index++) {
+            var panel = this.panels[index];
+            if (panel.container_index == container_index && panel.panel_index == panel_index) {
+                return index;
+            }
+        }
+        return -1;
+    };
+    PanelToggler.prototype.add_link = function (url_string, icon_class_name) {
+        var anchor = $("<button class=\"blue-button big-icon-button v-button\"><a class=\"big-icon octicon octicon-" + icon_class_name + "\" href=\"" + url_string + "\"></a></button>");
+        this.container.append(anchor);
+    };
+    return PanelToggler;
 }());
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = Prompt;
+exports.default = PanelToggler;
 
 
 /***/ }),
-/* 35 */
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
+var $ = __webpack_require__(0);
+var Actions_1 = __webpack_require__(2);
+var interprete_pl_1 = __webpack_require__(5);
+var Scalar = (function () {
+    function Scalar(parent, name, in_scope, init, dispatcher) {
+        var _this = this;
+        this.parent = parent;
+        this.dispatcher = dispatcher;
+        this.name = name;
+        this.container = $('<pre class="scalar flex-row"></pre>');
+        var name_element = $("<span class=\"scalar-name\">" + name + ":</span>");
+        if (in_scope) {
+            if (!init) {
+                this.value = null;
+                this.value_element = $("<span class=\"value italic\">Aun no ha sido inicializada</span>");
+            }
+            else {
+                this.value = null;
+                this.value_element = $("<span class=\"value italic\"></span>");
+            }
+        }
+        else {
+            this.value_element = $("<span class=\"value italic\">Esta variable no est\u00E1 en \u00E1mbito</span>");
+        }
+        this.remove_button = $('<button class="simple-button-icon octicon octicon-x pull-right"></button>');
+        this.remove_button.click(function () {
+            _this.dispatcher.dispatch({ kind: Actions_1.ActionKind.RemoveVarFromInspection, name: _this.name });
+        });
+        this.container.append(name_element, this.value_element, this.remove_button);
+        this.parent.append(this.container);
+    }
+    Scalar.prototype.set_value = function (vb) {
+        if (vb.value != this.value) {
+            this.value_element.text(vb.value);
+            this.value = vb.value;
+            this.value_element.removeClass('italic');
+        }
+    };
+    Scalar.prototype.change_state = function (state) {
+        this.value_element.addClass('italic');
+        this.value = null;
+        switch (state) {
+            case interprete_pl_1.VarState.DoesntExist:
+                this.value_element.text('Esta variable no existe');
+                break;
+            case interprete_pl_1.VarState.ExistsNotInit:
+                this.value_element.addClass('italic');
+                this.value_element.text('Aun no ha sido inicializada');
+                break;
+            case interprete_pl_1.VarState.ExistsOutOfScope:
+                this.value_element.addClass('italic');
+                this.value_element.text('Esta variable no esta en ámbito');
+                break;
+        }
+    };
+    return Scalar;
+}());
+exports.default = Scalar;
+
+
+/***/ }),
+/* 39 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
 var StatusBar = (function () {
     function StatusBar(container) {
         this.container = container;
@@ -27688,16 +28490,16 @@ var StatusBar = (function () {
     });
     return StatusBar;
 }());
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = StatusBar;
 
 
 /***/ }),
-/* 36 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 function get_template(data) {
     var template = data.reason in templates ? templates[data.reason] : (data.where in generic_templates ? generic_templates[data.where] : templates.default);
     var parsed_template = { title: style(interpolate(data, template.title)) };
@@ -27709,7 +28511,6 @@ function get_template(data) {
     }
     return parsed_template;
 }
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = get_template;
 function create(data, s) {
     var result = '';
@@ -27966,15 +28767,129 @@ var templates = {
 
 
 /***/ }),
-/* 37 */
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
+var $ = __webpack_require__(0);
+var Actions_1 = __webpack_require__(2);
+var interprete_pl_1 = __webpack_require__(5);
+var Vector = (function () {
+    function Vector(parent, name, in_scope, init, dispatcher) {
+        var _this = this;
+        this.parent = parent;
+        this.dispatcher = dispatcher;
+        this.name = name;
+        this.container = $('<div class="vector flex-col"></div>');
+        this.cells_container = $('<div class="scalar flex-col"></div>');
+        var name_element = $("<span class=\"scalar-name\">" + name + ":</span>");
+        var name_row = $("<div class=\"vector flex-row\"></div>");
+        var toggle_cells_button = $('<button class="simple-button-icon toggle-button octicon octicon-triangle-down"></button>');
+        toggle_cells_button.click(function () {
+            toggle_cells_button.toggleClass('octicon-triangle-down');
+            toggle_cells_button.toggleClass('octicon-triangle-right');
+            _this.cells_container.toggle();
+        });
+        name_row.append(toggle_cells_button, name_element);
+        var remove_button = $('<button class="simple-button-icon octicon octicon-x pull-right"></button>');
+        remove_button.click(function () {
+            _this.dispatcher.dispatch({ kind: Actions_1.ActionKind.RemoveVarFromInspection, name: _this.name });
+        });
+        this.cell_elements = [];
+        this.cells = [];
+        if (in_scope) {
+            if (!init) {
+                this.message = $("<span class=\"value italic\">Aun no ha sido inicializada</span>");
+                name_row.append(this.message, remove_button);
+                this.container.append(name_row);
+            }
+        }
+        else {
+            this.message = $("<span class=\"value italic\">Esta variable no est\u00E1 en \u00E1mbito</span>");
+            name_row.append(this.message, remove_button);
+            this.container.append(name_row);
+        }
+        this.container.append(this.cells_container);
+        this.parent.append(this.container);
+    }
+    Vector.prototype.update_values = function (bv) {
+        this.message.hide();
+        if (bv.cells.length > this.cells.length) {
+            var diff = bv.cells.length - this.cells.length;
+            for (var i = 0; i < diff; i++) {
+                var _a = this.create_cell_element(i + this.cells.length + 1, ''), container = _a.container, index_element = _a.index_element, value_element = _a.value_element;
+                this.cell_elements.push({ index_element: index_element, value_element: value_element });
+                this.cells_container.append(container);
+            }
+            this.cells = bv.cells;
+        }
+        for (var i = 0; i < bv.cells.length; i++) {
+            var cell = bv.cells[i];
+            var cell_element = this.cell_elements[i];
+            if (cell.index.toString() != cell_element.index_element.text()) {
+                cell_element.index_element.text(cell.index + 1 + ":");
+            }
+            if (cell.value.toString() != cell_element.value_element.text()) {
+                cell_element.value_element.text(cell.value.toString());
+            }
+        }
+    };
+    Vector.prototype.create_cell_element = function (index, value) {
+        var element_container = $('<pre class="vector-cell flex-row"></pre>');
+        var index_element = $("<span class=\"scalar-name\">" + index + ":</span>");
+        var value_element = $("<span class=\"value\">" + value + "</span>");
+        element_container.append(index_element, value_element);
+        return { container: element_container, index_element: index_element, value_element: value_element };
+    };
+    Vector.prototype.out_of_scope = function () {
+        this.message.text('Esta variable no esta en ámbito');
+        this.message.show();
+        this.cells = [];
+        this.cells_container.empty();
+        this.cell_elements = [];
+    };
+    Vector.prototype.not_defined = function () {
+        this.message.text('Esta variable no existe');
+        this.message.show();
+        this.cells = [];
+        this.cells_container.empty();
+        this.cell_elements = [];
+    };
+    Vector.prototype.change_state = function (state) {
+        switch (state) {
+            case interprete_pl_1.VarState.DoesntExist:
+                this.message.text('Esta variable no existe');
+                break;
+            case interprete_pl_1.VarState.ExistsNotInit:
+                this.message.text('Aun no ha sido inicializada');
+                break;
+            case interprete_pl_1.VarState.ExistsOutOfScope:
+                this.message.text('Esta variable no esta en ámbito');
+                break;
+        }
+        this.message.show();
+        this.cells = [];
+        this.cells_container.empty();
+        this.cell_elements = [];
+    };
+    return Vector;
+}());
+exports.default = Vector;
+
+
+/***/ }),
+/* 42 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(4);
-var Emitter_1 = __webpack_require__(31);
-var Prompt_1 = __webpack_require__(34);
-var $ = __webpack_require__(1);
+var Emitter_1 = __webpack_require__(32);
+var Prompt_1 = __webpack_require__(14);
+var $ = __webpack_require__(0);
 var Window = (function (_super) {
     tslib_1.__extends(Window, _super);
     function Window(container, d) {
@@ -27989,25 +28904,25 @@ var Window = (function (_super) {
     };
     Window.prototype.read = function () {
         // hace falta almacenar Prompt en p?
-        var p = new Prompt_1.default(this.container, this.dispatcher);
+        var p = new Prompt_1.default(this.container, this.dispatcher, 'input');
     };
     Window.prototype.clear = function () {
         this.container.empty();
     };
     return Window;
 }(Emitter_1.default));
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = Window;
 
 
 /***/ }),
-/* 38 */
+/* 43 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var $ = __webpack_require__(1);
-var Controller_1 = __webpack_require__(13);
+Object.defineProperty(exports, "__esModule", { value: true });
+var $ = __webpack_require__(0);
+var Controller_1 = __webpack_require__(15);
 var app = new Controller_1.Controller($('body'), false);
 
 
