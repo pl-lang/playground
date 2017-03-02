@@ -28,6 +28,10 @@ export default class Scalar {
                 this.value = null
                 this.value_element = $(`<span class="value italic">Aun no ha sido inicializada</span>`)
             }
+            else {
+                this.value = null
+                this.value_element = $(`<span class="value italic"></span>`)
+            }
         }
         else {
             this.value_element = $(`<span class="value italic">Esta variable no está en ámbito</span>`)
