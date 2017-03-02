@@ -1,4 +1,4 @@
-import { Parser, Interpreter, transform, fr_writer, Errors, Value, Failure, Success, S3, InterpreterRead, InterpreterStatementInfo, InterpreterWrite, InterpreterDone } from 'interprete-pl'
+import { ReservedKind, Parser, Interpreter, transform, fr_writer, Errors, Value, Failure, Success, S3, InterpreterRead, InterpreterStatementInfo, InterpreterWrite, InterpreterDone, VarState } from 'interprete-pl'
 import { Action, ActionKind } from './Actions'
 import AppUI from './AppUI'
 import * as $ from 'jquery'
@@ -181,21 +181,34 @@ export class Controller {
     }
 
     update_var(name: string) {
-        const var_maybe = this.interpreter.export_var(name)
-        if (var_maybe.error == false) {
-            const values = var_maybe.result
-            this.app_ui.update_var(name, values)
-        }
-        else {
-            this.app_ui.update_var(name, null)
-        }
+        const bv = this.interpreter.export_var(name)
+        this.app_ui.update_var(name, bv)
     }
 
     add_var(name: string) {
-        const var_maybe = this.interpreter.export_var(name)
-        if (var_maybe.error == false) {
-            const values = var_maybe.result
-            this.app_ui.add_var(name, values, true)
+        const var_state = this.interpreter.search_var(name)
+        if (var_state == VarState.ExistsInit || var_state == VarState.ExistsNotInit) {
+            const bv = this.interpreter.export_var(name)
+            if (var_state == VarState.ExistsInit) {
+                if (bv.type == 'scalar') {
+                    this.app_ui.add_var(name, bv, true)
+                }
+                else {
+                    this.app_ui.add_var(name, bv, true)
+                }
+            }
+            else {
+                if (bv.type == 'scalar') {
+                    this.app_ui.add_var(name, bv, false)
+                }
+                else {
+                    this.app_ui.add_var(name, bv, false)
+                }
+            }
+        }
+        else if (var_state == VarState.ExistsOutOfScope) {
+            // por ahora, mostrar un mensaje diciendo que esta fuera de ambito
+            this.app_ui.add_inspection_message(name)
         }
         else {
             this.app_ui.add_inspection_message(name)

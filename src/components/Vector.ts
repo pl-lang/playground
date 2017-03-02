@@ -14,7 +14,7 @@ export default class Vector {
     container: JQuery
     name: string
 
-    constructor(parent: JQuery, name: string, cells: Cell[], var_found: boolean, dispatcher: Dispatcher) {
+    constructor(parent: JQuery, name: string, cells: Cell[], init: boolean, dispatcher: Dispatcher) {
         this.parent = parent
 
         this.dispatcher = dispatcher
@@ -48,20 +48,15 @@ export default class Vector {
         this.cell_elements = []
         this.cells = []
 
-        if (!var_found) {
-            this.message = $(`<span class="value italic">No existe o no esta en ámbito</span>`)
-            name_row.append(this.message, remove_button)
-            this.container.append(name_row)
-        }
-        else if (cells && cells.length > 0) {
-            name_row.append(remove_button)
-            this.container.append(name_row)
-            this.init_cells(cells)
-        }
-        else {
+        if (!init) {
             this.message = $(`<span class="value italic">Aun no ha sido inicializada</span>`)
             name_row.append(this.message, remove_button)
             this.container.append(name_row)
+        }
+        else {
+            name_row.append(remove_button)
+            this.container.append(name_row)
+            this.init_cells(cells)
         }
 
         this.container.append(this.cells_container)
