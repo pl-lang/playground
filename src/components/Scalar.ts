@@ -52,6 +52,7 @@ export default class Scalar {
     }
 
     out_of_scope() {
+        this.value_element.addClass('italic')
         this.value_element.text('Esta variable no esta en ámbito')
         this.value = null
     }
