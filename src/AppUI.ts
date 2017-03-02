@@ -5,7 +5,7 @@ import PanelToggler from './components/PanelToggler'
 import InspectionPanel from './components/InspectionPanel'
 import { DragManager, Resizeable } from './DragManager'
 import { Dispatcher } from './Controller'
-import { Errors, Value } from 'interprete-pl'
+import { Errors, Value, VarInfo, BoxedValue } from 'interprete-pl'
 import * as $ from 'jquery'
 
 export interface AppOptions {
@@ -198,15 +198,15 @@ export default class AppUI {
         this.editor_panel.enable_buttons()
     }
 
-    add_var(name: string, in_scope: boolean, init: boolean, value: { type: 'scalar', value: number | string | boolean } | { type: 'vector', cells: Cell[] }) {
-        this.inspection_panel.add_var(name, in_scope, init, value)
+    add_var(name: string, in_scope: boolean, init: boolean, var_info: VarInfo, value: BoxedValue) {
+        this.inspection_panel.add_var(name, in_scope, init, var_info, value)
     }
 
     get_var_names(): string[] {
         return this.inspection_panel.get_var_names()
     }
 
-    update_var(name: string, values: { type: 'scalar', value: number | string | boolean } | { type: 'vector', cells: Cell[] }) {
+    update_var(name: string, values: BoxedValue) {
         return this.inspection_panel.update_var(name, values)
     }
 

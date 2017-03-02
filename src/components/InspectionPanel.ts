@@ -6,6 +6,7 @@ import Prompt from './Prompt'
 import Scalar from './Scalar'
 import Vector from './Vector'
 import InspectionMessage from './InspectionMessage'
+import { VarInfo, BoxedValue, BoxedVector, BoxedScalar } from 'interprete-pl'
 
 type Cell = { index: number, value: number | boolean | string }
 
@@ -63,23 +64,23 @@ export default class InspectionPanel implements Resizeable {
         this.add_button.show()
     }
 
-    add_var(name: string, in_scope: boolean, init: boolean, boxed_value: { type: 'scalar', value: number | string | boolean } | { type: 'vector', cells: Cell[] }) {
-        // solo agregar la variable si no existe
+    add_var(name: string, in_scope: boolean, init: boolean, var_info: VarInfo, boxed_value: BoxedValue) {
 
         const variable = this.find(name)
 
+        // solo agregar la variable si no existe
         if (!variable) {
-            if (boxed_value.type == 'scalar') {
+            if (var_info.type == 'scalar') {
                 const new_var = new Scalar(this.body, name, in_scope, init, this.dispatcher)
                 if (in_scope && init) {
-                    new_var.set_value(boxed_value)
+                    new_var.set_value(boxed_value as BoxedScalar)
                 }
                 this.var_elements.push(new_var)
             }
             else {
                 const new_var = new Vector(this.body, name, in_scope, init, this.dispatcher)
                 if (in_scope && init) {
-                    new_var.update_values(boxed_value)
+                    new_var.update_values(boxed_value as BoxedVector)
                 }
                 this.var_elements.push(new_var)
             }

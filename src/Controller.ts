@@ -181,38 +181,27 @@ export class Controller {
     }
 
     update_var(name: string) {
-        const var_state = this.interpreter.search_var(name)
+        const var_info = this.interpreter.search_var(name)
 
-        if (var_state == VarState.ExistsInit) {
+        if (var_info.state == VarState.ExistsInit) {
             const bv = this.interpreter.export_var(name)
             this.app_ui.update_var(name, bv)
         }
     }
 
     add_var(name: string) {
-        const var_state = this.interpreter.search_var(name)
-        if (var_state == VarState.ExistsInit || var_state == VarState.ExistsNotInit) {
+        const var_info = this.interpreter.search_var(name)
+        if (var_info.state == VarState.ExistsInit || var_info.state == VarState.ExistsNotInit) {
             const bv = this.interpreter.export_var(name)
-            if (var_state == VarState.ExistsInit) {
-                if (bv.type == 'scalar') {
-                    this.app_ui.add_var(name, true, true, bv)
-                }
-                else {
-                    this.app_ui.add_var(name, true, true, bv)
-                }
+            if (var_info.state == VarState.ExistsInit) {
+                this.app_ui.add_var(name, true, true, var_info, bv)
             }
             else {
-                if (bv.type == 'scalar') {
-                    this.app_ui.add_var(name, true, false, bv)
-                }
-                else {
-                    this.app_ui.add_var(name, true, false, bv)
-                }
+                this.app_ui.add_var(name, true, false, var_info, bv)
             }
         }
-        else if (var_state == VarState.ExistsOutOfScope) {
-            // por ahora, mostrar un mensaje diciendo que esta fuera de ambito
-            this.app_ui.add_inspection_message(name)
+        else if (var_info.state == VarState.ExistsOutOfScope) {
+            this.app_ui.add_var(name, false, false, var_info, null)
         }
         else {
             this.app_ui.add_inspection_message(name)
