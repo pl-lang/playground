@@ -290,7 +290,7 @@ export class Controller {
             let programaFinalizado = false
 
             while (!programaFinalizado && reporte.error == false) {
-                let { accion, numeroLinea } = reporte.result
+                let { accion, numeroLineaFuente, numeroInstruccion } = reporte.result
 
                 switch (accion) {
                     case Accion.ESCRIBIR:
@@ -301,7 +301,7 @@ export class Controller {
                     break
                 }
 
-                this.move_cursor(numeroLinea, 0)
+                this.move_cursor(numeroLineaFuente, 0)
 
                 if (!this.interprete.programaFinalizado()) {
                     reporte = this.interprete.ejecutarHastaElFinal()
