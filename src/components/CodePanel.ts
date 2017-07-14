@@ -4,7 +4,8 @@ import { Resizeable } from '../DragManager'
 export default class CodePanel implements Resizeable {
     parent: JQuery
     container: JQuery
-    private code: JQuery
+    private code: string
+    private pre_wrapper: JQuery
     container_index: number
     panel_index: number
 
@@ -21,20 +22,26 @@ export default class CodePanel implements Resizeable {
 
         this.container.append(bar)
 
-        const pre_wrapper = $('<div style="overflow: auto;"></div>')
+        this.pre_wrapper = $('<div style="overflow: auto;"></div>')
 
-        this.code = $('<pre id="fr-pre"></pre>')
-
-        pre_wrapper.append(this.code)
-
-        this.container.append(pre_wrapper)
+        this.container.append(this.pre_wrapper)
     }
 
     set contents(c: string) {
-        this.code.text(c)
+        this.pre_wrapper.empty()
+
+        const lineas = c.split('\n')
+        
+        for (let linea of lineas) {
+            if (linea.length > 0) {
+                this.pre_wrapper.append($(`<div><pre style="margin-left: 6px; font-size: 14px;">${linea}</pre></div>`))
+            }
+        }
+
+        this.code = c
     }
 
     get contents(): string {
-        return this.code.text()
+        return this.code
     }
 }
