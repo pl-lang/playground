@@ -1,4 +1,4 @@
-import { ReservedKind, Parser, Interpreter, transform, fr_writer, Errors, Value, Failure, Success, S3, InterpreterRead, InterpreterStatementInfo, InterpreterWrite, InterpreterDone, VarState } from 'interprete-pl'
+import { Interprete, programaCompiladoACadena, Accion, Errors, Value, Failure, Success, VarState } from 'interprete-pl'
 import { Action, ActionKind } from './Actions'
 import AppUI from './AppUI'
 import * as $ from 'jquery'
@@ -17,10 +17,9 @@ export class Dispatcher {
 
 export class Controller {
     private app_ui: AppUI
-    private interpreter: Interpreter
-    private parser: Parser
+    private interprete: Interprete
     private program_running: boolean
-    private by_steps: boolean
+    private porPasos: boolean
     private debug: boolean
 
     constructor(container: JQuery, debug: boolean) {
@@ -29,33 +28,50 @@ export class Controller {
         this.debug = debug
 
         this.program_running = false
-        this.by_steps = false
+        this.porPasos = false
 
         this.app_ui = new AppUI($('body'), container, action_dispatcher, { debug: debug })
 
-        this.interpreter = new Interpreter()
-
-        this.parser = new Parser()
+        this.interprete = new Interprete()
     }
 
     do(a: Action) {
         switch (a.kind) {
             case ActionKind.Execute:
+                /**
+                 * Limpiar interfaz
+                 */
                 this.do({ kind: ActionKind.ClearMessages })
                 this.do({ kind: ActionKind.ClearOutput })
+
+                /**
+                 * Si no hay ningun programa corriendo:
+                 *  -   "Cargar" el programa en el interprete
+                 *  -   Si hay errores mostrarlos.
+                 *  -   Si no hay errores y si el modo debug esta activado mostrar el programa compilado
+                 *  -   Si no hay errores desactivar los botones y ejecutar el programa.
+                 */
                 if (!this.program_running) {
-                    this.by_steps = false
-                    const compiled_program_maybe = this.compile(a.code)
-                    if (!compiled_program_maybe.error) {
+                    this.porPasos = false
+                    const reporteCompilacion = this.interprete.cargarPrograma(a.code)
+
+                    if (reporteCompilacion.error == false) {
                         this.app_ui.clear_vars()
                         this.program_running = true
-                        const program = compiled_program_maybe.result
-                        this.do({ kind: ActionKind.SetUpInterpreter, program: program })
+
                         if (this.debug) {
-                            this.do({ kind: ActionKind.ShowCompiledCode, code: fr_writer(program) })
+                            this.do({ kind: ActionKind.ShowCompiledCode, code: programaCompiladoACadena(reporteCompilacion.result) })
                         }
+
                         this.do({ kind: ActionKind.DisableButtons })
                         this.execute()
+                    }
+                    else {
+                        const errors = reporteCompilacion.result
+
+                        for (let error of errors) {
+                            this.do({ kind: ActionKind.ShowMessage, message: error })
+                        }
                     }
                 }
                 break
@@ -90,27 +106,41 @@ export class Controller {
             case ActionKind.ShowCompiledCode:
                 this.show_compiled_code(a.code)
                 break
-            case ActionKind.SetUpInterpreter:
-                this.set_up_interpreter(a.program)
-                break
-            case ActionKind.ExecuteBySteps:
-                this.do({ kind: ActionKind.ClearMessages })
-                this.do({ kind: ActionKind.ClearOutput })
-                if (!this.program_running) {
-                    this.by_steps = true
-                    const compiled_program_maybe = this.compile(a.code)
-                    if (!compiled_program_maybe.error) {
-                        this.app_ui.show_step_controls()
-                        this.program_running = true
-                        const program = compiled_program_maybe.result
-                        this.do({ kind: ActionKind.SetUpInterpreter, program: program })
-                        if (this.debug) {
-                            this.do({ kind: ActionKind.ShowCompiledCode, code: fr_writer(program) })
+            case ActionKind.CompileAndShow:
+                {
+                    this.do({ kind: ActionKind.ClearMessages })
+                    this.do({ kind: ActionKind.ClearOutput })
+                    const reporteCompilacion = this.interprete.cargarPrograma(a.code)
+                    if (reporteCompilacion.error == false) {
+                        this.do({ kind: ActionKind.ShowCompiledCode, code: programaCompiladoACadena(reporteCompilacion.result) })
+                    }
+                    else {
+                        const errors = reporteCompilacion.result
+
+                        for (let error of errors) {
+                            this.do({ kind: ActionKind.ShowMessage, message: error })
                         }
-                        this.do({ kind: ActionKind.DisableButtons })
-                        this.do({ kind: ActionKind.Step })
                     }
                 }
+                break
+            case ActionKind.ExecuteBySteps:
+                // this.do({ kind: ActionKind.ClearMessages })
+                // this.do({ kind: ActionKind.ClearOutput })
+                // if (!this.program_running) {
+                //     this.porPasos = true
+                //     const compiled_program_maybe = this.compile(a.code)
+                //     if (!compiled_program_maybe.error) {
+                //         this.app_ui.show_step_controls()
+                //         this.program_running = true
+                //         const program = compiled_program_maybe.result
+                //         this.do({ kind: ActionKind.SetUpInterpreter, program: program })
+                //         if (this.debug) {
+                //             this.do({ kind: ActionKind.ShowCompiledCode, code: fr_writer(program) })
+                //         }
+                //         this.do({ kind: ActionKind.DisableButtons })
+                //         this.do({ kind: ActionKind.Step })
+                //     }
+                // }
                 break
             case ActionKind.StopExecution:
                 this.program_running = false
@@ -129,14 +159,6 @@ export class Controller {
                 this.app_ui.hide_step_controls()
                 this.app_ui.write('Programa finalizado por el usuario.')
                 this.do({ kind: ActionKind.EnableButtons })
-                break
-            case ActionKind.CompileAndShow:
-                this.do({ kind: ActionKind.ClearMessages })
-                this.do({ kind: ActionKind.ClearOutput })
-                const { result } = this.compile(a.code)
-                if (result != null) {
-                    this.do({ kind: ActionKind.ShowCompiledCode, code: fr_writer(result) })
-                }
                 break
             case ActionKind.DisableButtons:
                 this.app_ui.disable_buttons()
@@ -180,56 +202,38 @@ export class Controller {
     }
 
     update_var(name: string) {
-        const var_info = this.interpreter.search_var(name)
+        // const var_info = this.interprete.search_var(name)
 
-        if (var_info.state == VarState.ExistsInit) {
-            const bv = this.interpreter.export_var(name)
-            this.app_ui.update_var(name, bv)
-        }
-        else {
-            this.app_ui.change_var_state(name, var_info.state)
-        }
+        // if (var_info.state == VarState.ExistsInit) {
+        //     const bv = this.interprete.export_var(name)
+        //     this.app_ui.update_var(name, bv)
+        // }
+        // else {
+        //     this.app_ui.change_var_state(name, var_info.state)
+        // }
     }
 
     add_var(name: string) {
-        const var_info = this.interpreter.search_var(name)
-        if (var_info.state == VarState.ExistsInit || var_info.state == VarState.ExistsNotInit) {
-            const bv = this.interpreter.export_var(name)
-            if (var_info.state == VarState.ExistsInit) {
-                this.app_ui.add_var(name, true, true, var_info, bv)
-            }
-            else {
-                this.app_ui.add_var(name, true, false, var_info, bv)
-            }
-        }
-        else if (var_info.state == VarState.ExistsOutOfScope) {
-            this.app_ui.add_var(name, false, false, var_info, null)
-        }
-        else {
-            this.app_ui.add_inspection_message(name)
-        }
-    }
-
-    interpreter_action(a: InterpreterStatementInfo | InterpreterRead | InterpreterWrite) {
-        switch (a.kind) {
-            case 'action':
-                switch (a.action) {
-                    case 'read':
-                        this.read()
-                        break
-                    case 'write':
-                        this.write(a.value)
-                        break
-                }
-                break
-            case 'info':
-                this.move_cursor(a.pos.line, a.pos.column)
-                break
-        }
+        // const var_info = this.interprete.search_var(name)
+        // if (var_info.state == VarState.ExistsInit || var_info.state == VarState.ExistsNotInit) {
+        //     const bv = this.interprete.export_var(name)
+        //     if (var_info.state == VarState.ExistsInit) {
+        //         this.app_ui.add_var(name, true, true, var_info, bv)
+        //     }
+        //     else {
+        //         this.app_ui.add_var(name, true, false, var_info, bv)
+        //     }
+        // }
+        // else if (var_info.state == VarState.ExistsOutOfScope) {
+        //     this.app_ui.add_var(name, false, false, var_info, null)
+        // }
+        // else {
+        //     this.app_ui.add_inspection_message(name)
+        // }
     }
 
     resume_program() {
-        if (this.by_steps) {
+        if (this.porPasos) {
             this.step()
         }
         else {
@@ -238,26 +242,20 @@ export class Controller {
     }
 
     step() {
-        if (!this.interpreter.is_done()) {
-            const output = this.interpreter.step()
+        // if (!this.interprete.is_done()) {
+        //     const output = this.interprete.step()
 
-            if (output.error == false) {
-                this.interpreter_action(output.result)
-            }
-            else {
-                this.do({ kind: ActionKind.StopExecutionWithError })
-                this.do({ kind: ActionKind.ShowMessage, message: output.result })
-            }
-        }
-        else {
-            this.do({ kind: ActionKind.StopExecution })
-        }
-    }
-
-    set_up_interpreter(program: S3.Program) {
-        if (program != null) {
-            this.interpreter.program = program
-        }
+        //     if (output.error == false) {
+        //         this.interpreter_action(output.result)
+        //     }
+        //     else {
+        //         this.do({ kind: ActionKind.StopExecutionWithError })
+        //         this.do({ kind: ActionKind.ShowMessage, message: output.result })
+        //     }
+        // }
+        // else {
+        //     this.do({ kind: ActionKind.StopExecution })
+        // }
     }
 
     move_cursor(line: number, column: number) {
@@ -283,29 +281,38 @@ export class Controller {
     }
 
     execute() {
-        if (!this.interpreter.is_done()) {
-            let output = this.interpreter.run()
+        if (!this.interprete.programaFinalizado()) {
+            /**
+             * Reporte de ejecucion.
+             */
+            let reporte = this.interprete.ejecutarHastaElFinal()
 
-            let done = false
+            let programaFinalizado = false
 
-            while (!done && output.error == false) {
-                let action: InterpreterRead | InterpreterWrite;
+            while (!programaFinalizado && reporte.error == false) {
+                let { accion, numeroLinea } = reporte.result
 
-                if (output.result.kind == 'action') {
-                    action = output.result
-                    this.interpreter_action(action)
+                switch (accion) {
+                    case Accion.ESCRIBIR:
+                        this.write(this.interprete.obtenerEscrituraPendiente())
+                        break
+                    case Accion.LEER:
+                    case Accion.NADA:
+                    break
                 }
 
-                if (!this.interpreter.is_done()) {
-                    output = this.interpreter.run()
+                this.move_cursor(numeroLinea, 0)
+
+                if (!this.interprete.programaFinalizado()) {
+                    reporte = this.interprete.ejecutarHastaElFinal()
                 }
                 else {
-                    done = true
+                    programaFinalizado = true
                 }
             }
 
-            if (output.error == true) {
-                this.do({ kind: ActionKind.ShowMessage, message: output.result })
+            if (reporte.error == true) {
+                this.do({ kind: ActionKind.ShowMessage, message: reporte.result })
                 this.do({ kind: ActionKind.StopExecutionWithError })
             }
             else {
@@ -317,38 +324,8 @@ export class Controller {
         }
     }
 
-    compile(code: string): Failure<null> | Success<S3.Program> {
-        const parsed_program = this.parser.parse(code)
-
-        if (parsed_program.error == false) {
-            const transformed_program = transform(parsed_program.result)
-
-            if (transformed_program.error == false) {
-                return transformed_program
-            }
-            else {
-                const errors = transformed_program.result
-
-                for (let error of errors) {
-                    this.do({ kind: ActionKind.ShowMessage, message: error })
-                }
-
-                return { error: true, result: null }
-            }
-        }
-        else {
-            const errors = parsed_program.result
-
-            for (let error of errors) {
-                this.do({ kind: ActionKind.ShowMessage, message: error })
-            }
-
-            return { error: true, result: null }
-        }
-    }
-
     send_input(input: string) {
-        this.interpreter.send(input)
+        this.interprete.enviarLectura(input)
     }
 
     write(v: Value) {
