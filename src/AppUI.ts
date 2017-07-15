@@ -176,6 +176,10 @@ export default class AppUI {
         this.editor_panel.move_cursor(line, column)
     }
 
+    highlight_instruction(inst: number) {
+        this.code_panel.highlight(inst)
+    }
+
     focus_editor() {
         this.editor_panel.focus_editor()
     }

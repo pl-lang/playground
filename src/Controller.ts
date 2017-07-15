@@ -281,6 +281,7 @@ export class Controller {
                 }
 
                 this.move_cursor(numeroLineaFuente, 0)
+                this.highlight_instruction(numeroInstruccion)
 
                 if (this.interprete.programaFinalizado()) {
                     this.do({ kind: ActionKind.StopExecution })
@@ -299,6 +300,10 @@ export class Controller {
 
     move_cursor(line: number, column: number) {
         this.app_ui.move_cursor(line, column)
+    }
+
+    highlight_instruction(inst: number) {
+        this.app_ui.highlight_instruction(inst)
     }
 
     show_compiled_code(code: string) {
@@ -341,6 +346,7 @@ export class Controller {
                 }
 
                 this.move_cursor(numeroLineaFuente, 0)
+                this.highlight_instruction(numeroInstruccion)
 
                 if (!this.interprete.programaFinalizado()) {
                     reporte = this.interprete.ejecutarHastaElFinal()

@@ -31,10 +31,17 @@ export default class CodePanel implements Resizeable {
         this.pre_wrapper.empty()
 
         const lineas = c.split('\n')
+
+        let resaltarPrimerLinea = true
         
         for (let linea of lineas) {
             if (linea.length > 0) {
-                this.pre_wrapper.append($(`<div><pre style="margin-left: 6px; font-size: 14px;">${linea}</pre></div>`))
+                const elementoLinea = $(`<div><pre class="lineaCodigoCompilado">${linea}</pre></div>`)
+                if (resaltarPrimerLinea) {
+                    elementoLinea.addClass("highlighted")
+                    resaltarPrimerLinea = false
+                }
+                this.pre_wrapper.append(elementoLinea)
             }
         }
 
@@ -43,5 +50,13 @@ export default class CodePanel implements Resizeable {
 
     get contents(): string {
         return this.code
+    }
+
+    highlight(n: number) {
+        this.pre_wrapper.children("div.highlighted").removeClass("highlighted")
+        /**
+         * El n + 1 se debe al funcionamiento del selector nth-child de CSS
+         */
+        this.pre_wrapper.children(`:nth-child(${n + 1})`).addClass("highlighted")
     }
 }
