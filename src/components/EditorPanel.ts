@@ -36,7 +36,7 @@ export default class EditorPanel implements Resizeable {
     container_index: number
     panel_index: number
 
-    constructor(container: JQuery, d: Dispatcher, options: EditorOptions) {
+    constructor(parent: JQuery, d: Dispatcher, options: EditorOptions) {
         if (options) {
             this.options = { ...defaults, ...options }
         }
@@ -44,7 +44,7 @@ export default class EditorPanel implements Resizeable {
             this.options = defaults
         }
 
-        this.parent = container
+        this.parent = parent
 
         this.dispatcher = d
 
