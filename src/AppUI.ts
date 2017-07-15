@@ -84,27 +84,27 @@ export default class AppUI {
 
         if (this.options.debug) {
             this.add_panel(this.editor_panel, 0)
-            this.toggler.add_panel(this.editor_panel, false, 'pencil')
+            this.toggler.add_panel(this.editor_panel, false, 'pencil', 'Mostrar/ocultar el panel de edicion')
 
             this.code_panel = new CodePanel(this.panel_container)
 
             this.add_panel(this.code_panel, 0)
-            this.toggler.add_panel(this.code_panel, false, 'gear')
+            this.toggler.add_panel(this.code_panel, false, 'gear', 'Mostrar/ocultar el panel de codigo compilado')
 
             this.inspection_panel = new InspectionPanel(this.panel_container, this.dispatcher)
 
             this.add_panel(this.inspection_panel, 0)
-            this.toggler.add_panel(this.inspection_panel, false, 'search')
+            this.toggler.add_panel(this.inspection_panel, false, 'search', 'Mostrar/ocultar el panel de inspeccion')
 
             this.output_panel = new OutputPanel(this.panel_container, this.dispatcher)
 
             this.add_panel(this.output_panel, 0)
-            this.toggler.add_panel(this.output_panel, false, 'terminal')
+            this.toggler.add_panel(this.output_panel, false, 'terminal', 'Mostrar/ocultar el panel de salida')
         }
         else {
             // agregar panel de codigo
             this.add_panel(this.editor_panel, 0)
-            this.toggler.add_panel(this.editor_panel, false, 'pencil')
+            this.toggler.add_panel(this.editor_panel, false, 'pencil', 'Mostrar/ocultar el panel de edicion')
 
             // cuando debug es falso el panel de codigo compilado no se muestra
             this.code_panel = null
@@ -112,15 +112,15 @@ export default class AppUI {
             this.inspection_panel = new InspectionPanel(this.panel_container, this.dispatcher)
 
             this.add_panel(this.inspection_panel, 0)
-            this.toggler.add_panel(this.inspection_panel, false, 'search')
+            this.toggler.add_panel(this.inspection_panel, false, 'search', 'Mostrar/ocultar el panel de inspeccion')
 
             this.output_panel = new OutputPanel(this.panel_container, this.dispatcher)
             this.add_panel(this.output_panel, 0)
-            this.toggler.add_panel(this.output_panel, false, 'terminal')
+            this.toggler.add_panel(this.output_panel, false, 'terminal', 'Mostrar/ocultar el panel de salida')
         }
 
-        this.toggler.add_link(`https://github.com/pl-lang/jsplint/wiki/Sintaxis/`, 'question')
-        this.toggler.add_link(`https://github.com/pl-lang/playground/`, 'mark-github')
+        this.toggler.add_link(`https://github.com/pl-lang/jsplint/wiki/Sintaxis/`, 'question', 'Abrir pestaña con ayuda sobre la sintaxis y el lenguaje')
+        this.toggler.add_link(`https://github.com/pl-lang/playground/`, 'mark-github', 'Ir al repositorio en Github de esta aplicación')
 
         $(document).mouseup(() => {
             if (this.dm.is_grabbed) {
