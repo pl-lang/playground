@@ -149,6 +149,10 @@ export default class AppUI {
             this.dispatcher.dispatch({ kind: ActionKind.CompileAndShow, code: this.editor_panel.editor_contents })
         })
 
+        this.button_bar.registrarCallbackMicroPaso(() => {
+            this.dispatcher.dispatch({ kind: ActionKind.ExecuteByInstructions, code: this.editor_panel.editor_contents })
+        })
+
         this.editor_panel.refresh()
     }
 

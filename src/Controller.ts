@@ -20,6 +20,7 @@ export class Controller {
     private interprete: Interprete
     private program_running: boolean
     private porPasos: boolean
+    private porInstrucciones: boolean
     private debug: boolean
 
     constructor(container: JQuery, debug: boolean) {
@@ -29,6 +30,7 @@ export class Controller {
 
         this.program_running = false
         this.porPasos = false
+        this.porInstrucciones = false
 
         this.app_ui = new AppUI($('body'), container, action_dispatcher, { debug: debug })
 
@@ -53,6 +55,7 @@ export class Controller {
                  */
                 if (!this.program_running) {
                     this.porPasos = false
+                    this.porInstrucciones = false
                     const reporteCompilacion = this.interprete.cargarPrograma(a.code)
 
                     if (reporteCompilacion.error == false) {
@@ -139,6 +142,47 @@ export class Controller {
                  */
                 if (!this.program_running) {
                     this.porPasos = true
+                    this.porInstrucciones = false
+                    const reporteCompilacion = this.interprete.cargarPrograma(a.code)
+
+                    if (reporteCompilacion.error == false) {
+                        this.app_ui.clear_vars()
+                        this.app_ui.show_step_controls()
+                        this.program_running = true
+
+                        if (this.debug) {
+                            this.do({ kind: ActionKind.ShowCompiledCode, code: programaCompiladoACadena(reporteCompilacion.result) })
+                        }
+
+                        this.do({ kind: ActionKind.DisableButtons })
+                        this.do({ kind: ActionKind.Step })
+                    }
+                    else {
+                        const errors = reporteCompilacion.result
+
+                        for (let error of errors) {
+                            this.do({ kind: ActionKind.ShowMessage, message: error })
+                        }
+                    }
+                }
+                break
+            case ActionKind.ExecuteByInstructions:
+                /**
+                * Limpiar interfaz
+                */
+                this.do({ kind: ActionKind.ClearMessages })
+                this.do({ kind: ActionKind.ClearOutput })
+
+                /**
+                 * Si no hay ningun programa corriendo:
+                 *  -   "Cargar" el programa en el interprete
+                 *  -   Si hay errores mostrarlos.
+                 *  -   Si no hay errores y si el modo debug esta activado mostrar el programa compilado
+                 *  -   Si no hay errores desactivar los botones y ejecutar el programa.
+                 */
+                if (!this.program_running) {
+                    this.porPasos = false
+                    this.porInstrucciones = true
                     const reporteCompilacion = this.interprete.cargarPrograma(a.code)
 
                     if (reporteCompilacion.error == false) {
@@ -253,7 +297,7 @@ export class Controller {
     }
 
     resume_program() {
-        if (this.porPasos) {
+        if (this.porPasos || this.porInstrucciones) {
             this.step()
         }
         else {
@@ -262,40 +306,70 @@ export class Controller {
     }
 
     step() {
-        if (!this.interprete.programaFinalizado()) {
-            /**
-            * Reporte de ejecucion.
-            */
-            let reporte = this.interprete.darPaso()
+        if (this.porPasos) {
+            if (!this.interprete.programaFinalizado()) {
+                /**
+                * Reporte de ejecucion.
+                */
+                let reporte = this.interprete.darPaso()
 
-            if (reporte.error == false) {
-                let { accion, numeroLineaFuente, numeroInstruccion } = reporte.result
+                if (reporte.error == false) {
+                    let { accion, numeroLineaFuente, numeroInstruccion } = reporte.result
 
-                switch (accion) {
-                    case Accion.ESCRIBIR:
-                        this.write(this.interprete.obtenerEscrituraPendiente())
-                        break
-                    case Accion.LEER:
-                    case Accion.NADA:
-                        break
+                    switch (accion) {
+                        case Accion.ESCRIBIR:
+                            this.write(this.interprete.obtenerEscrituraPendiente())
+                            break
+                        case Accion.LEER:
+                        case Accion.NADA:
+                            break
+                    }
+
+                    this.move_cursor(numeroLineaFuente, 0)
+                    this.highlight_instruction(numeroInstruccion)
+
+                    if (this.interprete.programaFinalizado()) {
+                        this.do({ kind: ActionKind.StopExecution })
+                    }
                 }
-
-                this.move_cursor(numeroLineaFuente, 0)
-                this.highlight_instruction(numeroInstruccion)
-
-                if (this.interprete.programaFinalizado()) {
-                    this.do({ kind: ActionKind.StopExecution })
+                else {
+                    this.do({ kind: ActionKind.StopExecutionWithError })
+                    this.do({ kind: ActionKind.ShowMessage, message: reporte.result })
                 }
-            }
-            else {
-                this.do({ kind: ActionKind.StopExecutionWithError })
-                this.do({ kind: ActionKind.ShowMessage, message: reporte.result })
             }
         }
-        // NO SE SI ESTO ES NECESARIO
-        // else {
-        //     this.do({ kind: ActionKind.StopExecution })
-        // }
+        else if (this.porInstrucciones) {
+            if (!this.interprete.programaFinalizado()) {
+                /**
+                * Reporte de ejecucion.
+                */
+                let reporte = this.interprete.ejecutarInstruccion()
+
+                if (reporte.error == false) {
+                    let { accion, numeroLineaFuente, numeroInstruccion } = reporte.result
+
+                    switch (accion) {
+                        case Accion.ESCRIBIR:
+                            this.write(this.interprete.obtenerEscrituraPendiente())
+                            break
+                        case Accion.LEER:
+                        case Accion.NADA:
+                            break
+                    }
+
+                    this.move_cursor(numeroLineaFuente, 0)
+                    this.highlight_instruction(numeroInstruccion)
+
+                    if (this.interprete.programaFinalizado()) {
+                        this.do({ kind: ActionKind.StopExecution })
+                    }
+                }
+                else {
+                    this.do({ kind: ActionKind.StopExecutionWithError })
+                    this.do({ kind: ActionKind.ShowMessage, message: reporte.result })
+                }
+            }
+        }
     }
 
     move_cursor(line: number, column: number) {

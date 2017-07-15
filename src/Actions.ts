@@ -12,6 +12,7 @@ export enum ActionKind {
     ClearOutput,
     ShowCompiledCode,
     ExecuteBySteps,
+    ExecuteByInstructions,
     StopExecution,
     CompileAndShow,
     StopExecutionWithError,
@@ -38,6 +39,7 @@ export type Action = Execute
     | ClearOutput
     | ShowCompiledCode
     | ExecuteBySteps
+    | ExecuteByInstructions
     | StopExecution
     | CompileAndShow
     | StopExecutionWithError
@@ -113,6 +115,11 @@ export interface StopExecution {
 
 export interface ExecuteBySteps {
     kind: ActionKind.ExecuteBySteps
+    code: string
+}
+
+export interface ExecuteByInstructions {
+    kind: ActionKind.ExecuteByInstructions
     code: string
 }
 
