@@ -17,7 +17,7 @@ body {
 
 #panels {
   width: 100%;
-  height: inherit;
+  height: 100%;
   display: flex;
   flex-flow: row nowrap;
   justify-content: center;
@@ -27,10 +27,6 @@ body {
 #app_container {
   width: 100%;
   height: inherit;
-  display: flex;
-  flex-flow: row nowrap;
-  justify-content: center;
-  align-items: center;
 }
 
 a {
@@ -184,6 +180,10 @@ pre {
 
 .bar-top-border {
   border-top: 1px solid hsl(192, 15%, 70%);
+}
+
+.bar-left-border {
+  border-left: 1px solid hsl(192, 15%, 70%);
 }
 
 .title {

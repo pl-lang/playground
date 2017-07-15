@@ -1,3 +1,5 @@
+import ButtonBar from './components/ButtonBar'
+import { Action, ActionKind } from './Actions'
 import OutputPanel from './components/OutputPanel'
 import EditorPanel from './components/EditorPanel'
 import CodePanel from './components/CodePanel'
@@ -22,6 +24,7 @@ export default class AppUI {
     container: JQuery
     panel_container: JQuery
     parent: JQuery
+    private button_bar: ButtonBar
     private editor_panel: EditorPanel
     private output_panel: OutputPanel
     private inspection_panel: InspectionPanel
@@ -48,15 +51,23 @@ export default class AppUI {
 
         this.handles = []
 
-        this.container = $('<div id="app_container" class="flex-col"></div>')
+        this.container = $('<div id="app_container" class="flex-row"></div>')
+
+        const columna = $('<div class="flex-col" style="width: 100%;"></div>')
+
+        this.button_bar = new ButtonBar(this.container, this.options.debug)
+
+        columna.append(this.button_bar.container)
 
         this.panel_container = $('<div id="panels" class="flex-row"></div>')
+
+        columna.append(this.panel_container)
 
         this.toggler = new PanelToggler(this.container, this.dispatcher, this.options.debug)
 
         this.container.append(this.toggler.container)
 
-        this.container.append(this.panel_container)
+        this.container.append(columna)
 
         this.parent.append(this.container)
 
@@ -124,6 +135,18 @@ export default class AppUI {
 
                 this.dm.drag_handle(this.dm.grabbed_handle, { x: pos.left, y: pos.top }, { x: m.pageX, y: m.pageY })
             }
+        })
+
+        this.button_bar.registrarCallbackEjecutar(() => {
+            this.dispatcher.dispatch({ kind: ActionKind.Execute, code: this.editor_panel.editor_contents })
+        })
+
+        this.button_bar.registrarCallbackEjecutarPaso(() => {
+            this.dispatcher.dispatch({ kind: ActionKind.ExecuteBySteps, code: this.editor_panel.editor_contents })
+        })
+
+        this.button_bar.registrarCallbackCompilar(() => {
+            this.dispatcher.dispatch({ kind: ActionKind.CompileAndShow, code: this.editor_panel.editor_contents })
         })
 
         this.editor_panel.refresh()
@@ -195,11 +218,11 @@ export default class AppUI {
     }
 
     disable_buttons() {
-        this.editor_panel.disable_buttons()
+        this.button_bar.desactivarBotones()
     }
 
     enable_buttons() {
-        this.editor_panel.enable_buttons()
+        this.button_bar.activarBotones()
     }
 
     add_var(name: string, in_scope: boolean, init: boolean, var_info: VarInfo, value: BoxedValue) {
