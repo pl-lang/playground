@@ -124,23 +124,43 @@ export class Controller {
                 }
                 break
             case ActionKind.ExecuteBySteps:
-                // this.do({ kind: ActionKind.ClearMessages })
-                // this.do({ kind: ActionKind.ClearOutput })
-                // if (!this.program_running) {
-                //     this.porPasos = true
-                //     const compiled_program_maybe = this.compile(a.code)
-                //     if (!compiled_program_maybe.error) {
-                //         this.app_ui.show_step_controls()
-                //         this.program_running = true
-                //         const program = compiled_program_maybe.result
-                //         this.do({ kind: ActionKind.SetUpInterpreter, program: program })
-                //         if (this.debug) {
-                //             this.do({ kind: ActionKind.ShowCompiledCode, code: fr_writer(program) })
-                //         }
-                //         this.do({ kind: ActionKind.DisableButtons })
-                //         this.do({ kind: ActionKind.Step })
-                //     }
-                // }
+                /**
+                * Limpiar interfaz
+                */
+                this.do({ kind: ActionKind.ClearMessages })
+                this.do({ kind: ActionKind.ClearOutput })
+
+                /**
+                 * Si no hay ningun programa corriendo:
+                 *  -   "Cargar" el programa en el interprete
+                 *  -   Si hay errores mostrarlos.
+                 *  -   Si no hay errores y si el modo debug esta activado mostrar el programa compilado
+                 *  -   Si no hay errores desactivar los botones y ejecutar el programa.
+                 */
+                if (!this.program_running) {
+                    this.porPasos = true
+                    const reporteCompilacion = this.interprete.cargarPrograma(a.code)
+
+                    if (reporteCompilacion.error == false) {
+                        this.app_ui.clear_vars()
+                        this.app_ui.show_step_controls()
+                        this.program_running = true
+
+                        if (this.debug) {
+                            this.do({ kind: ActionKind.ShowCompiledCode, code: programaCompiladoACadena(reporteCompilacion.result) })
+                        }
+
+                        this.do({ kind: ActionKind.DisableButtons })
+                        this.do({ kind: ActionKind.Step })
+                    }
+                    else {
+                        const errors = reporteCompilacion.result
+
+                        for (let error of errors) {
+                            this.do({ kind: ActionKind.ShowMessage, message: error })
+                        }
+                    }
+                }
                 break
             case ActionKind.StopExecution:
                 this.program_running = false
@@ -242,17 +262,36 @@ export class Controller {
     }
 
     step() {
-        // if (!this.interprete.is_done()) {
-        //     const output = this.interprete.step()
+        if (!this.interprete.programaFinalizado()) {
+            /**
+            * Reporte de ejecucion.
+            */
+            let reporte = this.interprete.darPaso()
 
-        //     if (output.error == false) {
-        //         this.interpreter_action(output.result)
-        //     }
-        //     else {
-        //         this.do({ kind: ActionKind.StopExecutionWithError })
-        //         this.do({ kind: ActionKind.ShowMessage, message: output.result })
-        //     }
-        // }
+            if (reporte.error == false) {
+                let { accion, numeroLineaFuente, numeroInstruccion } = reporte.result
+
+                switch (accion) {
+                    case Accion.ESCRIBIR:
+                        this.write(this.interprete.obtenerEscrituraPendiente())
+                        break
+                    case Accion.LEER:
+                    case Accion.NADA:
+                        break
+                }
+
+                this.move_cursor(numeroLineaFuente, 0)
+
+                if (this.interprete.programaFinalizado()) {
+                    this.do({ kind: ActionKind.StopExecution })
+                }
+            }
+            else {
+                this.do({ kind: ActionKind.StopExecutionWithError })
+                this.do({ kind: ActionKind.ShowMessage, message: reporte.result })
+            }
+        }
+        // NO SE SI ESTO ES NECESARIO
         // else {
         //     this.do({ kind: ActionKind.StopExecution })
         // }
