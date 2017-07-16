@@ -2,6 +2,8 @@ import ButtonBar from './components/ButtonBar'
 import { Action, ActionKind } from './Actions'
 import OutputPanel from './components/OutputPanel'
 import EditorPanel from './components/EditorPanel'
+import MessagePanel from './components/MessagePanel'
+import StatusBar from './components/StatusBar'
 import CodePanel from './components/CodePanel'
 import PanelToggler from './components/PanelToggler'
 import InspectionPanel from './components/InspectionPanel'
@@ -26,6 +28,8 @@ export default class AppUI {
     parent: JQuery
     private button_bar: ButtonBar
     private editor_panel: EditorPanel
+    private status_bar: StatusBar
+    private message_panel: MessagePanel
     private output_panel: OutputPanel
     private inspection_panel: InspectionPanel
     private dispatcher: Dispatcher
@@ -62,6 +66,14 @@ export default class AppUI {
         this.panel_container = $('<div id="panels" class="flex-row"></div>')
 
         columna.append(this.panel_container)
+
+        const info_panel = $('<div id="info_panel"></div>')
+
+        this.status_bar = new StatusBar(info_panel)
+
+        this.message_panel = new MessagePanel(info_panel, this.dispatcher)
+
+        columna.append(info_panel)
 
         this.toggler = new PanelToggler(this.container, this.dispatcher, this.options.debug)
 
@@ -174,13 +186,13 @@ export default class AppUI {
     }
 
     clear_messages() {
-        this.editor_panel.message_panel.clear()
-        this.editor_panel.status_bar.error_count = 0
+        this.message_panel.clear()
+        this.status_bar.error_count = 0
     }
 
     show_message(message: Errors.Base) {
-        this.editor_panel.message_panel.add_message(message)
-        this.editor_panel.status_bar.error_count += 1
+        this.message_panel.add_message(message)
+        this.status_bar.error_count += 1
     }
 
     get_editor_contents(): string {

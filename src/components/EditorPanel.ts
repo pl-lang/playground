@@ -1,7 +1,6 @@
 import * as $ from 'jquery'
 import * as CodeMirror from 'codemirror'
 import MessagePanel from './MessagePanel'
-import StatusBar from './StatusBar'
 import { Action, ActionKind } from '../Actions'
 import { Dispatcher } from '../Controller'
 import { Resizeable } from '../DragManager'
@@ -26,8 +25,6 @@ export default class EditorPanel implements Resizeable {
     private parent: JQuery
     container: JQuery
     private editor: CodeMirror.EditorFromTextArea
-    message_panel: MessagePanel
-    status_bar: StatusBar
     private options: EditorOptions
     private dispatcher: Dispatcher
     container_index: number
@@ -55,14 +52,6 @@ export default class EditorPanel implements Resizeable {
         this.container.append($('<textarea id="editor"></textarea>'))
 
         this.editor = CodeMirror.fromTextArea(this.container.children('#editor')[0] as HTMLTextAreaElement, { lineNumbers: true, firstLineNumber: 0, styleActiveLine: true })
-
-        const info_panel = $('<div id="info_panel"></div>')
-
-        this.status_bar = new StatusBar(info_panel)
-
-        this.message_panel = new MessagePanel(info_panel, this.dispatcher)
-
-        this.container.append(info_panel)
     }
 
     create_title_bar() {

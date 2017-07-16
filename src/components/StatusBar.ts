@@ -7,13 +7,14 @@ export default class StatusBar {
 
     constructor (readonly container: JQuery) {
         const htmlstring = `
-        <div id="status_bar" class="bar bar-top-border bar-bottom-border flex-row center-align">
+        <div id="status_bar" class="bar bar-left-border ar-top-border bar-bottom-border flex-row center-align">
             <span id="status_msg" class="title small-title"></span>
         </div>
         `
 
         this.element = this.container.append(htmlstring)
         this.status_msg = this.element.find('#status_msg')
+        this.error_count = 0
     }
 
     set title(s: string) {
