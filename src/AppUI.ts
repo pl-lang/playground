@@ -9,7 +9,7 @@ import PanelToggler from './components/PanelToggler'
 import InspectionPanel from './components/InspectionPanel'
 import { DragManager, Resizeable } from './DragManager'
 import { Dispatcher } from './Controller'
-import { Errors, Value, VarInfo, BoxedValue, VarState } from 'interprete-pl'
+import { Errors, Value, VarInfo, BoxedValue, VarState, ValorExpresionInspeccionada } from 'interprete-pl'
 import * as $ from 'jquery'
 
 export interface AppOptions {
@@ -241,35 +241,27 @@ export default class AppUI {
         this.button_bar.activarBotones()
     }
 
-    add_var(name: string, in_scope: boolean, init: boolean, var_info: VarInfo, value: BoxedValue) {
-        this.inspection_panel.add_var(name, in_scope, init, var_info, value)
+    agregarExpresionInspeccionada(expresion: string): number {
+        return this.inspection_panel.agregarExpresion(expresion)
     }
 
-    get_var_names(): string[] {
-        return this.inspection_panel.get_var_names()
+    actualizarValorInspeccion(indice: number, valor: ValorExpresionInspeccionada) {
+        this.inspection_panel.actualizarValorInspeccion(indice, valor)
     }
 
-    update_var(name: string, values: BoxedValue) {
-        return this.inspection_panel.update_var(name, values)
+    mostrarErrorInspeccion(indice: number) {
+        this.inspection_panel.mostrarMensajeError(indice)
     }
 
-    change_var_state(name: string, state: VarState.DoesntExist | VarState.ExistsNotInit | VarState.ExistsOutOfScope) {
-        this.inspection_panel.change_var_state(name, state)
+    mostrarMensajeInicialInspeccion(indice: number) {
+        this.inspection_panel.mostrarMensajeInicialInspeccion(indice)
     }
 
     clear_vars() {
         this.inspection_panel.clear()
     }
 
-    remove_var(name: string) {
-        this.inspection_panel.remove_var(name)
-    }
-
-    add_inspection_message(name: string) {
-        this.inspection_panel.add_message(name)
-    }
-
-    remove_msg(name: string) {
-        this.inspection_panel.remove_msg(name)
+    remove_var(id: number) {
+        this.inspection_panel.remove_var(id)
     }
 }

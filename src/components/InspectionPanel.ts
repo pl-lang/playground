@@ -3,13 +3,9 @@ import { Dispatcher } from '../Controller'
 import { Action, ActionKind } from '../Actions'
 import { Resizeable } from '../DragManager'
 import Prompt from './Prompt'
-import Scalar from './Scalar'
-import Vector from './Vector'
+import ExpresionInspeccionada from './ExpresionInspeccionada'
 import InspectionMessage from './InspectionMessage'
-import { VarInfo, BoxedValue, BoxedVector, BoxedScalar } from 'interprete-pl'
-import { VarState } from 'interprete-pl'
-
-type Cell = { index: number, value: number | boolean | string }
+import { TipoValorInspeccionado, ValorExpresionInspeccionada } from 'interprete-pl'
 
 export default class InspectionPanel implements Resizeable {
     private dispatcher: Dispatcher
@@ -17,14 +13,20 @@ export default class InspectionPanel implements Resizeable {
     private body: JQuery
     private prompt: Prompt
     private add_button: JQuery
-    private var_elements: (Scalar | Vector | InspectionMessage)[]
+    private var_elements: ExpresionInspeccionada[]
     container_index: number
     panel_index: number
     container: JQuery
+    private expresionesInspeccionadas: string[]
+    private ultimoId: number
 
     constructor(parent: JQuery, dispatcher: Dispatcher) {
         this.parent = parent
         this.dispatcher = dispatcher
+
+        this.ultimoId = 0
+
+        this.expresionesInspeccionadas = []
 
         this.var_elements = []
 
@@ -65,90 +67,65 @@ export default class InspectionPanel implements Resizeable {
         this.add_button.show()
     }
 
-    add_var(name: string, in_scope: boolean, init: boolean, var_info: VarInfo, boxed_value: BoxedValue) {
+    agregarExpresion(expresion: string): number {
+        const id = this.ultimoId
 
-        const variable = this.find(name)
+        this.expresionesInspeccionadas.push(expresion)
 
-        // solo agregar la variable si no existe
-        if (!variable) {
-            if (var_info.type == 'scalar') {
-                const new_var = new Scalar(this.body, name, in_scope, init, this.dispatcher)
-                if (in_scope && init) {
-                    new_var.set_value(boxed_value as BoxedScalar)
-                }
-                this.var_elements.push(new_var)
+        const nuevaExpresion = new ExpresionInspeccionada(this.body, expresion, this.dispatcher, Number(this.ultimoId))
+
+        this.var_elements.push(nuevaExpresion)
+
+        this.ultimoId++
+
+        return id
+    }
+
+    existe(cadena: string, arreglo: string[]): boolean {
+        for (let c of arreglo) {
+            if (cadena == c) {
+                return true
             }
-            else {
-                const new_var = new Vector(this.body, name, in_scope, init, this.dispatcher)
-                if (in_scope && init) {
-                    new_var.update_values(boxed_value as BoxedVector)
-                }
-                this.var_elements.push(new_var)
-            }
+        }
+        return false
+    }
+
+    actualizarValorInspeccion(indice: number, valor: ValorExpresionInspeccionada) {
+        const elemento = this.var_elements[indice]
+
+        if (valor.tipo == TipoValorInspeccionado.ESCALAR) {
+            elemento.establecerValorEscalar(valor.valor)
+        }
+        else {
+            elemento.establecerValorVectorial(valor.celdas)
         }
     }
 
-    /**
-     * get_var_names
-     * retorna una lista de los nombres de las variables que estan siendo inspeccion
-     */
-    get_var_names(): string[] {
-        return this.var_elements.map(s => s.name)
+    mostrarMensajeError(indice: number) {
+        const elemento = this.var_elements[indice]
+
+        elemento.mostrarMensajeError()
     }
 
-    update_var(name: string, boxed_value: { type: 'scalar', value: number | string | boolean } | { type: 'vector', cells: Cell[] }) {
-        const variable = this.find(name)
+    mostrarMensajeInicialInspeccion(indice: number) {
+        const elemento = this.var_elements[indice]
 
-        if (variable instanceof Scalar) {
-            variable.set_value(boxed_value as { type: 'scalar', value: number | string | boolean })
-        }
-        else if (variable instanceof Vector) {
-            variable.update_values(boxed_value as { type: 'vector', cells: Cell[] })
-        }
+        elemento.mostrarMensajeInicial()
     }
 
-    change_var_state(name: string, state: VarState.DoesntExist | VarState.ExistsNotInit | VarState.ExistsOutOfScope) {
-        const variable = this.find(name)
-        // actualizar solo variables existentes
-        if (variable) {
-            variable.change_state(state)
-        }
-    }
-
-    private find(name: string): Scalar | Vector {
+    private find(id: number): ExpresionInspeccionada {
         for (let i = 0; i < this.var_elements.length; i++) {
             const v_element = this.var_elements[i]
-            if (v_element.name == name && (v_element instanceof Scalar || v_element instanceof Vector)) {
+            if (v_element.id == id) {
                 return v_element
             }
         }
     }
 
-    private find_msg(name: string): InspectionMessage {
-        for (let i = 0; i < this.var_elements.length; i++) {
-            const v_element = this.var_elements[i]
-            if (v_element.name == name && v_element instanceof InspectionMessage) {
-                return v_element
-            }
-        }
-    }
-
-    remove_var(name: string) {
-        const removed_var = this.find(name)
-        this.var_elements = this.var_elements.filter(v => v.name != name)
+    remove_var(id: number) {
+        const removed_var = this.find(id)
+        this.var_elements = this.var_elements.filter(v => v.id != id)
         removed_var.container.empty()
         removed_var.container.remove()
-    }
-
-    add_message(name: string) {
-        const msg = new InspectionMessage(this.body, name, this.dispatcher)
-        this.var_elements.push(msg)
-    }
-
-    remove_msg(name: string) {
-        const removed_msg = this.find_msg(name)
-        this.var_elements = this.var_elements.filter(v => v.name != name)
-        removed_msg.container.empty()
-        removed_msg.container.remove()
     }
 }

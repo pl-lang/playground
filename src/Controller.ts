@@ -1,4 +1,4 @@
-import { Interprete, programaCompiladoACadena, Accion, Errors, Value, Failure, Success, VarState } from 'interprete-pl'
+import { Interprete, ValorExpresionInspeccionada, programaCompiladoACadena, Accion, Errors, Value, Failure, Success, VarState } from 'interprete-pl'
 import { Action, ActionKind } from './Actions'
 import AppUI from './AppUI'
 import * as $ from 'jquery'
@@ -22,6 +22,7 @@ export class Controller {
     private porPasos: boolean
     private porInstrucciones: boolean
     private debug: boolean
+    private expresionesInspecciondas: { cadenaExpresion: string, id: number }[]
 
     constructor(container: JQuery, debug: boolean) {
         const action_dispatcher = new Dispatcher(this)
@@ -35,6 +36,8 @@ export class Controller {
         this.app_ui = new AppUI($('body'), container, action_dispatcher, { debug: debug })
 
         this.interprete = new Interprete()
+
+        this.expresionesInspecciondas = []
     }
 
     do(a: Action) {
@@ -80,7 +83,6 @@ export class Controller {
                 break
             case ActionKind.Step:
                 this.step()
-                this.do({ kind: ActionKind.UpdateVars })
                 break
             case ActionKind.FocusEditor:
                 this.app_ui.focus_editor()
@@ -132,6 +134,10 @@ export class Controller {
                 */
                 this.do({ kind: ActionKind.ClearMessages })
                 this.do({ kind: ActionKind.ClearOutput })
+                // "limpiar" variables en inspeccion
+                for (let i = 0, l = this.expresionesInspecciondas.length; i < l; i++) {
+                    this.app_ui.mostrarMensajeInicialInspeccion(i)
+                }
 
                 /**
                  * Si no hay ningun programa corriendo:
@@ -146,7 +152,6 @@ export class Controller {
                     const reporteCompilacion = this.interprete.cargarPrograma(a.code)
 
                     if (reporteCompilacion.error == false) {
-                        this.app_ui.clear_vars()
                         this.app_ui.show_step_controls()
                         this.program_running = true
 
@@ -155,7 +160,7 @@ export class Controller {
                         }
 
                         this.do({ kind: ActionKind.DisableButtons })
-                        this.do({ kind: ActionKind.Step })
+                        // this.do({ kind: ActionKind.Step })
                     }
                     else {
                         const errors = reporteCompilacion.result
@@ -172,6 +177,10 @@ export class Controller {
                 */
                 this.do({ kind: ActionKind.ClearMessages })
                 this.do({ kind: ActionKind.ClearOutput })
+                // "limpiar" variables en inspeccion
+                for (let i = 0, l = this.expresionesInspecciondas.length; i < l; i++) {
+                    this.app_ui.mostrarMensajeInicialInspeccion(i)
+                }
 
                 /**
                  * Si no hay ningun programa corriendo:
@@ -186,7 +195,6 @@ export class Controller {
                     const reporteCompilacion = this.interprete.cargarPrograma(a.code)
 
                     if (reporteCompilacion.error == false) {
-                        this.app_ui.clear_vars()
                         this.app_ui.show_step_controls()
                         this.program_running = true
 
@@ -235,65 +243,36 @@ export class Controller {
                 this.app_ui.toggle_panel(a.container_index, a.panel_index)
                 break
             case ActionKind.SendVarName:
-                this.add_var(a.name)
+                this.inspeccionarExpresion(a.name)
                 break
             case ActionKind.UpdateVars:
-                this.update_vars()
-                break
+                throw new Error("Accion 'ActionKind.UpdateVars' obsoleta.")
             case ActionKind.RemoveVarFromInspection:
-                this.remove_var(a.name)
+                this.remove_var(a.id)
                 break
             case ActionKind.RemoveMsgFromInspection:
-                this.remove_msg(a.name)
-                break
+                throw new Error("Accion 'ActionKind.RemoveMsgFromInspection:' obsoleta.")
         }
     }
 
-    remove_msg(name: string) {
-        this.app_ui.remove_msg(name)
-    }
-
-    remove_var(name: string) {
-        this.app_ui.remove_var(name)
-    }
-
-    update_vars() {
-        const var_names = this.app_ui.get_var_names()
-
-        for (let name of var_names) {
-            this.update_var(name)
+    remove_var(id: number) {
+        let expresionEncontrada = false
+        let i = 0
+        while (!expresionEncontrada) {
+            if (this.expresionesInspecciondas[i].id == id) {
+                expresionEncontrada = true
+            }
+            else {
+                i++
+            }
         }
+        this.expresionesInspecciondas = [...this.expresionesInspecciondas.slice(0, i), ...this.expresionesInspecciondas.slice(i + 1)]
+        this.app_ui.remove_var(id)
     }
 
-    update_var(name: string) {
-        // const var_info = this.interprete.search_var(name)
-
-        // if (var_info.state == VarState.ExistsInit) {
-        //     const bv = this.interprete.export_var(name)
-        //     this.app_ui.update_var(name, bv)
-        // }
-        // else {
-        //     this.app_ui.change_var_state(name, var_info.state)
-        // }
-    }
-
-    add_var(name: string) {
-        // const var_info = this.interprete.search_var(name)
-        // if (var_info.state == VarState.ExistsInit || var_info.state == VarState.ExistsNotInit) {
-        //     const bv = this.interprete.export_var(name)
-        //     if (var_info.state == VarState.ExistsInit) {
-        //         this.app_ui.add_var(name, true, true, var_info, bv)
-        //     }
-        //     else {
-        //         this.app_ui.add_var(name, true, false, var_info, bv)
-        //     }
-        // }
-        // else if (var_info.state == VarState.ExistsOutOfScope) {
-        //     this.app_ui.add_var(name, false, false, var_info, null)
-        // }
-        // else {
-        //     this.app_ui.add_inspection_message(name)
-        // }
+    inspeccionarExpresion(expresion: string) {
+        const id = this.app_ui.agregarExpresionInspeccionada(expresion)
+        this.expresionesInspecciondas.push({ cadenaExpresion: expresion, id })
     }
 
     resume_program() {
@@ -328,6 +307,17 @@ export class Controller {
                     this.move_cursor(numeroLineaFuente, 0)
                     this.highlight_instruction(numeroInstruccion)
 
+                    const valoresExpresiones = this.expresionesInspecciondas.map(e => this.interprete.inspeccionarExpresion(e.cadenaExpresion))
+                    for (let i = 0, l = valoresExpresiones.length; i < l; i++) {
+                        const valor = valoresExpresiones[i]
+                        if (valor.error == false) {
+                            this.app_ui.actualizarValorInspeccion(i, valor.result)
+                        }
+                        else {
+                            this.app_ui.mostrarErrorInspeccion(i)
+                        }
+                    }
+
                     if (this.interprete.programaFinalizado()) {
                         this.do({ kind: ActionKind.StopExecution })
                     }
@@ -359,6 +349,17 @@ export class Controller {
 
                     this.move_cursor(numeroLineaFuente, 0)
                     this.highlight_instruction(numeroInstruccion)
+
+                    const valoresExpresiones = this.expresionesInspecciondas.map(e => this.interprete.inspeccionarExpresion(e.cadenaExpresion))
+                    for (let i = 0, l = valoresExpresiones.length; i < l; i++) {
+                        const valor = valoresExpresiones[i]
+                        if (valor.error == false) {
+                            this.app_ui.actualizarValorInspeccion(i, valor.result)
+                        }
+                        else {
+                            this.app_ui.mostrarErrorInspeccion(i)
+                        }
+                    }
 
                     if (this.interprete.programaFinalizado()) {
                         this.do({ kind: ActionKind.StopExecution })

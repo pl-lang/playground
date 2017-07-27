@@ -61,7 +61,7 @@ export interface RemoveMsgFromInspection {
 
 export interface RemoveVarFromInspection {
     kind: ActionKind.RemoveVarFromInspection
-    name: string
+    id: number
 }
 
 export interface UpdateVars {

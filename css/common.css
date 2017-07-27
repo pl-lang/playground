@@ -233,6 +233,12 @@ textarea {
   font-style: italic;
 }
 
+.flex-row > span.value.italic {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .fullh {
   height: 100%;
 }
