@@ -11,8 +11,8 @@ export enum ActionKind {
     Write,
     ClearOutput,
     ShowCompiledCode,
-    SetUpInterpreter,
     ExecuteBySteps,
+    ExecuteByInstructions,
     StopExecution,
     CompileAndShow,
     StopExecutionWithError,
@@ -38,8 +38,8 @@ export type Action = Execute
     | Write
     | ClearOutput
     | ShowCompiledCode
-    | SetUpInterpreter
     | ExecuteBySteps
+    | ExecuteByInstructions
     | StopExecution
     | CompileAndShow
     | StopExecutionWithError
@@ -61,7 +61,7 @@ export interface RemoveMsgFromInspection {
 
 export interface RemoveVarFromInspection {
     kind: ActionKind.RemoveVarFromInspection
-    name: string
+    id: number
 }
 
 export interface UpdateVars {
@@ -104,7 +104,6 @@ export interface StopExecutionWithError {
 export interface StopExecutionUser {
     kind: ActionKind.StopExecutionUser
 }
-
 export interface CompileAndShow {
     kind: ActionKind.CompileAndShow
     code: string
@@ -119,9 +118,9 @@ export interface ExecuteBySteps {
     code: string
 }
 
-export interface SetUpInterpreter {
-    kind: ActionKind.SetUpInterpreter
-    program: S3.Program
+export interface ExecuteByInstructions {
+    kind: ActionKind.ExecuteByInstructions
+    code: string
 }
 
 export interface ShowCompiledCode {

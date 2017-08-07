@@ -1,4 +1,4 @@
-import { ReservedKind, Parser, Interpreter, transform, fr_writer, Errors, Value, Failure, Success, S3, InterpreterRead, InterpreterStatementInfo, InterpreterWrite, InterpreterDone, VarState } from 'interprete-pl'
+import { Interprete, ValorExpresionInspeccionada, programaCompiladoACadena, Accion, Errors, Value, Failure, Success, VarState } from 'interprete-pl'
 import { Action, ActionKind } from './Actions'
 import AppUI from './AppUI'
 import * as $ from 'jquery'
@@ -17,11 +17,12 @@ export class Dispatcher {
 
 export class Controller {
     private app_ui: AppUI
-    private interpreter: Interpreter
-    private parser: Parser
+    private interprete: Interprete
     private program_running: boolean
-    private by_steps: boolean
+    private porPasos: boolean
+    private porInstrucciones: boolean
     private debug: boolean
+    private expresionesInspecciondas: { cadenaExpresion: string, id: number }[]
 
     constructor(container: JQuery, debug: boolean) {
         const action_dispatcher = new Dispatcher(this)
@@ -29,39 +30,59 @@ export class Controller {
         this.debug = debug
 
         this.program_running = false
-        this.by_steps = false
+        this.porPasos = false
+        this.porInstrucciones = false
 
         this.app_ui = new AppUI($('body'), container, action_dispatcher, { debug: debug })
 
-        this.interpreter = new Interpreter()
+        this.interprete = new Interprete()
 
-        this.parser = new Parser()
+        this.expresionesInspecciondas = []
     }
 
     do(a: Action) {
         switch (a.kind) {
             case ActionKind.Execute:
+                /**
+                 * Limpiar interfaz
+                 */
                 this.do({ kind: ActionKind.ClearMessages })
                 this.do({ kind: ActionKind.ClearOutput })
+
+                /**
+                 * Si no hay ningun programa corriendo:
+                 *  -   "Cargar" el programa en el interprete
+                 *  -   Si hay errores mostrarlos.
+                 *  -   Si no hay errores y si el modo debug esta activado mostrar el programa compilado
+                 *  -   Si no hay errores desactivar los botones y ejecutar el programa.
+                 */
                 if (!this.program_running) {
-                    this.by_steps = false
-                    const compiled_program_maybe = this.compile(a.code)
-                    if (!compiled_program_maybe.error) {
+                    this.porPasos = false
+                    this.porInstrucciones = false
+                    const reporteCompilacion = this.interprete.cargarPrograma(a.code)
+
+                    if (reporteCompilacion.error == false) {
                         this.app_ui.clear_vars()
                         this.program_running = true
-                        const program = compiled_program_maybe.result
-                        this.do({ kind: ActionKind.SetUpInterpreter, program: program })
+
                         if (this.debug) {
-                            this.do({ kind: ActionKind.ShowCompiledCode, code: fr_writer(program) })
+                            this.do({ kind: ActionKind.ShowCompiledCode, code: programaCompiladoACadena(reporteCompilacion.result) })
                         }
+
                         this.do({ kind: ActionKind.DisableButtons })
                         this.execute()
+                    }
+                    else {
+                        const errors = reporteCompilacion.result
+
+                        for (let error of errors) {
+                            this.do({ kind: ActionKind.ShowMessage, message: error })
+                        }
                     }
                 }
                 break
             case ActionKind.Step:
                 this.step()
-                this.do({ kind: ActionKind.UpdateVars })
                 break
             case ActionKind.FocusEditor:
                 this.app_ui.focus_editor()
@@ -90,25 +111,106 @@ export class Controller {
             case ActionKind.ShowCompiledCode:
                 this.show_compiled_code(a.code)
                 break
-            case ActionKind.SetUpInterpreter:
-                this.set_up_interpreter(a.program)
+            case ActionKind.CompileAndShow:
+                {
+                    this.do({ kind: ActionKind.ClearMessages })
+                    this.do({ kind: ActionKind.ClearOutput })
+                    const reporteCompilacion = this.interprete.cargarPrograma(a.code)
+                    if (reporteCompilacion.error == false) {
+                        this.do({ kind: ActionKind.ShowCompiledCode, code: programaCompiladoACadena(reporteCompilacion.result) })
+                    }
+                    else {
+                        const errors = reporteCompilacion.result
+
+                        for (let error of errors) {
+                            this.do({ kind: ActionKind.ShowMessage, message: error })
+                        }
+                    }
+                }
                 break
             case ActionKind.ExecuteBySteps:
+                /**
+                * Limpiar interfaz
+                */
                 this.do({ kind: ActionKind.ClearMessages })
                 this.do({ kind: ActionKind.ClearOutput })
+                // "limpiar" variables en inspeccion
+                for (let i = 0, l = this.expresionesInspecciondas.length; i < l; i++) {
+                    this.app_ui.mostrarMensajeInicialInspeccion(i)
+                }
+
+                /**
+                 * Si no hay ningun programa corriendo:
+                 *  -   "Cargar" el programa en el interprete
+                 *  -   Si hay errores mostrarlos.
+                 *  -   Si no hay errores y si el modo debug esta activado mostrar el programa compilado
+                 *  -   Si no hay errores desactivar los botones y ejecutar el programa.
+                 */
                 if (!this.program_running) {
-                    this.by_steps = true
-                    const compiled_program_maybe = this.compile(a.code)
-                    if (!compiled_program_maybe.error) {
+                    this.porPasos = true
+                    this.porInstrucciones = false
+                    const reporteCompilacion = this.interprete.cargarPrograma(a.code)
+
+                    if (reporteCompilacion.error == false) {
                         this.app_ui.show_step_controls()
                         this.program_running = true
-                        const program = compiled_program_maybe.result
-                        this.do({ kind: ActionKind.SetUpInterpreter, program: program })
+
                         if (this.debug) {
-                            this.do({ kind: ActionKind.ShowCompiledCode, code: fr_writer(program) })
+                            this.do({ kind: ActionKind.ShowCompiledCode, code: programaCompiladoACadena(reporteCompilacion.result) })
                         }
+
+                        this.do({ kind: ActionKind.DisableButtons })
+                        // this.do({ kind: ActionKind.Step })
+                    }
+                    else {
+                        const errors = reporteCompilacion.result
+
+                        for (let error of errors) {
+                            this.do({ kind: ActionKind.ShowMessage, message: error })
+                        }
+                    }
+                }
+                break
+            case ActionKind.ExecuteByInstructions:
+                /**
+                * Limpiar interfaz
+                */
+                this.do({ kind: ActionKind.ClearMessages })
+                this.do({ kind: ActionKind.ClearOutput })
+                // "limpiar" variables en inspeccion
+                for (let i = 0, l = this.expresionesInspecciondas.length; i < l; i++) {
+                    this.app_ui.mostrarMensajeInicialInspeccion(i)
+                }
+
+                /**
+                 * Si no hay ningun programa corriendo:
+                 *  -   "Cargar" el programa en el interprete
+                 *  -   Si hay errores mostrarlos.
+                 *  -   Si no hay errores y si el modo debug esta activado mostrar el programa compilado
+                 *  -   Si no hay errores desactivar los botones y ejecutar el programa.
+                 */
+                if (!this.program_running) {
+                    this.porPasos = false
+                    this.porInstrucciones = true
+                    const reporteCompilacion = this.interprete.cargarPrograma(a.code)
+
+                    if (reporteCompilacion.error == false) {
+                        this.app_ui.show_step_controls()
+                        this.program_running = true
+
+                        if (this.debug) {
+                            this.do({ kind: ActionKind.ShowCompiledCode, code: programaCompiladoACadena(reporteCompilacion.result) })
+                        }
+
                         this.do({ kind: ActionKind.DisableButtons })
                         this.do({ kind: ActionKind.Step })
+                    }
+                    else {
+                        const errors = reporteCompilacion.result
+
+                        for (let error of errors) {
+                            this.do({ kind: ActionKind.ShowMessage, message: error })
+                        }
                     }
                 }
                 break
@@ -130,14 +232,6 @@ export class Controller {
                 this.app_ui.write('Programa finalizado por el usuario.')
                 this.do({ kind: ActionKind.EnableButtons })
                 break
-            case ActionKind.CompileAndShow:
-                this.do({ kind: ActionKind.ClearMessages })
-                this.do({ kind: ActionKind.ClearOutput })
-                const { result } = this.compile(a.code)
-                if (result != null) {
-                    this.do({ kind: ActionKind.ShowCompiledCode, code: fr_writer(result) })
-                }
-                break
             case ActionKind.DisableButtons:
                 this.app_ui.disable_buttons()
                 break
@@ -149,87 +243,40 @@ export class Controller {
                 this.app_ui.toggle_panel(a.container_index, a.panel_index)
                 break
             case ActionKind.SendVarName:
-                this.add_var(a.name)
+                this.inspeccionarExpresion(a.name)
                 break
             case ActionKind.UpdateVars:
-                this.update_vars()
-                break
+                throw new Error("Accion 'ActionKind.UpdateVars' obsoleta.")
             case ActionKind.RemoveVarFromInspection:
-                this.remove_var(a.name)
+                this.remove_var(a.id)
                 break
             case ActionKind.RemoveMsgFromInspection:
-                this.remove_msg(a.name)
-                break
+                throw new Error("Accion 'ActionKind.RemoveMsgFromInspection:' obsoleta.")
         }
     }
 
-    remove_msg(name: string) {
-        this.app_ui.remove_msg(name)
-    }
-
-    remove_var(name: string) {
-        this.app_ui.remove_var(name)
-    }
-
-    update_vars() {
-        const var_names = this.app_ui.get_var_names()
-
-        for (let name of var_names) {
-            this.update_var(name)
-        }
-    }
-
-    update_var(name: string) {
-        const var_info = this.interpreter.search_var(name)
-
-        if (var_info.state == VarState.ExistsInit) {
-            const bv = this.interpreter.export_var(name)
-            this.app_ui.update_var(name, bv)
-        }
-        else {
-            this.app_ui.change_var_state(name, var_info.state)
-        }
-    }
-
-    add_var(name: string) {
-        const var_info = this.interpreter.search_var(name)
-        if (var_info.state == VarState.ExistsInit || var_info.state == VarState.ExistsNotInit) {
-            const bv = this.interpreter.export_var(name)
-            if (var_info.state == VarState.ExistsInit) {
-                this.app_ui.add_var(name, true, true, var_info, bv)
+    remove_var(id: number) {
+        let expresionEncontrada = false
+        let i = 0
+        while (!expresionEncontrada) {
+            if (this.expresionesInspecciondas[i].id == id) {
+                expresionEncontrada = true
             }
             else {
-                this.app_ui.add_var(name, true, false, var_info, bv)
+                i++
             }
         }
-        else if (var_info.state == VarState.ExistsOutOfScope) {
-            this.app_ui.add_var(name, false, false, var_info, null)
-        }
-        else {
-            this.app_ui.add_inspection_message(name)
-        }
+        this.expresionesInspecciondas = [...this.expresionesInspecciondas.slice(0, i), ...this.expresionesInspecciondas.slice(i + 1)]
+        this.app_ui.remove_var(id)
     }
 
-    interpreter_action(a: InterpreterStatementInfo | InterpreterRead | InterpreterWrite) {
-        switch (a.kind) {
-            case 'action':
-                switch (a.action) {
-                    case 'read':
-                        this.read()
-                        break
-                    case 'write':
-                        this.write(a.value)
-                        break
-                }
-                break
-            case 'info':
-                this.move_cursor(a.pos.line, a.pos.column)
-                break
-        }
+    inspeccionarExpresion(expresion: string) {
+        const id = this.app_ui.agregarExpresionInspeccionada(expresion)
+        this.expresionesInspecciondas.push({ cadenaExpresion: expresion, id })
     }
 
     resume_program() {
-        if (this.by_steps) {
+        if (this.porPasos || this.porInstrucciones) {
             this.step()
         }
         else {
@@ -238,30 +285,100 @@ export class Controller {
     }
 
     step() {
-        if (!this.interpreter.is_done()) {
-            const output = this.interpreter.step()
+        if (this.porPasos) {
+            if (!this.interprete.programaFinalizado()) {
+                /**
+                * Reporte de ejecucion.
+                */
+                let reporte = this.interprete.darPaso()
 
-            if (output.error == false) {
-                this.interpreter_action(output.result)
-            }
-            else {
-                this.do({ kind: ActionKind.StopExecutionWithError })
-                this.do({ kind: ActionKind.ShowMessage, message: output.result })
+                if (reporte.error == false) {
+                    let { accion, numeroLineaFuente, numeroInstruccion } = reporte.result
+
+                    switch (accion) {
+                        case Accion.ESCRIBIR:
+                            this.write(this.interprete.obtenerEscrituraPendiente())
+                            break
+                        case Accion.LEER:
+                        case Accion.NADA:
+                            break
+                    }
+
+                    this.move_cursor(numeroLineaFuente, 0)
+                    this.highlight_instruction(numeroInstruccion)
+
+                    const valoresExpresiones = this.expresionesInspecciondas.map(e => this.interprete.inspeccionarExpresion(e.cadenaExpresion))
+                    for (let i = 0, l = valoresExpresiones.length; i < l; i++) {
+                        const valor = valoresExpresiones[i]
+                        if (valor.error == false) {
+                            this.app_ui.actualizarValorInspeccion(i, valor.result)
+                        }
+                        else {
+                            this.app_ui.mostrarErrorInspeccion(i)
+                        }
+                    }
+
+                    if (this.interprete.programaFinalizado()) {
+                        this.do({ kind: ActionKind.StopExecution })
+                    }
+                }
+                else {
+                    this.do({ kind: ActionKind.StopExecutionWithError })
+                    this.do({ kind: ActionKind.ShowMessage, message: reporte.result })
+                }
             }
         }
-        else {
-            this.do({ kind: ActionKind.StopExecution })
-        }
-    }
+        else if (this.porInstrucciones) {
+            if (!this.interprete.programaFinalizado()) {
+                /**
+                * Reporte de ejecucion.
+                */
+                let reporte = this.interprete.ejecutarInstruccion()
 
-    set_up_interpreter(program: S3.Program) {
-        if (program != null) {
-            this.interpreter.program = program
+                if (reporte.error == false) {
+                    let { accion, numeroLineaFuente, numeroInstruccion } = reporte.result
+
+                    switch (accion) {
+                        case Accion.ESCRIBIR:
+                            this.write(this.interprete.obtenerEscrituraPendiente())
+                            break
+                        case Accion.LEER:
+                        case Accion.NADA:
+                            break
+                    }
+
+                    this.move_cursor(numeroLineaFuente, 0)
+                    this.highlight_instruction(numeroInstruccion)
+
+                    const valoresExpresiones = this.expresionesInspecciondas.map(e => this.interprete.inspeccionarExpresion(e.cadenaExpresion))
+                    for (let i = 0, l = valoresExpresiones.length; i < l; i++) {
+                        const valor = valoresExpresiones[i]
+                        if (valor.error == false) {
+                            this.app_ui.actualizarValorInspeccion(i, valor.result)
+                        }
+                        else {
+                            this.app_ui.mostrarErrorInspeccion(i)
+                        }
+                    }
+
+                    if (this.interprete.programaFinalizado()) {
+                        this.do({ kind: ActionKind.StopExecution })
+                    }
+                }
+                else {
+                    this.do({ kind: ActionKind.StopExecutionWithError })
+                    this.do({ kind: ActionKind.ShowMessage, message: reporte.result })
+                }
+            }
         }
     }
 
     move_cursor(line: number, column: number) {
         this.app_ui.move_cursor(line, column)
+    }
+
+    highlight_instruction(inst: number) {
+        this.app_ui.highlight_instruction(inst)
     }
 
     show_compiled_code(code: string) {
@@ -283,29 +400,39 @@ export class Controller {
     }
 
     execute() {
-        if (!this.interpreter.is_done()) {
-            let output = this.interpreter.run()
+        if (!this.interprete.programaFinalizado()) {
+            /**
+             * Reporte de ejecucion.
+             */
+            let reporte = this.interprete.ejecutarHastaElFinal()
 
-            let done = false
+            let programaFinalizado = false
 
-            while (!done && output.error == false) {
-                let action: InterpreterRead | InterpreterWrite;
+            while (!programaFinalizado && reporte.error == false) {
+                let { accion, numeroLineaFuente, numeroInstruccion } = reporte.result
 
-                if (output.result.kind == 'action') {
-                    action = output.result
-                    this.interpreter_action(action)
+                switch (accion) {
+                    case Accion.ESCRIBIR:
+                        this.write(this.interprete.obtenerEscrituraPendiente())
+                        break
+                    case Accion.LEER:
+                    case Accion.NADA:
+                    break
                 }
 
-                if (!this.interpreter.is_done()) {
-                    output = this.interpreter.run()
+                this.move_cursor(numeroLineaFuente, 0)
+                this.highlight_instruction(numeroInstruccion)
+
+                if (!this.interprete.programaFinalizado()) {
+                    reporte = this.interprete.ejecutarHastaElFinal()
                 }
                 else {
-                    done = true
+                    programaFinalizado = true
                 }
             }
 
-            if (output.error == true) {
-                this.do({ kind: ActionKind.ShowMessage, message: output.result })
+            if (reporte.error == true) {
+                this.do({ kind: ActionKind.ShowMessage, message: reporte.result })
                 this.do({ kind: ActionKind.StopExecutionWithError })
             }
             else {
@@ -317,38 +444,8 @@ export class Controller {
         }
     }
 
-    compile(code: string): Failure<null> | Success<S3.Program> {
-        const parsed_program = this.parser.parse(code)
-
-        if (parsed_program.error == false) {
-            const transformed_program = transform(parsed_program.result)
-
-            if (transformed_program.error == false) {
-                return transformed_program
-            }
-            else {
-                const errors = transformed_program.result
-
-                for (let error of errors) {
-                    this.do({ kind: ActionKind.ShowMessage, message: error })
-                }
-
-                return { error: true, result: null }
-            }
-        }
-        else {
-            const errors = parsed_program.result
-
-            for (let error of errors) {
-                this.do({ kind: ActionKind.ShowMessage, message: error })
-            }
-
-            return { error: true, result: null }
-        }
-    }
-
     send_input(input: string) {
-        this.interpreter.send(input)
+        this.interprete.enviarLectura(input)
     }
 
     write(v: Value) {

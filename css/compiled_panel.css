@@ -1,11 +1,14 @@
 #fr-panel {
   height: 100%;
   border-left: 1px solid hsl(192, 15%, 70%);
+  font-family: "Source Code Pro Regular", "Consolas", monospace;
+  font-size: 14px;
 }		
 		
-#fr-pre {		
-  margin-top: 4px;		
-  margin-left: 4px;
-  font-family: "Source Code Pro Regular", "Consolas", monospace;
-  font-size: 10pt;
+.lineaCodigoCompilado {
+  margin-left: 6px;
+}
+
+.highlighted {
+  background-color: #e8f2ff;
 }

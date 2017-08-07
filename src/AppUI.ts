@@ -1,11 +1,15 @@
+import ButtonBar from './components/ButtonBar'
+import { Action, ActionKind } from './Actions'
 import OutputPanel from './components/OutputPanel'
 import EditorPanel from './components/EditorPanel'
+import MessagePanel from './components/MessagePanel'
+import StatusBar from './components/StatusBar'
 import CodePanel from './components/CodePanel'
 import PanelToggler from './components/PanelToggler'
 import InspectionPanel from './components/InspectionPanel'
 import { DragManager, Resizeable } from './DragManager'
 import { Dispatcher } from './Controller'
-import { Errors, Value, VarInfo, BoxedValue, VarState } from 'interprete-pl'
+import { Errors, Value, VarInfo, BoxedValue, VarState, ValorExpresionInspeccionada } from 'interprete-pl'
 import * as $ from 'jquery'
 
 export interface AppOptions {
@@ -22,7 +26,10 @@ export default class AppUI {
     container: JQuery
     panel_container: JQuery
     parent: JQuery
+    private button_bar: ButtonBar
     private editor_panel: EditorPanel
+    private status_bar: StatusBar
+    private message_panel: MessagePanel
     private output_panel: OutputPanel
     private inspection_panel: InspectionPanel
     private dispatcher: Dispatcher
@@ -48,15 +55,31 @@ export default class AppUI {
 
         this.handles = []
 
-        this.container = $('<div id="app_container" class="flex-col"></div>')
+        this.container = $('<div id="app_container" class="flex-row"></div>')
+
+        const columna = $('<div class="flex-col" style="width: 100%;"></div>')
+
+        this.button_bar = new ButtonBar(this.container, this.options.debug)
+
+        columna.append(this.button_bar.container)
 
         this.panel_container = $('<div id="panels" class="flex-row"></div>')
+
+        columna.append(this.panel_container)
+
+        const info_panel = $('<div id="info_panel"></div>')
+
+        this.status_bar = new StatusBar(info_panel)
+
+        this.message_panel = new MessagePanel(info_panel, this.dispatcher)
+
+        columna.append(info_panel)
 
         this.toggler = new PanelToggler(this.container, this.dispatcher, this.options.debug)
 
         this.container.append(this.toggler.container)
 
-        this.container.append(this.panel_container)
+        this.container.append(columna)
 
         this.parent.append(this.container)
 
@@ -73,27 +96,27 @@ export default class AppUI {
 
         if (this.options.debug) {
             this.add_panel(this.editor_panel, 0)
-            this.toggler.add_panel(this.editor_panel, false, 'pencil')
+            this.toggler.add_panel(this.editor_panel, false, 'pencil', 'Mostrar/ocultar el panel de edicion')
 
             this.code_panel = new CodePanel(this.panel_container)
 
             this.add_panel(this.code_panel, 0)
-            this.toggler.add_panel(this.code_panel, false, 'gear')
+            this.toggler.add_panel(this.code_panel, false, 'gear', 'Mostrar/ocultar el panel de codigo compilado')
 
             this.inspection_panel = new InspectionPanel(this.panel_container, this.dispatcher)
 
             this.add_panel(this.inspection_panel, 0)
-            this.toggler.add_panel(this.inspection_panel, false, 'search')
+            this.toggler.add_panel(this.inspection_panel, false, 'search', 'Mostrar/ocultar el panel de inspeccion')
 
             this.output_panel = new OutputPanel(this.panel_container, this.dispatcher)
 
             this.add_panel(this.output_panel, 0)
-            this.toggler.add_panel(this.output_panel, false, 'terminal')
+            this.toggler.add_panel(this.output_panel, false, 'terminal', 'Mostrar/ocultar el panel de salida')
         }
         else {
             // agregar panel de codigo
             this.add_panel(this.editor_panel, 0)
-            this.toggler.add_panel(this.editor_panel, false, 'pencil')
+            this.toggler.add_panel(this.editor_panel, false, 'pencil', 'Mostrar/ocultar el panel de edicion')
 
             // cuando debug es falso el panel de codigo compilado no se muestra
             this.code_panel = null
@@ -101,15 +124,15 @@ export default class AppUI {
             this.inspection_panel = new InspectionPanel(this.panel_container, this.dispatcher)
 
             this.add_panel(this.inspection_panel, 0)
-            this.toggler.add_panel(this.inspection_panel, false, 'search')
+            this.toggler.add_panel(this.inspection_panel, false, 'search', 'Mostrar/ocultar el panel de inspeccion')
 
             this.output_panel = new OutputPanel(this.panel_container, this.dispatcher)
             this.add_panel(this.output_panel, 0)
-            this.toggler.add_panel(this.output_panel, false, 'terminal')
+            this.toggler.add_panel(this.output_panel, false, 'terminal', 'Mostrar/ocultar el panel de salida')
         }
 
-        this.toggler.add_link(`https://github.com/pl-lang/jsplint/wiki/Sintaxis/`, 'question')
-        this.toggler.add_link(`https://github.com/pl-lang/playground/`, 'mark-github')
+        this.toggler.add_link(`https://github.com/pl-lang/jsplint/wiki/Sintaxis/`, 'question', 'Abrir pestaña con ayuda sobre la sintaxis y el lenguaje')
+        this.toggler.add_link(`https://github.com/pl-lang/playground/`, 'mark-github', 'Ir al repositorio en Github de esta aplicación')
 
         $(document).mouseup(() => {
             if (this.dm.is_grabbed) {
@@ -124,6 +147,22 @@ export default class AppUI {
 
                 this.dm.drag_handle(this.dm.grabbed_handle, { x: pos.left, y: pos.top }, { x: m.pageX, y: m.pageY })
             }
+        })
+
+        this.button_bar.registrarCallbackEjecutar(() => {
+            this.dispatcher.dispatch({ kind: ActionKind.Execute, code: this.editor_panel.editor_contents })
+        })
+
+        this.button_bar.registrarCallbackEjecutarPaso(() => {
+            this.dispatcher.dispatch({ kind: ActionKind.ExecuteBySteps, code: this.editor_panel.editor_contents })
+        })
+
+        this.button_bar.registrarCallbackCompilar(() => {
+            this.dispatcher.dispatch({ kind: ActionKind.CompileAndShow, code: this.editor_panel.editor_contents })
+        })
+
+        this.button_bar.registrarCallbackMicroPaso(() => {
+            this.dispatcher.dispatch({ kind: ActionKind.ExecuteByInstructions, code: this.editor_panel.editor_contents })
         })
 
         this.editor_panel.refresh()
@@ -147,13 +186,13 @@ export default class AppUI {
     }
 
     clear_messages() {
-        this.editor_panel.message_panel.clear()
-        this.editor_panel.status_bar.error_count = 0
+        this.message_panel.clear()
+        this.status_bar.error_count = 0
     }
 
     show_message(message: Errors.Base) {
-        this.editor_panel.message_panel.add_message(message)
-        this.editor_panel.status_bar.error_count += 1
+        this.message_panel.add_message(message)
+        this.status_bar.error_count += 1
     }
 
     get_editor_contents(): string {
@@ -176,6 +215,10 @@ export default class AppUI {
         this.editor_panel.move_cursor(line, column)
     }
 
+    highlight_instruction(inst: number) {
+        this.code_panel.highlight(inst)
+    }
+
     focus_editor() {
         this.editor_panel.focus_editor()
     }
@@ -191,42 +234,34 @@ export default class AppUI {
     }
 
     disable_buttons() {
-        this.editor_panel.disable_buttons()
+        this.button_bar.desactivarBotones()
     }
 
     enable_buttons() {
-        this.editor_panel.enable_buttons()
+        this.button_bar.activarBotones()
     }
 
-    add_var(name: string, in_scope: boolean, init: boolean, var_info: VarInfo, value: BoxedValue) {
-        this.inspection_panel.add_var(name, in_scope, init, var_info, value)
+    agregarExpresionInspeccionada(expresion: string): number {
+        return this.inspection_panel.agregarExpresion(expresion)
     }
 
-    get_var_names(): string[] {
-        return this.inspection_panel.get_var_names()
+    actualizarValorInspeccion(indice: number, valor: ValorExpresionInspeccionada) {
+        this.inspection_panel.actualizarValorInspeccion(indice, valor)
     }
 
-    update_var(name: string, values: BoxedValue) {
-        return this.inspection_panel.update_var(name, values)
+    mostrarErrorInspeccion(indice: number) {
+        this.inspection_panel.mostrarMensajeError(indice)
     }
 
-    change_var_state(name: string, state: VarState.DoesntExist | VarState.ExistsNotInit | VarState.ExistsOutOfScope) {
-        this.inspection_panel.change_var_state(name, state)
+    mostrarMensajeInicialInspeccion(indice: number) {
+        this.inspection_panel.mostrarMensajeInicialInspeccion(indice)
     }
 
     clear_vars() {
         this.inspection_panel.clear()
     }
 
-    remove_var(name: string) {
-        this.inspection_panel.remove_var(name)
-    }
-
-    add_inspection_message(name: string) {
-        this.inspection_panel.add_message(name)
-    }
-
-    remove_msg(name: string) {
-        this.inspection_panel.remove_msg(name)
+    remove_var(id: number) {
+        this.inspection_panel.remove_var(id)
     }
 }

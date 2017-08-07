@@ -22,10 +22,10 @@ export default class PanelToggler {
         this.panels = []
     }
 
-    add_panel(panel: Resizeable, hidden: boolean, icon_class_name: string) {
+    add_panel(panel: Resizeable, hidden: boolean, icon_class_name: string, title: string) {
         const new_panel: Toggleable = { hidden, container: panel.container, container_index: panel.container_index, panel_index: panel.panel_index }
         this.panels.push(new_panel)
-        const button = $(`<button class="blue-button big-icon-button v-button"><span class="big-icon octicon octicon-${icon_class_name}"></span></button>`)
+        const button = $(`<button title="${title}" class="blue-button big-icon-button v-button"><span class="big-icon octicon octicon-${icon_class_name}"></span></button>`)
         button.click(() => {
             this.toggle_panel(panel.container_index, panel.panel_index)
         })
@@ -61,8 +61,9 @@ export default class PanelToggler {
         return -1
     }
 
-    add_link(url_string: string, icon_class_name: string) {
-        const anchor = $(`<button class="blue-button big-icon-button v-button"><a class="big-icon octicon octicon-${icon_class_name}" href="${url_string}"></a></button>`)
+    add_link(url_string: string, icon_class_name: string, title: string) {
+        // const anchor = $(`<button class="blue-button big-icon-button v-button"><a class="big-icon octicon octicon-${icon_class_name}" href="${url_string}"></a></button>`)
+        const anchor = $(`<a title="${title}" class="blue-button big-icon-button v-button" href="${url_string}"><span class="big-icon octicon octicon-${icon_class_name}"></span></a>`)
 
         this.container.append(anchor)
     }
