@@ -24,6 +24,16 @@ export class Controller {
     private debug: boolean
     private expresionesInspecciondas: { cadenaExpresion: string, id: number }[]
 
+    /**
+     * Indica si se encontro un error durante la ejecucion de un programa
+     */
+    private errorEjecucion: boolean
+
+    /**
+     * Indica si se esta esperando una lectura
+     */
+    private esperandoLectura: boolean
+
     constructor(container: JQuery, debug: boolean) {
         const action_dispatcher = new Dispatcher(this)
 
@@ -38,6 +48,8 @@ export class Controller {
         this.interprete = new Interprete()
 
         this.expresionesInspecciondas = []
+
+        this.esperandoLectura = false
     }
 
     do(a: Action) {
@@ -100,7 +112,6 @@ export class Controller {
                 break
             case ActionKind.SendInput:
                 this.send_input(a.input)
-                this.resume_program()
                 break
             case ActionKind.Write:
                 this.write(a.value)
@@ -286,7 +297,7 @@ export class Controller {
 
     step() {
         if (this.porPasos) {
-            if (!this.interprete.programaFinalizado()) {
+            if (this.esperandoLectura == false && !this.interprete.programaFinalizado()) {
                 /**
                 * Reporte de ejecucion.
                 */
@@ -300,6 +311,9 @@ export class Controller {
                             this.write(this.interprete.obtenerEscrituraPendiente())
                             break
                         case Accion.LEER:
+                            this.esperandoLectura = true
+                            this.read()
+                            break
                         case Accion.NADA:
                             break
                     }
@@ -329,7 +343,7 @@ export class Controller {
             }
         }
         else if (this.porInstrucciones) {
-            if (!this.interprete.programaFinalizado()) {
+            if (this.esperandoLectura == false && !this.interprete.programaFinalizado()) {
                 /**
                 * Reporte de ejecucion.
                 */
@@ -343,6 +357,9 @@ export class Controller {
                             this.write(this.interprete.obtenerEscrituraPendiente())
                             break
                         case Accion.LEER:
+                            this.esperandoLectura = true
+                            this.read()
+                            break
                         case Accion.NADA:
                             break
                     }
@@ -408,7 +425,7 @@ export class Controller {
 
             let programaFinalizado = false
 
-            while (!programaFinalizado && reporte.error == false) {
+            while (!programaFinalizado && reporte.error == false && this.esperandoLectura == false) {
                 let { accion, numeroLineaFuente, numeroInstruccion } = reporte.result
 
                 switch (accion) {
@@ -416,6 +433,9 @@ export class Controller {
                         this.write(this.interprete.obtenerEscrituraPendiente())
                         break
                     case Accion.LEER:
+                        this.esperandoLectura = true
+                        this.read()
+                        break
                     case Accion.NADA:
                     break
                 }
@@ -435,7 +455,7 @@ export class Controller {
                 this.do({ kind: ActionKind.ShowMessage, message: reporte.result })
                 this.do({ kind: ActionKind.StopExecutionWithError })
             }
-            else {
+            else if (programaFinalizado == true) {
                 this.do({ kind: ActionKind.StopExecution })
             }
         }
@@ -445,7 +465,19 @@ export class Controller {
     }
 
     send_input(input: string) {
-        this.interprete.enviarLectura(input)
+        this.esperandoLectura = false
+        
+        const reporteLectura = this.interprete.leer(input)
+
+        if (reporteLectura.error == true) {
+            for (let error of reporteLectura.result) {
+                this.do({ kind: ActionKind.ShowMessage, message: error })
+            }
+            this.do({ kind: ActionKind.StopExecutionWithError })
+        }
+        else {
+            this.resume_program()
+        }
     }
 
     write(v: Value) {
